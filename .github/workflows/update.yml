@@ -42,11 +42,30 @@ jobs:
           declare -A seen_urls
           declare -A seen_names
 
+          # 中文省份映射表
+          declare -A PROVINCE_MAP=(
+            ["Beijing"]="北京"
+            ["Shanghai"]="上海"
+            ["Hunan"]="湖南"
+            ["Guangdong"]="广东"
+            ["Zhejiang"]="浙江"
+            ["Jiangsu"]="江苏"
+            ["Sichuan"]="四川"
+            ["Shandong"]="山东"
+            # 可根据实际频道名补充完整
+          )
+
           parse_area () {
             AREA=$1
             FILE=$2
             echo "" >> output/playlist.m3u
-            echo "# ===== ${AREA} Channels =====" >> output/playlist.m3u
+            if [[ "$AREA" == "China" ]]; then
+              echo "# ===== 中国频道 =====" >> output/playlist.m3u
+            elif [[ "$AREA" == "Hong Kong" ]]; then
+              echo "# ===== 香港频道 =====" >> output/playlist.m3u
+            elif [[ "$AREA" == "Taiwan" ]]; then
+              echo "# ===== 台湾频道 =====" >> output/playlist.m3u
+            fi
 
             awk '
               /^#EXTINF/ {
@@ -59,30 +78,51 @@ jobs:
               NAME=$(echo "$INFO" | sed 's/.*,//')
               CLEAN_NAME=$(echo "$NAME" | tr -dc 'A-Za-z0-9')
 
+              # 去重
               if [[ ${seen_urls[$URL]} || ${seen_names[$CLEAN_NAME]} ]]; then
                 continue
               fi
 
+              # 流是否可访问
               STATUS=$(curl -I --max-time 3 -o /dev/null -s -w "%{http_code}" "$URL" || echo "000")
               if [[ "$STATUS" != "200" ]]; then
-                echo "Skipping $NAME ($URL)"
+                echo "跳过不可访问频道: $NAME ($URL)"
                 continue
               fi
 
               seen_urls[$URL]=1
               seen_names[$CLEAN_NAME]=1
 
+              # LOGO
               LOGO_URL="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/${CLEAN_NAME}.png"
               if ! curl --output /dev/null --silent --head --fail "$LOGO_URL"; then
                 LOGO_URL=""
               fi
 
+              # EPG
               TVG_ID=$(grep -iF "$NAME" epg.xml | head -1 | sed -n 's/.*tvg-id="\([^"]*\)".*/\1/p')
+
+              # 中国频道按省份显示中文
+              if [[ "$AREA" == "China" ]]; then
+                PROVINCE_KEY=$(echo "$NAME" | awk '{print $1}')
+                PROVINCE_CH=${PROVINCE_MAP[$PROVINCE_KEY]}
+              else
+                PROVINCE_CH=""
+              fi
 
               EXT="#EXTINF:-1"
               [[ -n "$TVG_ID" ]] && EXT="${EXT} tvg-id=\"${TVG_ID}\""
               [[ -n "$LOGO_URL" ]] && EXT="${EXT} tvg-logo=\"${LOGO_URL}\""
-              EXT="${EXT} group-title=\"${AREA}\",${NAME}"
+
+              if [[ -n "$PROVINCE_CH" ]]; then
+                EXT="${EXT} group-title=\"中国: ${PROVINCE_CH}\",${NAME}"
+              elif [[ "$AREA" == "Hong Kong" ]]; then
+                EXT="${EXT} group-title=\"香港\",${NAME}"
+              elif [[ "$AREA" == "Taiwan" ]]; then
+                EXT="${EXT} group-title=\"台湾\",${NAME}"
+              else
+                EXT="${EXT} group-title=\"${AREA}\",${NAME}"
+              fi
 
               echo "$EXT" >> output/playlist.m3u
               echo "$URL" >> output/playlist.m3u
@@ -90,6 +130,7 @@ jobs:
             done
           }
 
+          # 按地区生成 playlist
           parse_area "China" china.m3u
           parse_area "Hong Kong" hongkong.m3u
           parse_area "Taiwan" taiwan.m3u
@@ -100,7 +141,6 @@ jobs:
           git config --global user.email "actions@github.com"
           git config --global user.name "GitHub Actions"
           git add output/playlist.m3u
-          git commit -m "Auto update playlist" || echo "No change"
-          # 使用 PAT 拼接 URL，保证 push 权限
+          git commit -m "自动更新 playlist" || echo "无变化"
           git remote set-url origin https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/will2w/auto-m3u.git
           git push origin main
