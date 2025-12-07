@@ -2,8 +2,8 @@ name: IPTV Auto Builder Pro
 
 on:
   schedule:
-    # 修正：每 4 小时自动更新 (标准 Cron 语法: 分 时 日 月 周)
-    - cron: "0 */4 * * *"
+    # 每 4 小时运行一次 (标准 Cron 语法: 分 时 日 月 周)
+    - cron: "0 */12 * * *"
   workflow_dispatch:
 
 jobs:
@@ -15,6 +15,7 @@ jobs:
       - name: 📦 Checkout repository
         uses: actions/checkout@v3
         with:
+          # 确保 PAT_TOKEN 具有写入权限
           token: ${{ secrets.PAT_TOKEN }}
 
       # 2. 安装必需工具
@@ -38,18 +39,15 @@ jobs:
           curl -L --retry 3 -o epg.xml http://epg.51zmt.top:8000/e.xml
 
       # 5. 生成 playlist
-      - name: ⚙️ Build and Filter Playlist
+      - name: ⚙️ Build Playlist (Select Fastest)
         run: |
-          mkdir -p output
+          # 【修改点】直接在根目录生成 playlist.m3u
+          echo "#EXTM3U" > playlist.m3u
           
-          # 【修改点】使用 echo 替代 cat EOF，避免 YAML 缩进错误导致 FLOW 不显示
-          echo "#EXTM3U" > output/playlist.m3u
+          # 创建一个临时文件来存放所有测试通过的频道数据
+          touch valid_channels.txt
 
-          # 声明关联数组
-          declare -A seen_urls
-          declare -A seen_names
-
-          # 中文省份映射表
+          # 声明省份映射
           declare -A PROVINCE_MAP=( 
             ["Beijing"]="北京" ["Shanghai"]="上海" ["Tianjin"]="天津" ["Chongqing"]="重庆" 
             ["Hebei"]="河北" ["Shanxi"]="山西" ["InnerMongolia"]="内蒙古" ["Liaoning"]="辽宁" 
@@ -58,82 +56,94 @@ jobs:
             ["Henan"]="河南" ["Hubei"]="湖北" ["Hunan"]="湖南" ["Guangdong"]="广东" 
             ["Guangxi"]="广西" ["Hainan"]="海南" ["Sichuan"]="四川" ["Guizhou"]="贵州" 
             ["Yunnan"]="云南" ["Tibet"]="西藏" ["Shaanxi"]="陕西" ["Gansu"]="甘肃" 
-            ["Qinghai"]="青海" ["Ningxia"]="宁夏" ["Xinjiang"]="新疆" ["HongKong"]="香港" 
-            ["Macau"]="澳门" ["Taiwan"]="台湾" 
+            ["Qinghai"]="青海" ["Ningxia"]="宁夏" ["Xinjiang"]="新疆" 
           )
 
-          # 定义处理函数
-          parse_area () {
+          # 定义处理函数：负责测速和收集数据
+          collect_channels () {
             AREA=$1
             FILE=$2
 
-            # 添加区域分隔符
-            if [[ "$AREA" == "China" ]]; then
-              echo "" >> output/playlist.m3u
-              echo "# ===== 中国频道 =====" >> output/playlist.m3u
-            elif [[ "$AREA" == "Hong Kong" ]]; then
-              echo "" >> output/playlist.m3u
-              echo "# ===== 香港频道 =====" >> output/playlist.m3u
-            elif [[ "$AREA" == "Taiwan" ]]; then
-              echo "" >> output/playlist.m3u
-              echo "# ===== 台湾频道 =====" >> output/playlist.m3u
-            fi
+            echo "Processing $AREA from $FILE..."
 
-            # 使用 awk 提取 #EXTINF 和 URL
             awk '
               /^#EXTINF/ {
                 info=$0;
                 getline url;
-                # 确保 URL 是 http/https 开头
                 if (url ~ /^http/) {
                     print info "\t" url;
                 }
               }
             ' "$FILE" | while IFS=$'\t' read -r INFO URL; do
-
-              # 提取并清洗名称
+              
               NAME=$(echo "$INFO" | sed 's/.*,//')
+              
+              # === 核心：获取 HTTP状态码 和 响应时间 ===
+              # %{time_total} 获取总耗时 (Latency)
+              CHECK_RESULT=$(curl -s -w "%{http_code} %{time_total}" -o /dev/null --connect-timeout 3 --max-time 5 "$URL" || echo "000 999")
+              
+              HTTP_CODE=$(echo "$CHECK_RESULT" | awk '{print $1}')
+              LATENCY=$(echo "$CHECK_RESULT" | awk '{print $2}')
+
+              if [[ "$HTTP_CODE" != "200" ]]; then
+                # echo "Skipping invalid: $NAME ($URL)"
+                continue
+              fi
+
+              # 写入临时文件，格式：耗时 [TAB] 名字 [TAB] URL [TAB] 区域 [TAB] 原始信息
+              echo -e "${LATENCY}\t${NAME}\t${URL}\t${AREA}\t${INFO}" >> valid_channels.txt
+              # echo "Collected: $NAME ($LATENCY s)"
+
+            done
+          }
+
+          # 2. 收集所有频道的测速数据
+          declare -A AREAS=( ["China"]="china.m3u" ["Hong Kong"]="hongkong.m3u" ["Taiwan"]="taiwan.m3u" )
+          for AREA in "${!AREAS[@]}"; do
+            collect_channels "$AREA" "${AREAS[$AREA]}"
+          done
+
+          echo "Sorting and Selecting best sources..."
+
+          # 3. 排序与去重：选出速度最快的唯一频道
+          # 排序规则：按名字分组(-k2,2)，然后按耗时数字升序排序(-k1,1n)
+          # 去重规则：awk 只保留第一次出现的行 (即最快的那个)
+          sort -t $'\t' -k2,2 -k1,1n valid_channels.txt | awk -F '\t' '!seen[$2]++' > best_channels.txt
+
+          # 4. 写入最终 M3U 文件
+          write_playlist() {
+            TARGET_AREA=$1
+            TITLE_TEXT=$2
+            
+            echo "" >> playlist.m3u
+            echo "# ===== $TITLE_TEXT =====" >> playlist.m3u
+            
+            # 从 best_channels.txt 中读取属于当前区域的频道
+            grep "$TARGET_AREA" best_channels.txt | while IFS=$'\t' read -r LATENCY NAME URL AREA INFO; do
+              
               CLEAN_NAME=$(echo "$NAME" | tr -dc '[:alnum:][:alpha:]')
-
-              # 去重检查
-              if [[ ${seen_urls[$URL]} || ${seen_names[$CLEAN_NAME]} ]]; then
-                # echo "Skipping duplicate: $NAME"
-                continue
-              fi
-
-              # 链接有效性检查 (仅检查 HTTP 头)
-              STATUS=$(curl -I --max-time 5 -o /dev/null -s -w "%{http_code}" "$URL" || echo "000")
-              if [[ "$STATUS" != "200" ]]; then
-                echo "Skipping unreachable: $NAME ($URL) - Status $STATUS"
-                continue
-              fi
-
-              # 标记已处理
-              seen_urls[$URL]=1
-              seen_names[$CLEAN_NAME]=1
 
               # 匹配 Logo
               LOGO_URL="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/${CLEAN_NAME}.png"
               if ! curl --output /dev/null --silent --head --fail "$LOGO_URL"; then
-                LOGO_URL=""
+                 LOGO_URL=""
               fi
 
-              # 匹配 EPG ID
+              # 匹配 EPG
               TVG_ID=$(grep -iF "$NAME" epg.xml | head -1 | sed -n 's/.*tvg-id="\([^"]*\)".*/\1/p')
 
-              # 处理分组标题 (Group Title)
+              # 处理分组标题
+              PROVINCE_CH=""
               if [[ "$AREA" == "China" ]]; then
                 PROVINCE_KEY=$(echo "$NAME" | awk '{print $1}')
                 PROVINCE_CH=${PROVINCE_MAP[$PROVINCE_KEY]}
-              else
-                PROVINCE_CH=""
               fi
 
-              # 构建新的 #EXTINF 行
+              # 构建标签 (包含 Group-Title)
               EXT="#EXTINF:-1"
               [[ -n "$TVG_ID" ]] && EXT="${EXT} tvg-id=\"${TVG_ID}\""
               [[ -n "$LOGO_URL" ]] && EXT="${EXT} tvg-logo=\"${LOGO_URL}\""
-
+              
               if [[ -n "$PROVINCE_CH" ]]; then
                 EXT="${EXT} group-title=\"中国: ${PROVINCE_CH}\",${NAME}"
               elif [[ "$AREA" == "Hong Kong" ]]; then
@@ -143,33 +153,32 @@ jobs:
               else
                 EXT="${EXT} group-title=\"${AREA}\",${NAME}"
               fi
-
-              # 写入文件
-              echo "$EXT" >> output/playlist.m3u
-              echo "$URL" >> output/playlist.m3u
-
+              
+              echo "$EXT" >> playlist.m3u
+              echo "$URL" >> playlist.m3u
             done
           }
 
-          # 循环处理所有区域
-          declare -A AREAS=( ["China"]="china.m3u" ["Hong Kong"]="hongkong.m3u" ["Taiwan"]="taiwan.m3u" )
-          for AREA in "${!AREAS[@]}"; do
-            parse_area "$AREA" "${AREAS[$AREA]}"
-          done
-          
-          echo "Playlist generation complete."
+          # 按顺序写入 M3U 文件
+          write_playlist "China" "中国频道"
+          write_playlist "Hong Kong" "香港频道"
+          write_playlist "Taiwan" "台湾频道"
 
-      # 6. Commit & Push
+          echo "Final playlist generated (Root Directory)."
+          # 清理临时文件
+          rm valid_channels.txt best_channels.txt
+
+      # 6. Commit & Push (推送到根目录)
       - name: ⬆️ Commit and Push Playlist
         run: |
           git config --global user.email "actions@github.com"
           git config --global user.name "GitHub Actions"
           
-          # 检查文件是否有变化
-          if git diff --quiet output/playlist.m3u; then
+          # 检查根目录文件是否有变化
+          if git diff --quiet playlist.m3u; then
             echo "No changes detected. Skipping commit."
           else
-            git add output/playlist.m3u
-            git commit -m "🤖 Auto update playlist: $(date +%Y-%m-%d %H:%M:%S)" 
+            git add playlist.m3u # 【修改点】只添加根目录的 playlist.m3u
+            git commit -m "🚀 Update playlist (Best Speed): $(date +%Y-%m-%d %H:%M:%S)" 
             git push
           fi
