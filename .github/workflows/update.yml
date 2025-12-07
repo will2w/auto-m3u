@@ -2,7 +2,7 @@ name: IPTV Auto Builder Pro
 
 on:
   schedule:
-    - cron: "*/240 * * * *"   # 每 30 分鐘自動更新
+    - cron: "*/240 * * * *"   # 每 4 小時自動更新
   workflow_dispatch:
 
 jobs:
@@ -10,26 +10,31 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # 1. Checkout repository
       - uses: actions/checkout@v3
 
+      # 2. Install required tools
       - name: Install Tools
         run: |
           sudo apt-get update
           sudo apt-get install -y jq curl
 
+      # 3. Download Source Lists
       - name: Download Source Lists
         run: |
           curl -L --retry 3 -o china.m3u    https://freetv.fun/test_channels_china_new.m3u
           curl -L --retry 3 -o hongkong.m3u https://freetv.fun/test_channels_hong_kong_new.m3u
           curl -L --retry 3 -o taiwan.m3u   https://freetv.fun/test_channels_taiwan_new.m3u
 
+      # 4. Download EPG
       - name: Download EPG
         run: curl -L --retry 3 -o epg.xml http://epg.51zmt.top:8000/e.xml
 
+      # 5. Build Playlist
       - name: Build Playlist
-run: |
-  mkdir -p output
-  echo "#EXTM3U" > output/playlist.m3u
+        run: |
+          mkdir -p output
+          echo "#EXTM3U" > output/playlist.m3u
 
           declare -A seen_urls
           declare -A seen_names
@@ -37,8 +42,8 @@ run: |
           parse_area () {
             AREA=$1
             FILE=$2
-            echo "" >> playlist.m3u
-            echo "# ===== ${AREA} Channels =====" >> playlist.m3u
+            echo "" >> output/playlist.m3u
+            echo "# ===== ${AREA} Channels =====" >> output/playlist.m3u
 
             awk '
               /^#EXTINF/ {
@@ -46,8 +51,8 @@ run: |
                 getline url;
                 print info "\t" url;
               }
-            ' "$FILE" | while IFS="\t" read -r INFO URL; do
-              
+            ' "$FILE" | while IFS=$'\t' read -r INFO URL; do
+
               NAME=$(echo "$INFO" | sed 's/.*,//')
               CLEAN_NAME=$(echo "$NAME" | tr -dc 'A-Za-z0-9')
 
@@ -75,8 +80,8 @@ run: |
               [[ -n "$LOGO_URL" ]] && EXT="${EXT} tvg-logo=\"${LOGO_URL}\""
               EXT="${EXT} group-title=\"${AREA}\",${NAME}"
 
-              echo "$EXT" >> playlist.m3u
-              echo "$URL" >> playlist.m3u
+              echo "$EXT" >> output/playlist.m3u
+              echo "$URL" >> output/playlist.m3u
 
             done
           }
@@ -85,10 +90,11 @@ run: |
           parse_area "Hong Kong" hongkong.m3u
           parse_area "Taiwan" taiwan.m3u
 
+      # 6. Commit Playlist
       - name: Commit Playlist
         run: |
           git config --global user.email "actions@github.com"
           git config --global user.name "GitHub Actions"
-          git add playlist.m3u
+          git add output/playlist.m3u
           git commit -m "Auto update playlist" || echo "No change"
           git push
