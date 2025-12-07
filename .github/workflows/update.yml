@@ -1,167 +1,140 @@
 name: IPTV Auto Builder Pro
 
 on:
-  schedule:
-    - cron: "*/240 * * * *"   # 每 4 小时自动更新
-  workflow_dispatch:
+schedule:
+- cron: "0 */4 * * *"   # 每 4 小时自动更新
+workflow_dispatch:
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
+build:
+runs-on: ubuntu-latest
 
-    steps:
-      # 1. Checkout repository 使用 PAT
-      - name: Checkout repository
-        uses: actions/checkout@v3
-        with:
-          token: ${{ secrets.PAT_TOKEN }}
+```
+steps:
+  # 1. Checkout repository 使用 PAT
+  - name: Checkout repository
+    uses: actions/checkout@v3
+    with:
+      token: ${{ secrets.PAT_TOKEN }}
 
-      # 2. 安装必需工具
-      - name: 🛠️ Install Tools (jq, curl)
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y jq curl
+  # 2. 安装必需工具
+  - name: 🛠️ Install Tools (jq, curl, bc)
+    run: |
+      sudo apt-get update
+      sudo apt-get install -y jq curl bc
 
-      # 3. 下载 M3U 源列表
-      - name: ⬇️ Download Source Lists
-        run: |
-          echo "Downloading China, Hong Kong, and Taiwan M3U sources..."
-          curl -L --retry 3 -o china.m3u    https://freetv.fun/test_channels_china_new.m3u
-          curl -L --retry 3 -o hongkong.m3u https://freetv.fun/test_channels_hong_kong_new.m3u
-          curl -L --retry 3 -o taiwan.m3u   https://freetv.fun/test_channels_taiwan_new.m3u
-          
-      # 4. 下载 EPG
-      - name: ⬇️ Download EPG Data
-        run: |
-          echo "Downloading EPG file..."
-          curl -L --retry 3 -o epg.xml http://epg.51zmt.top:8000/e.xml
+  # 3. 下载 M3U 源列表
+  - name: ⬇️ Download Source Lists
+    run: |
+      echo "Downloading China, Hong Kong, and Taiwan M3U sources..."
+      curl -L --retry 3 -o china.m3u    https://freetv.fun/test_channels_china_new.m3u
+      curl -L --retry 3 -o hongkong.m3u https://freetv.fun/test_channels_hong_kong_new.m3u
+      curl -L --retry 3 -o taiwan.m3u   https://freetv.fun/test_channels_taiwan_new.m3u
 
-      # 5. 生成 playlist
-      - name: Build Playlist
-   run: |
-    # 在根目录生成 playlist.m3u
-    cat << 'EOF' > playlist.m3u
-   #EXTM3U
-   EOF
+  # 4. 下载 EPG
+  - name: ⬇️ Download EPG Data
+    run: |
+      echo "Downloading EPG file..."
+      curl -L --retry 3 -o epg.xml http://epg.51zmt.top:8000/e.xml
 
-          # 声明用于去重和映射的关联数组
-           declare -A seen_urls
-          declare -A seen_names
+  # 5. 生成 playlist
+  - name: Build Playlist
+    run: |
+      mkdir -p output
+      cat << 'EOF' > output/playlist.m3u
+```
 
-          # 中文省份映射表
-          declare -A PROVINCE_MAP=( 
-           ["Beijing"]="北京" ["Shanghai"]="上海" ["Tianjin"]="天津" ["Chongqing"]="重庆" ["Hebei"]="河北" ["Shanxi"]="山西" ["InnerMongolia"]="内蒙古" ["Liaoning"]="辽宁" ["Jilin"]="吉林" ["Heilongjiang"]="黑龙江" ["Jiangsu"]="江苏" ["Zhejiang"]="浙江" ["Anhui"]="安徽" ["Fujian"]="福建" ["Jiangxi"]="江西" ["Shandong"]="山东" ["Henan"]="河南" ["Hubei"]="湖北" ["Hunan"]="湖南" ["Guangdong"]="广东" ["Guangxi"]="广西" ["Hainan"]="海南" ["Sichuan"]="四川" ["Guizhou"]="贵州" ["Yunnan"]="云南" ["Tibet"]="西藏" ["Shaanxi"]="陕西" ["Gansu"]="甘肃" ["Qinghai"]="青海" ["Ningxia"]="宁夏" ["Xinjiang"]="新疆" ["HongKong"]="香港" ["Macau"]="澳门" ["Taiwan"]="台湾" 
-          )
-          
+#EXTM3U
+EOF
 
-          # 定义处理函数的逻辑
-          parse_area () {
-            AREA=$1
-            FILE=$2
+```
+      declare -A seen_urls
+      declare -A seen_names
+      declare -A PROVINCE_MAP=( 
+        ["Beijing"]="北京" ["Shanghai"]="上海" ["Tianjin"]="天津" ["Chongqing"]="重庆" ["Hebei"]="河北" ["Shanxi"]="山西" ["InnerMongolia"]="内蒙古" ["Liaoning"]="辽宁" ["Jilin"]="吉林" ["Heilongjiang"]="黑龙江" ["Jiangsu"]="江苏" ["Zhejiang"]="浙江" ["Anhui"]="安徽" ["Fujian"]="福建" ["Jiangxi"]="江西" ["Shandong"]="山东" ["Henan"]="河南" ["Hubei"]="湖北" ["Hunan"]="湖南" ["Guangdong"]="广东" ["Guangxi"]="广西" ["Hainan"]="海南" ["Sichuan"]="四川" ["Guizhou"]="贵州" ["Yunnan"]="云南" ["Tibet"]="西藏" ["Shaanxi"]="陕西" ["Gansu"]="甘肃" ["Qinghai"]="青海" ["Ningxia"]="宁夏" ["Xinjiang"]="新疆" ["HongKong"]="香港" ["Macau"]="澳门" ["Taiwan"]="台湾" 
+      )
 
-            if [[ "$AREA" == "China" ]]; then
-              echo "" >> output/playlist.m3u
-              echo "# ===== 中国频道 =====" >> output/playlist.m3u
-            elif [[ "$AREA" == "Hong Kong" ]]; then
-              echo "" >> output/playlist.m3u
-              echo "# ===== 香港频道 =====" >> output/playlist.m3u
-            elif [[ "$AREA" == "Taiwan" ]]; then
-              echo "" >> output/playlist.m3u
-              echo "# ===== 台湾频道 =====" >> output/playlist.m3u
-            fi
+      parse_area () {
+        AREA=$1
+        FILE=$2
 
-            # 使用 awk 提取 info 和 url
-            awk '
-              /^#EXTINF/ {
-                info=$0;
-                getline url;
-                # 仅处理包含 http/https 的 URL，避免空行
-                if (url ~ /^http/) {
-                    print info "\t" url;
-                }
-              }
-            ' "$FILE" | while IFS=$'\t' read -r INFO URL; do
+        if [[ "$AREA" == "China" ]]; then
+          echo "" >> output/playlist.m3u
+          echo "# ===== 中国频道 =====" >> output/playlist.m3u
+        elif [[ "$AREA" == "Hong Kong" ]]; then
+          echo "" >> output/playlist.m3u
+          echo "# ===== 香港频道 =====" >> output/playlist.m3u
+        elif [[ "$AREA" == "Taiwan" ]]; then
+          echo "" >> output/playlist.m3u
+          echo "# ===== 台湾频道 =====" >> output/playlist.m3u
+        fi
 
-              # 提取频道名称并规范化
-              NAME=$(echo "$INFO" | sed 's/.*,//')
-              CLEAN_NAME=$(echo "$NAME" | tr -dc '[:alnum:][:alpha:]')
-
-              # 检查是否重复
-              if [[ ${seen_urls[$URL]} || ${seen_names[$CLEAN_NAME]} ]]; then
-                echo "Skipping duplicate: $NAME"
-                continue
-              fi
-
-              # 检查链接可用性 (只获取 HTTP 状态码)
-              STATUS=$(curl -I --max-time 5 -o /dev/null -s -w "%{http_code}" "$URL" || echo "000")
-              if [[ "$STATUS" != "200" ]]; then
-                echo "Skipping unreachable: $NAME ($URL) - Status $STATUS"
-                continue
-              fi
-
-              # 标记为已处理
-              seen_urls[$URL]=1
-              seen_names[$CLEAN_NAME]=1
-
-              # 查找 Logo URL
-              LOGO_URL="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/${CLEAN_NAME}.png"
-              if ! curl --output /dev/null --silent --head --fail "$LOGO_URL"; then
-                LOGO_URL="" # 如果 404，则清空 URL
-              fi
-
-              # 查找 TVG ID
-              TVG_ID=$(grep -iF "$NAME" epg.xml | head -1 | sed -n 's/.*tvg-id="\([^"]*\)".*/\1/p')
-
-              # 处理中国频道的分组标题
-              if [[ "$AREA" == "China" ]]; then
-                # 尝试提取省份关键字 (通常是第一个词)
-                PROVINCE_KEY=$(echo "$NAME" | awk '{print $1}')
-                PROVINCE_CH=${PROVINCE_MAP[$PROVINCE_KEY]}
-              else
-                PROVINCE_CH=""
-              fi
-
-              # 构建 EXTFINF 行
-              EXT="#EXTINF:-1"
-              [[ -n "$TVG_ID" ]] && EXT="${EXT} tvg-id=\"${TVG_ID}\""
-              [[ -n "$LOGO_URL" ]] && EXT="${EXT} tvg-logo=\"${LOGO_URL}\""
-
-              if [[ -n "$PROVINCE_CH" ]]; then
-                EXT="${EXT} group-title=\"中国: ${PROVINCE_CH}\",${NAME}"
-              elif [[ "$AREA" == "Hong Kong" ]]; then
-                EXT="${EXT} group-title=\"香港\",${NAME}"
-              elif [[ "$AREA" == "Taiwan" ]]; then
-                EXT="${EXT} group-title=\"台湾\",${NAME}"
-              else
-                EXT="${EXT} group-title=\"${AREA}\",${NAME}"
-              fi
-
-              # 写入最终的 M3U 内容
-              echo "$EXT" >> output/playlist.m3u
-              echo "$URL" >> output/playlist.m3u
-
-            done
+        awk '
+          /^#EXTINF/ {
+            info=$0;
+            getline url;
+            if (url ~ /^http/) { print info "\t" url }
           }
+        ' "$FILE" | while IFS=$'\t' read -r INFO URL; do
+          NAME=$(echo "$INFO" | sed 's/.*,//')
+          CLEAN_NAME=$(echo "$NAME" | tr -dc '[:alnum:]')
 
-          # 循环调用函数处理所有区域
-          declare -A AREAS=( ["China"]="china.m3u" ["Hong Kong"]="hongkong.m3u" ["Taiwan"]="taiwan.m3u" )
-          for AREA in "${!AREAS[@]}"; do
-            parse_area "$AREA" "${AREAS[$AREA]}"
-          done
-          echo "Playlist build complete."
-
-      # 6. Commit & Push
-      - name: ⬆️ Commit and Push Playlist
-        run: |
-          git config --global user.email "actions@github.com"
-          git config --global user.name "GitHub Actions"
-          
-          # 检查文件是否有实际变化 (防止空提交)
-          if git diff --quiet output/playlist.m3u; then
-            echo "No changes in playlist.m3u. Skipping commit."
-          else
-            git add output/playlist.m3u
-            git commit -m "🤖 Auto update playlist: $(date +%Y-%m-%d %H:%M:%S)" 
-            git push
+          if [[ ${seen_urls[$URL]} || ${seen_names[$CLEAN_NAME]} ]]; then
+            continue
           fi
-          echo "Commit and Push done."
+
+          STATUS=$(curl -I --max-time 5 -o /dev/null -s -w "%{http_code}" "$URL" || echo "000")
+          if [[ "$STATUS" != "200" ]]; then
+            continue
+          fi
+
+          seen_urls[$URL]=1
+          seen_names[$CLEAN_NAME]=1
+
+          LOGO_URL="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/${CLEAN_NAME}.png"
+          if ! curl --output /dev/null --silent --head --fail "$LOGO_URL"; then
+            LOGO_URL=""
+          fi
+
+          TVG_ID=$(grep -iF "$NAME" epg.xml | head -1 | sed -n 's/.*tvg-id="\([^"]*\)".*/\1/p')
+
+          if [[ "$AREA" == "China" ]]; then
+            PROVINCE_KEY=$(echo "$NAME" | awk '{print $1}')
+            PROVINCE_CH=${PROVINCE_MAP[$PROVINCE_KEY]}
+          else
+            PROVINCE_CH=""
+          fi
+
+          EXT="#EXTINF:-1"
+          [[ -n "$TVG_ID" ]] && EXT="${EXT} tvg-id=\"${TVG_ID}\""
+          [[ -n "$LOGO_URL" ]] && EXT="${EXT} tvg-logo=\"${LOGO_URL}\""
+
+          if [[ -n "$PROVINCE_CH" ]]; then
+            EXT="${EXT} group-title=\"中国: ${PROVINCE_CH}\",${NAME}"
+          elif [[ "$AREA" == "Hong Kong" ]]; then
+            EXT="${EXT} group-title=\"香港\",${NAME}"
+          elif [[ "$AREA" == "Taiwan" ]]; then
+            EXT="${EXT} group-title=\"台湾\",${NAME}"
+          else
+            EXT="${EXT} group-title=\"${AREA}\",${NAME}"
+          fi
+
+          echo "$EXT" >> output/playlist.m3u
+          echo "$URL" >> output/playlist.m3u
+        done
+      }
+
+      declare -A AREAS=( ["China"]="china.m3u" ["Hong Kong"]="hongkong.m3u" ["Taiwan"]="taiwan.m3u" )
+      for AREA in "${!AREAS[@]}"; do
+        parse_area "$AREA" "${AREAS[$AREA]}"
+      done
+      echo "Playlist build complete."
+
+  # 6. Commit & Push
+  - name: ⬆️ Commit and Push Playlist
+    run: |
+      git config --global user.email "actions@github.com"
+      git config --global user.name "GitHub Actions"
+      git add output/playlist.m3u
+      git commit -m "🤖 Auto update playlist: $(date +%Y-%m-%d %H:%M:%S)" --allow-empty
+      git push
