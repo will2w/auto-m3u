@@ -2,7 +2,7 @@ name: IPTV Auto Builder Pro
 
 on:
   schedule:
-    - cron: "*/30 * * * *"   # 每 30 分鐘自動更新
+    - cron: "*/240 * * * *"   # 每 30 分鐘自動更新
   workflow_dispatch:
 
 jobs:
