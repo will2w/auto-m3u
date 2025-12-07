@@ -2,7 +2,7 @@ name: IPTV Auto Builder Pro
 
 on:
   schedule:
-    # 每 4 小时运行一次 (标准 Cron 语法)
+    # 每 4 小时运行一次 (標準 Cron 語法)
     - cron: "0 */4 * * *"
   workflow_dispatch:
 
@@ -53,15 +53,22 @@ jobs:
             ["Henan"]="河南" ["Hubei"]="湖北" ["Hunan"]="湖南" ["Guangdong"]="广东" 
             ["Guangxi"]="广西" ["Hainan"]="海南" ["Sichuan"]="四川" ["Guizhou"]="贵州" 
             ["Yunnan"]="云南" ["Tibet"]="西藏" ["Shaanxi"]="陕西" ["Gansu"]="甘肃" 
-            ["Qinghai"]="青海" ["Ningxia"]="寧夏" ["Xinjiang"]="新疆" 
+            ["Qinghai"]="青海" ["Ningxia"]="宁夏" ["Xinjiang"]="新疆" 
           )
           
           # === 關鍵：正規化函數 (Normalization) ===
           normalize_name() {
               local name="$1"
+              
+              # 1. 移除方括號 [] 及其內部包含的所有內容
+              name=$(echo "$name" | sed -E 's/\[[^]]*\]//g')
+              
+              # 2. 移除常見品質後綴
               name=$(echo "$name" | sed -E 's/( )?(\(|\[)(高清|HD|超清|UHD|4K|FHD|標清|标清|SD)(\)|\])//ig')
               name=$(echo "$name" | sed -E 's/( )?(高清|HD|超清|UHD|4K|FHD|標清|标清|SD)//ig')
-              name=$(echo "$name" | tr -d ' ' | tr -d '()' | tr -d '[]' | sed -E 's/^-+//; s/-+$//')
+              
+              # 3. 移除圓括號、空格、並去除首尾多餘符號
+              name=$(echo "$name" | tr -d ' ' | tr -d '()' | sed -E 's/^-+//; s/-+$//')
               echo "$name"
           }
 
@@ -85,14 +92,18 @@ jobs:
               ORIGINAL_NAME=$(echo "$INFO" | sed 's/.*,//')
               NORMALIZED_NAME=$(normalize_name "$ORIGINAL_NAME")
 
-              # === 核心：串行測速 (獲取延遲/Latency) ===
-              CHECK_RESULT=$(curl -s -w "%{http_code} %{time_total}" -o /dev/null --connect-timeout 3 --max-time 5 "$URL" || echo "000 999")
+              # === 核心：串行測速 - 使用 time_connect 和 speed_download ===
+              # 輸出格式: http_code time_connect speed_download (字節/秒)
+              CHECK_RESULT=$(curl -s -w "%{http_code} %{time_connect} %{speed_download}" -o /dev/null --connect-timeout 3 --max-time 5 "$URL" || echo "000 999 0")
               
               HTTP_CODE=$(echo "$CHECK_RESULT" | awk '{print $1}')
-              LATENCY=$(echo "$CHECK_RESULT" | awk '{print $2}')
+              TIME_CONNECT=$(echo "$CHECK_RESULT" | awk '{print $2}')
+              SPEED_DOWNLOAD=$(echo "$CHECK_RESULT" | awk '{print $3}')
 
+              # 只保留 HTTP 200 的線路
               if [[ "$HTTP_CODE" == "200" ]]; then
-                  echo -e "${LATENCY}\t${NORMALIZED_NAME}\t${URL}\t${AREA}\t${INFO}" >> valid_channels.txt
+                  # 格式: TIME_CONNECT [TAB] SPEED_DOWNLOAD [TAB] NORMALIZED_NAME [TAB] URL [TAB] AREA [TAB] 原始信息
+                  echo -e "${TIME_CONNECT}\t${SPEED_DOWNLOAD}\t${NORMALIZED_NAME}\t${URL}\t${AREA}\t${INFO}" >> valid_channels.txt
               fi
 
             done
@@ -106,12 +117,15 @@ jobs:
           echo "Total valid channels found: $(wc -l valid_channels.txt)"
 
 
-          # 3. 排序與擇優 (保留前 3 線路)
-          echo "Sorting and Selecting best sources (Top 3 per normalized channel)..."
-          sort -t $'\t' -k2,2 -k1,1n valid_channels.txt | \
-          awk -F '\t' '{ if (count[$2] < 3) { print; count[$2]++; } }' > best_channels.txt
+          # 3. 【關鍵修改】排序與擇優 (選擇下載速度最高的 Top 5)
+          echo "Sorting and Selecting best sources (Top 5 per normalized channel by SPEED_DOWNLOAD)..."
+          
+          # 排序規則：按正規化名稱分組(-k3,3)，然後按下載速度數字降序排序(-k2,2nr)
+          sort -t $'\t' -k3,3 -k2,2nr valid_channels.txt | \
+          # 【核心更改】：保留每個正規化頻道名稱的 TOP 5 記錄
+          awk -F '\t' '{ if (count[$3] < 5) { print; count[$3]++; } }' > best_channels.txt
 
-          echo "Selected $(wc -l best_channels.txt) unique fastest sources (Max 3 per channel)."
+          echo "Selected $(wc -l best_channels.txt) unique fastest sources (Max 5 per channel)."
 
 
           # 4. EPG 查找优化
@@ -126,16 +140,17 @@ jobs:
           done
 
 
-          # 5. 寫入最終 M3U 文件 (支持 "全國" 歸類)
+          # 5. 寫入最終 M3U 文件 (從 best_channels.txt 讀取)
           declare CURRENT_GROUP="" 
           
           write_playlist() {
-            # 按 AREA 排序 (第 4 欄) 確保國家級分組順序，然後按 NORMALIZED_NAME 排序 (第 2 欄)
-            sort -t $'\t' -k4,4 -k2,2 best_channels.txt | while IFS=$'\t' read -r LATENCY NORMALIZED_NAME URL AREA INFO; do
+            # 從 best_channels.txt 讀取所有最優線路。
+            # 排序鍵：按 AREA (第 5 欄) 和 NORMALIZED_NAME (第 3 欄) 排序
+            sort -t $'\t' -k5,5 -k3,3 best_channels.txt | while IFS=$'\t' read -r TIME_CONNECT SPEED_DOWNLOAD NORMALIZED_NAME URL AREA INFO; do
               
               DISPLAY_NAME=$(echo "$INFO" | sed 's/.*,//')
 
-              # === 判斷 Group Title (核心邏輯：新增 "全國" 處理) ===
+              # === 判斷 Group Title (核心邏輯) ===
               GROUP_TITLE=""
               if [[ "$AREA" == "China" ]]; then
                 PROVINCE_KEY=$(echo "$DISPLAY_NAME" | awk '{print $1}')
@@ -144,7 +159,7 @@ jobs:
                 if [[ -n "$PROVINCE_CH" ]]; then
                   GROUP_TITLE="中国: ${PROVINCE_CH}"
                 else
-                  # 【關鍵修改】如果無法識別省份，歸類到 "全国"
+                  # 如果無法識別省份，歸類到 "全国"
                   GROUP_TITLE="中国: 全国"
                 fi
               elif [[ "$AREA" == "Hong Kong" ]]; then
@@ -195,6 +210,6 @@ jobs:
             echo "No changes detected. Skipping commit."
           else
             git add playlist.m3u
-            git commit -m "🚀 Update playlist (Serial Stable - Top 3 Normalized & Grouped): $(date +'%Y-%m-%d %H:%M:%S')" 
+            git commit -m "🚀 Update playlist (Top 5 Speed, Normalized & Grouped): $(date +'%Y-%m-%d %H:%M:%S')" 
             git push
           fi
