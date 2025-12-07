@@ -2,7 +2,7 @@ name: IPTV Auto Builder Pro
 
 on:
   schedule:
-    # 每 4 小时运行一次 (标准 Cron 语法: 分 时 日 月 周)
+    # 每 4 小时运行一次 (标准 Cron 语法)
     - cron: "0 */12 * * *"
   workflow_dispatch:
 
@@ -18,11 +18,12 @@ jobs:
           # 确保 PAT_TOKEN 具有写入权限
           token: ${{ secrets.PAT_TOKEN }}
 
-      # 2. 安装必需工具
-      - name: 🛠️ Install Tools
+      # 2. 安装必需工具 (包含 GNU parallel)
+      - name: 🛠️ Install Tools (jq, curl, parallel)
         run: |
           sudo apt-get update
-          sudo apt-get install -y jq curl
+          # 【重要】安装 parallel 实现并发测速
+          sudo apt-get install -y jq curl parallel 
 
       # 3. 下载 M3U 源列表
       - name: ⬇️ Download Source Lists
@@ -38,15 +39,14 @@ jobs:
           echo "Downloading EPG file..."
           curl -L --retry 3 -o epg.xml http://epg.51zmt.top:8000/e.xml
 
-      # 5. 生成 playlist
-      - name: ⚙️ Build Playlist (Select Fastest)
+      # 5. 生成 playlist (优化核心步骤)
+      - name: ⚙️ Build Playlist (Parallel Speed Test)
         run: |
-          # 【修改点】直接在根目录生成 playlist.m3u
+          # 1. 初始化和准备数据
           echo "#EXTM3U" > playlist.m3u
-          
-          # 创建一个临时文件来存放所有测试通过的频道数据
+          touch all_channels_raw.txt
           touch valid_channels.txt
-
+          
           # 声明省份映射
           declare -A PROVINCE_MAP=( 
             ["Beijing"]="北京" ["Shanghai"]="上海" ["Tianjin"]="天津" ["Chongqing"]="重庆" 
@@ -58,59 +58,80 @@ jobs:
             ["Yunnan"]="云南" ["Tibet"]="西藏" ["Shaanxi"]="陕西" ["Gansu"]="甘肃" 
             ["Qinghai"]="青海" ["Ningxia"]="宁夏" ["Xinjiang"]="新疆" 
           )
+          
+          # 将所有源文件合并，并添加 AREA 标记 (格式: INFO \t URL \t AREA)
+          echo "Merging all M3U sources..."
+          
+          extract_and_tag() {
+              FILE=$1
+              AREA=$2
+              awk -v area="$AREA" '
+                /^#EXTINF/ {
+                    info=$0;
+                    getline url;
+                    if (url ~ /^http/) {
+                        print info "\t" url "\t" area;
+                    }
+                }' "$FILE" >> all_channels_raw.txt
+          }
 
-          # 定义处理函数：负责测速和收集数据
-          collect_channels () {
-            AREA=$1
-            FILE=$2
+          extract_and_tag "china.m3u" "China"
+          extract_and_tag "hongkong.m3u" "Hong Kong"
+          extract_and_tag "taiwan.m3u" "Taiwan"
 
-            echo "Processing $AREA from $FILE..."
 
-            awk '
-              /^#EXTINF/ {
-                info=$0;
-                getline url;
-                if (url ~ /^http/) {
-                    print info "\t" url;
-                }
-              }
-            ' "$FILE" | while IFS=$'\t' read -r INFO URL; do
-              
+          # 2. 核心优化：使用 parallel 进行并发测速
+          echo "Starting parallel speed test (Max 5s timeout per URL)..."
+          
+          # 定义一个 Shell 函数来处理单个 URL 的测试和记录
+          export -f process_url
+          process_url() {
+              LINE="$1"
+              INFO=$(echo "$LINE" | awk -F'\t' '{print $1}')
+              URL=$(echo "$LINE" | awk -F'\t' '{print $2}')
+              AREA=$(echo "$LINE" | awk -F'\t' '{print $3}')
               NAME=$(echo "$INFO" | sed 's/.*,//')
               
-              # === 核心：获取 HTTP状态码 和 响应时间 ===
-              # %{time_total} 获取总耗时 (Latency)
+              # 测速，并捕获 HTTP状态码 和 耗时
               CHECK_RESULT=$(curl -s -w "%{http_code} %{time_total}" -o /dev/null --connect-timeout 3 --max-time 5 "$URL" || echo "000 999")
               
               HTTP_CODE=$(echo "$CHECK_RESULT" | awk '{print $1}')
               LATENCY=$(echo "$CHECK_RESULT" | awk '{print $2}')
 
-              if [[ "$HTTP_CODE" != "200" ]]; then
-                # echo "Skipping invalid: $NAME ($URL)"
-                continue
+              if [[ "$HTTP_CODE" == "200" ]]; then
+                  # 格式: 耗时 [TAB] 名字 [TAB] URL [TAB] 区域 [TAB] 原始信息
+                  echo -e "${LATENCY}\t${NAME}\t${URL}\t${AREA}\t${INFO}"
+              else
+                  echo "Skipped: $NAME (Status $HTTP_CODE)" >&2 
               fi
-
-              # 写入临时文件，格式：耗时 [TAB] 名字 [TAB] URL [TAB] 区域 [TAB] 原始信息
-              echo -e "${LATENCY}\t${NAME}\t${URL}\t${AREA}\t${INFO}" >> valid_channels.txt
-              # echo "Collected: $NAME ($LATENCY s)"
-
-            done
           }
+          
+          # 使用 parallel 并发执行测试
+          cat all_channels_raw.txt | parallel -j 32 process_url {} > valid_channels.txt
+          
+          echo "Parallel test finished. Total valid channels: $(wc -l valid_channels.txt)"
 
-          # 2. 收集所有频道的测速数据
-          declare -A AREAS=( ["China"]="china.m3u" ["Hong Kong"]="hongkong.m3u" ["Taiwan"]="taiwan.m3u" )
-          for AREA in "${!AREAS[@]}"; do
-            collect_channels "$AREA" "${AREAS[$AREA]}"
-          done
 
-          echo "Sorting and Selecting best sources..."
-
-          # 3. 排序与去重：选出速度最快的唯一频道
-          # 排序规则：按名字分组(-k2,2)，然后按耗时数字升序排序(-k1,1n)
-          # 去重规则：awk 只保留第一次出现的行 (即最快的那个)
+          # 3. 排序与去重
+          # 排序：按名字分组(-k2,2)，按耗时数字升序排序(-k1,1n)
+          # 去重：awk 只保留最快的那一条
           sort -t $'\t' -k2,2 -k1,1n valid_channels.txt | awk -F '\t' '!seen[$2]++' > best_channels.txt
 
-          # 4. 写入最终 M3U 文件
+          echo "Selected $(wc -l best_channels.txt) unique fastest sources."
+
+          # 4. EPG 查找优化 (预先提取 EPG ID 映射表，避免重复调用 grep)
+          declare -A EPG_MAP
+          echo "Building EPG map..."
+          grep 'channel id' epg.xml | while IFS= read -r LINE; do
+              TVG_ID=$(echo "$LINE" | sed -n 's/.*id="\([^"]*\)".*/\1/p')
+              CHANNEL_NAME=$(echo "$LINE" | sed -n 's/.*display-name="\([^"]*\)".*/\1/p')
+              if [[ -n "$TVG_ID" && -n "$CHANNEL_NAME" ]]; then
+                  EPG_MAP["$CHANNEL_NAME"]="$TVG_ID"
+              fi
+          done
+
+
+          # 5. 写入最终 M3U 文件
           write_playlist() {
             TARGET_AREA=$1
             TITLE_TEXT=$2
@@ -119,7 +140,7 @@ jobs:
             echo "# ===== $TITLE_TEXT =====" >> playlist.m3u
             
             # 从 best_channels.txt 中读取属于当前区域的频道
-            grep "$TARGET_AREA" best_channels.txt | while IFS=$'\t' read -r LATENCY NAME URL AREA INFO; do
+            grep -E "\t$TARGET_AREA\t" best_channels.txt | while IFS=$'\t' read -r LATENCY NAME URL AREA INFO; do
               
               CLEAN_NAME=$(echo "$NAME" | tr -dc '[:alnum:][:alpha:]')
 
@@ -129,8 +150,8 @@ jobs:
                  LOGO_URL=""
               fi
 
-              # 匹配 EPG
-              TVG_ID=$(grep -iF "$NAME" epg.xml | head -1 | sed -n 's/.*tvg-id="\([^"]*\)".*/\1/p')
+              # 优化：直接从 EPG_MAP 中查找 TVG ID
+              TVG_ID=${EPG_MAP[$NAME]}
 
               # 处理分组标题
               PROVINCE_CH=""
@@ -164,21 +185,21 @@ jobs:
           write_playlist "Hong Kong" "香港频道"
           write_playlist "Taiwan" "台湾频道"
 
-          echo "Final playlist generated (Root Directory)."
+          echo "Final playlist generated."
           # 清理临时文件
-          rm valid_channels.txt best_channels.txt
+          rm all_channels_raw.txt valid_channels.txt best_channels.txt epg.xml
 
-      # 6. Commit & Push (推送到根目录)
+      # 6. Commit & Push (修正 date 语法)
       - name: ⬆️ Commit and Push Playlist
         run: |
           git config --global user.email "actions@github.com"
           git config --global user.name "GitHub Actions"
           
-          # 检查根目录文件是否有变化
           if git diff --quiet playlist.m3u; then
             echo "No changes detected. Skipping commit."
           else
-            git add playlist.m3u # 【修改点】只添加根目录的 playlist.m3u
-            git commit -m "🚀 Update playlist (Best Speed): $(date +%Y-%m-%d %H:%M:%S)" 
+            git add playlist.m3u
+            # 【关键修正】date 格式字符串外围添加单引号，修复 'extra operand' 错误
+            git commit -m "🚀 Update playlist (Optimized Speed): $(date +'%Y-%m-%d %H:%M:%S')" 
             git push
           fi
