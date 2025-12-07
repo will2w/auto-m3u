@@ -11,7 +11,10 @@ jobs:
 
     steps:
       # 1. Checkout repository
-      - uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          persist-credentials: true   # 确保 push 时使用 GITHUB_TOKEN
 
       # 2. Install required tools
       - name: Install Tools
