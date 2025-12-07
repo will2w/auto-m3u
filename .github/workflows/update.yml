@@ -24,7 +24,7 @@ jobs:
           curl -L --retry 3 -o taiwan.m3u   https://freetv.fun/test_channels_taiwan_new.m3u
 
       - name: Download EPG
-        run: curl -L --retry 3 -o epg.xml https://epg.51zmt.top:8000/e.xml
+        run: curl -L --retry 3 -o epg.xml http://epg.51zmt.top:8000/e.xml
 
       - name: Build Playlist
         run: |
