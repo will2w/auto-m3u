@@ -27,8 +27,9 @@ jobs:
         run: curl -L --retry 3 -o epg.xml http://epg.51zmt.top:8000/e.xml
 
       - name: Build Playlist
-        run: |
-          echo "#EXTM3U" > playlist.m3u
+run: |
+  mkdir -p output
+  echo "#EXTM3U" > output/playlist.m3u
 
           declare -A seen_urls
           declare -A seen_names
