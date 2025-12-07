@@ -37,12 +37,12 @@ jobs:
           curl -L --retry 3 -o epg.xml http://epg.51zmt.top:8000/e.xml
 
       # 5. 生成 playlist
-     - name: Build Playlist
-  run: |
+      - name: Build Playlist
+   run: |
     # 在根目录生成 playlist.m3u
     cat << 'EOF' > playlist.m3u
-  #EXTM3U
-  EOF
+   #EXTM3U
+   EOF
 
           # 声明用于去重和映射的关联数组
            declare -A seen_urls
