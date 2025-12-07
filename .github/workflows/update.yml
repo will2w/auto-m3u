@@ -73,7 +73,7 @@ jobs:
                 LOGO_URL=""
               fi
 
-              TVG_ID=$(grep -i "$NAME" epg.xml | head -1 | sed -n 's/.*tvg-id="\([^"]*\)".*/\1/p')
+              TVG_ID=$(grep -iF "$NAME" epg.xml | head -1 | sed -n 's/.*tvg-id="\([^"]*\)".*/\1/p')
 
               EXT="#EXTINF:-1"
               [[ -n "$TVG_ID" ]] && EXT="${EXT} tvg-id=\"${TVG_ID}\""
