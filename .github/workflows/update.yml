@@ -3,7 +3,7 @@ name: IPTV Auto Builder Pro
 on:
   schedule:
     # 每 4 小时运行一次 (標準 Cron 語法)
-    - cron: "0 */4 * * *"
+    - cron: "0 */24 * * *"
   workflow_dispatch:
 
 jobs:
