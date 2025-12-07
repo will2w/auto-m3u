@@ -10,11 +10,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Checkout repository
+      # 1. Checkout repository (使用 PAT)
       - name: Checkout repository
         uses: actions/checkout@v3
         with:
-          persist-credentials: true   # 确保 push 时使用 GITHUB_TOKEN
+          token: ${{ secrets.PAT_TOKEN }}
 
       # 2. Install required tools
       - name: Install Tools
@@ -69,7 +69,6 @@ jobs:
                 continue
               fi
 
-
               seen_urls[$URL]=1
               seen_names[$CLEAN_NAME]=1
 
@@ -95,11 +94,11 @@ jobs:
           parse_area "Hong Kong" hongkong.m3u
           parse_area "Taiwan" taiwan.m3u
 
-      # 6. Commit Playlist
+      # 6. Commit and Push Playlist
       - name: Commit Playlist
         run: |
           git config --global user.email "actions@github.com"
           git config --global user.name "GitHub Actions"
           git add output/playlist.m3u
           git commit -m "Auto update playlist" || echo "No change"
-          git push
+          git push origin main
