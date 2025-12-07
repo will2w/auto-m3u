@@ -2,381 +2,92 @@ name: IPTV Auto Builder Pro
 
 on:
   schedule:
-    - cron: "*/240 * * * *"   # 每 240 分鐘自動更新
-  workflow_dispatch:           # 手動觸發
-
-permissions:
-  contents: write             # 明確聲明寫入權限
+    - cron: "*/240 * * * *"   # 每 30 分鐘自動更新
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 10       # 設置超時時間，避免無限運行
 
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/checkout@v3
 
-      - name: Setup Environment
-        run: |
-          echo "工作目錄: $(pwd)"
-          echo "當前時間: $(date)"
-          echo "================================="
-
-      - name: Install Dependencies
+      - name: Install Tools
         run: |
           sudo apt-get update
-          sudo apt-get install -y curl jq parallel
-          echo "工具安裝完成"
+          sudo apt-get install -y jq curl
 
       - name: Download Source Lists
         run: |
-          echo "開始下載播放列表..."
-          
-          # 設置下載超時和重試
-          download_with_retry() {
-            local url=$1
-            local output=$2
-            local max_retries=3
-            local retry_count=0
-            
-            while [ $retry_count -lt $max_retries ]; do
-              if curl -L --connect-timeout 30 --max-time 120 -f -o "$output" "$url"; then
-                echo "✓ 成功下載: $output"
-                return 0
-              else
-                retry_count=$((retry_count + 1))
-                echo "⚠ 下載失敗 ($retry_count/$max_retries): $url"
-                sleep 5
-              fi
-            done
-            
-            echo "❌ 無法下載: $url"
-            # 創建空文件避免後續錯誤
-            echo "#EXTM3U" > "$output"
-            return 1
-          }
-          
-          # 同時下載所有文件
-          download_with_retry "https://freetv.fun/test_channels_china_new.m3u" "china.m3u" &
-          download_with_retry "https://freetv.fun/test_channels_hong_kong_new.m3u" "hongkong.m3u" &
-          download_with_retry "https://freetv.fun/test_channels_taiwan_new.m3u" "taiwan.m3u" &
-          wait
-          
-          echo "播放列表下載完成"
-          ls -lh *.m3u
+          curl -L --retry 3 -o china.m3u    https://freetv.fun/test_channels_china_new.m3u
+          curl -L --retry 3 -o hongkong.m3u https://freetv.fun/test_channels_hong_kong_new.m3u
+          curl -L --retry 3 -o taiwan.m3u   https://freetv.fun/test_channels_taiwan_new.m3u
 
       - name: Download EPG
-        run: |
-          echo "開始下載 EPG..."
-          if curl -L --retry 3 --connect-timeout 30 -o epg.xml "http://epg.51zmt.top:8000/e.xml"; then
-            echo "✓ EPG 下載成功"
-            echo "EPG 文件大小: $(wc -l epg.xml | awk '{print $1}') 行"
-          else
-            echo "⚠ EPG 下載失敗，創建空文件"
-            echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?><tv></tv>" > epg.xml
-          fi
+        run: curl -L --retry 3 -o epg.xml http://epg.51zmt.top:8000/e.xml
 
       - name: Build Playlist
         run: |
-          echo "開始構建播放列表..."
-          
-          # 創建處理腳本
-          cat > process_channels.py << 'EOF'
-          #!/usr/bin/env python3
-          import sys
-          import re
-          import subprocess
-          import time
-          from pathlib import Path
-          
-          def extract_channels(file_path):
-              """從 M3U 文件中提取頻道信息"""
-              channels = []
-              with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
-                  lines = f.readlines()
-              
-              i = 0
-              while i < len(lines):
-                  line = lines[i].strip()
-                  if line.startswith('#EXTINF'):
-                      extinf = line
-                      if i + 1 < len(lines):
-                          url = lines[i + 1].strip()
-                          channels.append({
-                              'extinf': extinf,
-                              'url': url,
-                              'raw': f"{extinf}\n{url}"
-                          })
-                          i += 2
-                          continue
-                  i += 1
-              return channels
-          
-          def extract_tvg_info(extinf_line):
-              """從 EXTINF 行提取信息"""
-              info = {
-                  'tvg_id': None,
-                  'tvg_logo': None,
-                  'group': None,
-                  'name': None
+          echo "#EXTM3U" > playlist.m3u
+
+          declare -A seen_urls
+          declare -A seen_names
+
+          parse_area () {
+            AREA=$1
+            FILE=$2
+            echo "" >> playlist.m3u
+            echo "# ===== ${AREA} Channels =====" >> playlist.m3u
+
+            awk '
+              /^#EXTINF/ {
+                info=$0;
+                getline url;
+                print info "\t" url;
               }
+            ' "$FILE" | while IFS="\t" read -r INFO URL; do
               
-              # 提取名稱（最後一個逗號後面的內容）
-              name_match = re.search(r',([^,]+)$', extinf_line)
-              if name_match:
-                  info['name'] = name_match.group(1).strip()
-              
-              # 提取 tvg-id
-              tvg_id_match = re.search(r'tvg-id="([^"]+)"', extinf_line)
-              if tvg_id_match:
-                  info['tvg_id'] = tvg_id_match.group(1)
-              
-              # 提取 tvg-logo
-              logo_match = re.search(r'tvg-logo="([^"]+)"', extinf_line)
-              if logo_match:
-                  info['tvg_logo'] = logo_match.group(1)
-              
-              # 提取 group-title
-              group_match = re.search(r'group-title="([^"]+)"', extinf_line)
-              if group_match:
-                  info['group'] = group_match.group(1)
-              
-              return info
-          
-          def find_tvg_id_in_epg(channel_name, epg_file):
-              """在 EPG 文件中查找 tvg-id"""
-              try:
-                  with open(epg_file, 'r', encoding='utf-8', errors='ignore') as f:
-                      content = f.read()
-                      
-                  # 簡化頻道名稱以匹配
-                  simple_name = re.sub(r'[^a-zA-Z0-9]', '', channel_name).lower()
-                  
-                  # 查找匹配的頻道
-                  pattern = rf'channel id="([^"]+)".*?<display-name>.*?{re.escape(channel_name[:20])}.*?</display-name>'
-                  matches = re.findall(pattern, content, re.IGNORECASE | re.DOTALL)
-                  
-                  if matches:
-                      return matches[0]
-                      
-                  # 嘗試更寬鬆的匹配
-                  if simple_name:
-                      pattern = rf'channel id="([^"]+)".*?<display-name>.*?{re.escape(simple_name)}.*?</display-name>'
-                      matches = re.findall(pattern, content, re.IGNORECASE | re.DOTALL)
-                      if matches:
-                          return matches[0]
-              except Exception as e:
-                  print(f"EPG 查找錯誤: {e}")
-              
-              return None
-          
-          def check_url_availability(url, timeout=3):
-              """檢查 URL 是否可用"""
-              try:
-                  result = subprocess.run(
-                      ['curl', '-I', '-s', '-o', '/dev/null', '-w', '%{http_code}', '--max-time', str(timeout), url],
-                      capture_output=True,
-                      text=True,
-                      timeout=timeout + 1
-                  )
-                  return result.stdout.strip() == '200'
-              except:
-                  return False
-          
-          def main():
-              if len(sys.argv) < 3:
-                  print("用法: python script.py <area> <input_file> <output_file>")
-                  sys.exit(1)
-              
-              area = sys.argv[1]
-              input_file = sys.argv[2]
-              output_file = sys.argv[3]
-              epg_file = 'epg.xml' if Path('epg.xml').exists() else None
-              
-              print(f"處理區域: {area}, 文件: {input_file}")
-              
-              # 讀取已處理的 URL 和名稱
-              processed_urls = set()
-              processed_names = set()
-              
-              # 提取頻道
-              channels = extract_channels(input_file)
-              print(f"找到 {len(channels)} 個頻道")
-              
-              # 準備輸出
-              output_lines = [f"\n# ===== {area} Channels ====="]
-              
-              valid_count = 0
-              skipped_count = 0
-              
-              for idx, channel in enumerate(channels):
-                  if idx % 50 == 0:
-                      print(f"處理進度: {idx}/{len(channels)}")
-                  
-                  # 提取信息
-                  info = extract_tvg_info(channel['extinf'])
-                  name = info['name'] or f"Channel_{idx}"
-                  url = channel['url']
-                  
-                  # 檢查重複
-                  if url in processed_urls:
-                      skipped_count += 1
-                      continue
-                  
-                  # 檢查名稱重複（簡化後）
-                  simple_name = re.sub(r'[^a-zA-Z0-9]', '', name).lower()
-                  if simple_name in processed_names:
-                      skipped_count += 1
-                      continue
-                  
-                  # 檢查 URL 可用性（可選，會顯著增加處理時間）
-                  # if not check_url_availability(url):
-                  #     skipped_count += 1
-                  #     continue
-                  
-                  # 查找 tvg-id
-                  tvg_id = info['tvg_id']
-                  if not tvg_id and epg_file and info['name']:
-                      tvg_id = find_tvg_id_in_epg(info['name'], epg_file)
-                  
-                  # 構建圖標 URL
-                  tvg_logo = info['tvg_logo']
-                  if not tvg_logo and simple_name:
-                      tvg_logo = f"https://raw.githubusercontent.com/fanmingming/live/main/tvicon/{simple_name}.png"
-                  
-                  # 構建 EXTINF 行
-                  extinf_parts = ["#EXTINF:-1"]
-                  if tvg_id:
-                      extinf_parts.append(f'tvg-id="{tvg_id}"')
-                  if tvg_logo:
-                      extinf_parts.append(f'tvg-logo="{tvg_logo}"')
-                  if area:
-                      extinf_parts.append(f'group-title="{area}"')
-                  extinf_parts.append(f',{name}')
-                  
-                  new_extinf = ' '.join(extinf_parts)
-                  
-                  # 添加到輸出
-                  output_lines.append(new_extinf)
-                  output_lines.append(url)
-                  
-                  # 記錄已處理
-                  processed_urls.add(url)
-                  processed_names.add(simple_name)
-                  valid_count += 1
-              
-              # 寫入輸出文件
-              with open(output_file, 'a', encoding='utf-8') as f:
-                  f.write('\n'.join(output_lines))
-              
-              print(f"區域 {area}: 添加 {valid_count} 個頻道，跳過 {skipped_count} 個")
-              return valid_count
-          
-          if __name__ == "__main__":
-              main()
-          EOF
-          
-          # 創建臨時文件
-          TEMP_PLAYLIST="temp_playlist.m3u"
-          
-          # 寫入 M3U 頭
-          echo "#EXTM3U x-tvg-url=\"https://epg.51zmt.top:8000/e.xml\"" > "$TEMP_PLAYLIST"
-          echo "# Generated by IPTV Auto Builder Pro" >> "$TEMP_PLAYLIST"
-          echo "# Update Time: $(date)" >> "$TEMP_PLAYLIST"
-          
-          # 處理每個區域
-          python3 process_channels.py "China" "china.m3u" "$TEMP_PLAYLIST"
-          python3 process_channels.py "Hong Kong" "hongkong.m3u" "$TEMP_PLAYLIST"
-          python3 process_channels.py "Taiwan" "taiwan.m3u" "$TEMP_PLAYLIST"
-          
-          # 重命名為最終文件
-          mv "$TEMP_PLAYLIST" "playlist.m3u"
-          
-          # 統計信息
-          TOTAL_CHANNELS=$(grep -c "^http" playlist.m3u || echo "0")
-          echo "================================="
-          echo "✅ 播放列表構建完成"
-          echo "總頻道數: $TOTAL_CHANNELS"
-          echo "文件大小: $(wc -l playlist.m3u | awk '{print $1}') 行"
-          echo "文件大小: $(ls -lh playlist.m3u | awk '{print $5}')"
-          echo "================================="
-          
-          # 顯示前幾個頻道作為示例
-          echo "前 5 個頻道示例:"
-          head -20 playlist.m3u
+              NAME=$(echo "$INFO" | sed 's/.*,//')
+              CLEAN_NAME=$(echo "$NAME" | tr -dc 'A-Za-z0-9')
 
-      - name: Validate Playlist
-        run: |
-          echo "驗證播放列表..."
-          if [ ! -f "playlist.m3u" ]; then
-            echo "❌ 錯誤: playlist.m3u 文件不存在"
-            exit 1
-          fi
-          
-          LINE_COUNT=$(wc -l playlist.m3u | awk '{print $1}')
-          if [ "$LINE_COUNT" -lt 10 ]; then
-            echo "⚠ 警告: 播放列表行數過少 ($LINE_COUNT)"
-          else
-            echo "✓ 播放列表驗證通過 ($LINE_COUNT 行)"
-          fi
-          
-          # 檢查格式
-          if grep -q "^#EXTM3U" playlist.m3u; then
-            echo "✓ M3U 格式正確"
-          else
-            echo "❌ 錯誤: 缺少 #EXTM3U 標頭"
-            exit 1
-          fi
+              if [[ ${seen_urls[$URL]} || ${seen_names[$CLEAN_NAME]} ]]; then
+                continue
+              fi
 
-      - name: Commit Changes
+              STATUS=$(curl -I --max-time 3 -o /dev/null -s -w "%{http_code}" "$URL")
+              if [[ "$STATUS" != "200" ]]; then
+                continue
+              fi
+
+              seen_urls[$URL]=1
+              seen_names[$CLEAN_NAME]=1
+
+              LOGO_URL="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/${CLEAN_NAME}.png"
+              if ! curl --output /dev/null --silent --head --fail "$LOGO_URL"; then
+                LOGO_URL=""
+              fi
+
+              TVG_ID=$(grep -i "$NAME" epg.xml | head -1 | sed -n 's/.*tvg-id="\([^"]*\)".*/\1/p')
+
+              EXT="#EXTINF:-1"
+              [[ -n "$TVG_ID" ]] && EXT="${EXT} tvg-id=\"${TVG_ID}\""
+              [[ -n "$LOGO_URL" ]] && EXT="${EXT} tvg-logo=\"${LOGO_URL}\""
+              EXT="${EXT} group-title=\"${AREA}\",${NAME}"
+
+              echo "$EXT" >> playlist.m3u
+              echo "$URL" >> playlist.m3u
+
+            done
+          }
+
+          parse_area "China" china.m3u
+          parse_area "Hong Kong" hongkong.m3u
+          parse_area "Taiwan" taiwan.m3u
+
+      - name: Commit Playlist
         run: |
-          echo "提交更改..."
-          
-          # 配置 Git
           git config --global user.email "actions@github.com"
           git config --global user.name "GitHub Actions"
-          
-          # 檢查是否有更改
-          if git diff --quiet -- playlist.m3u 2>/dev/null; then
-            echo "沒有更改，跳過提交"
-          else
-            echo "檢測到更改，提交中..."
-            git add playlist.m3u
-            git commit -m "🔄 Auto update playlist - $(date +'%Y-%m-%d %H:%M:%S')
-            
-            - Total channels: $(grep -c '^http' playlist.m3u)
-            - Last update: $(date)"
-            
-            # 嘗試推送
-            MAX_RETRIES=3
-            for i in $(seq 1 $MAX_RETRIES); do
-              if git push; then
-                echo "✓ 成功推送到倉庫"
-                break
-              else
-                echo "⚠ 推送失敗 ($i/$MAX_RETRIES)，重試..."
-                sleep 2
-              fi
-            done
-          fi
-
-      - name: Upload Playlist as Artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: iptv-playlist
-          path: playlist.m3u
-          retention-days: 7
-
-      - name: Final Status
-        run: |
-          echo "================================="
-          echo "🚀 IPTV Auto Builder 執行完成"
-          echo "================================="
-          echo "✅ 播放列表已更新"
-          echo "📊 頻道總數: $(grep -c '^http' playlist.m3u 2>/dev/null || echo 'N/A')"
-          echo "📁 文件位置: playlist.m3u"
-          echo "🕒 下次更新: 30 分鐘後"
-          echo "================================="
+          git add playlist.m3u
+          git commit -m "Auto update playlist" || echo "No change"
+          git push
