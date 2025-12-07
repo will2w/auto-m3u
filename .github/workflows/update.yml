@@ -2,7 +2,7 @@ name: IPTV Auto Builder Pro
 
 on:
   schedule:
-    # 每 4 小时运行一次
+    # 每 4 小时运行一次 (标准 Cron 语法)
     - cron: "0 */4 * * *"
   workflow_dispatch:
 
@@ -12,19 +12,19 @@ jobs:
 
     steps:
       # 1. Checkout repository
-      - name: 📦 Checkout repository
+      - name: Checkout repository
         uses: actions/checkout@v3
         with:
           token: ${{ secrets.PAT_TOKEN }}
 
-      # 2. 安装必需工具 (仅需 jq 和 curl)
-      - name: 🛠️ Install Tools (jq, curl)
+      # 2. 安装必需工具
+      - name: Install Tools
         run: |
           sudo apt-get update
           sudo apt-get install -y jq curl 
 
       # 3. 下载 M3U 源列表
-      - name: ⬇️ Download Source Lists
+      - name: Download Source Lists
         run: |
           echo "Downloading M3U sources..."
           curl -L --retry 3 -o china.m3u    https://freetv.fun/test_channels_china_new.m3u
@@ -32,20 +32,19 @@ jobs:
           curl -L --retry 3 -o taiwan.m3u   https://freetv.fun/test_channels_taiwan_new.m3u
 
       # 4. 下载 EPG
-      - name: ⬇️ Download EPG
+      - name: Download EPG
         run: |
           echo "Downloading EPG file..."
           curl -L --retry 3 -o epg.xml http://epg.51zmt.top:8000/e.xml
 
-      # 5. 生成 playlist (核心逻辑：串行测速)
-      - name: ⚙️ Build Playlist (Serial Speed Test)
+      # 5. 生成 playlist
+      - name: Build Playlist
         run: |
-          # 1. 初始化和准备数据
+          # 1. 初始化和準備數據
           echo "#EXTM3U" > playlist.m3u
-          # 存放有效且测速后的数据
           touch valid_channels.txt
           
-          # 声明省份映射
+          # 聲明省份映射 (Province Map)
           declare -A PROVINCE_MAP=( 
             ["Beijing"]="北京" ["Shanghai"]="上海" ["Tianjin"]="天津" ["Chongqing"]="重庆" 
             ["Hebei"]="河北" ["Shanxi"]="山西" ["InnerMongolia"]="内蒙古" ["Liaoning"]="辽宁" 
@@ -54,10 +53,19 @@ jobs:
             ["Henan"]="河南" ["Hubei"]="湖北" ["Hunan"]="湖南" ["Guangdong"]="广东" 
             ["Guangxi"]="广西" ["Hainan"]="海南" ["Sichuan"]="四川" ["Guizhou"]="贵州" 
             ["Yunnan"]="云南" ["Tibet"]="西藏" ["Shaanxi"]="陕西" ["Gansu"]="甘肃" 
-            ["Qinghai"]="青海" ["Ningxia"]="宁夏" ["Xinjiang"]="新疆" 
+            ["Qinghai"]="青海" ["Ningxia"]="寧夏" ["Xinjiang"]="新疆" 
           )
           
-          # 定义串行处理函数
+          # === 關鍵：正規化函數 (Normalization) ===
+          normalize_name() {
+              local name="$1"
+              name=$(echo "$name" | sed -E 's/( )?(\(|\[)(高清|HD|超清|UHD|4K|FHD|標清|标清|SD)(\)|\])//ig')
+              name=$(echo "$name" | sed -E 's/( )?(高清|HD|超清|UHD|4K|FHD|標清|标清|SD)//ig')
+              name=$(echo "$name" | tr -d ' ' | tr -d '()' | tr -d '[]' | sed -E 's/^-+//; s/-+$//')
+              echo "$name"
+          }
+
+          # 定義串行處理函數
           collect_channels () {
             AREA=$1
             FILE=$2
@@ -74,41 +82,39 @@ jobs:
               }
             ' "$FILE" | while IFS=$'\t' read -r INFO URL AREA; do
               
-              NAME=$(echo "$INFO" | sed 's/.*,//')
-              
-              # === 核心：串行测速 (逐个等待结果) ===
+              ORIGINAL_NAME=$(echo "$INFO" | sed 's/.*,//')
+              NORMALIZED_NAME=$(normalize_name "$ORIGINAL_NAME")
+
+              # === 核心：串行測速 (獲取延遲/Latency) ===
               CHECK_RESULT=$(curl -s -w "%{http_code} %{time_total}" -o /dev/null --connect-timeout 3 --max-time 5 "$URL" || echo "000 999")
               
               HTTP_CODE=$(echo "$CHECK_RESULT" | awk '{print $1}')
               LATENCY=$(echo "$CHECK_RESULT" | awk '{print $2}')
 
               if [[ "$HTTP_CODE" == "200" ]]; then
-                  # 格式: 耗时 [TAB] 名字 [TAB] URL [TAB] 区域 [TAB] 原始信息
-                  echo -e "${LATENCY}\t${NAME}\t${URL}\t${AREA}\t${INFO}" >> valid_channels.txt
-                  echo "Collected (Serial): $NAME ($LATENCY s)"
-              else
-                  echo "Skipped: $NAME (Status $HTTP_CODE)"
+                  echo -e "${LATENCY}\t${NORMALIZED_NAME}\t${URL}\t${AREA}\t${INFO}" >> valid_channels.txt
               fi
 
             done
           }
 
-          # 2. 串行收集所有频道的测速数据
+          # 2. 串行收集所有頻道的測速數據
           collect_channels "China" "china.m3u"
           collect_channels "Hong Kong" "hongkong.m3u"
           collect_channels "Taiwan" "taiwan.m3u"
 
-          echo "Serial test finished. Total valid channels: $(wc -l valid_channels.txt)"
+          echo "Total valid channels found: $(wc -l valid_channels.txt)"
 
 
-          # 3. 排序与去重 (保持不变，这是测速择优的关键)
-          # 排序：按名字分组(-k2,2)，按耗时数字升序排序(-k1,1n)
-          # 去重：awk 只保留最快的那一条
-          sort -t $'\t' -k2,2 -k1,1n valid_channels.txt | awk -F '\t' '!seen[$2]++' > best_channels.txt
+          # 3. 排序與擇優 (保留前 3 線路)
+          echo "Sorting and Selecting best sources (Top 3 per normalized channel)..."
+          sort -t $'\t' -k2,2 -k1,1n valid_channels.txt | \
+          awk -F '\t' '{ if (count[$2] < 3) { print; count[$2]++; } }' > best_channels.txt
 
-          echo "Selected $(wc -l best_channels.txt) unique fastest sources."
+          echo "Selected $(wc -l best_channels.txt) unique fastest sources (Max 3 per channel)."
 
-          # 4. EPG 查找优化 (预先提取 EPG ID 映射表)
+
+          # 4. EPG 查找优化
           declare -A EPG_MAP
           echo "Building EPG map..."
           grep 'channel id' epg.xml | while IFS= read -r LINE; do
@@ -120,58 +126,67 @@ jobs:
           done
 
 
-          # 5. 写入最终 M3U 文件
+          # 5. 寫入最終 M3U 文件 (支持 "全國" 歸類)
+          declare CURRENT_GROUP="" 
+          
           write_playlist() {
-            TARGET_AREA=$1
-            TITLE_TEXT=$2
-            
-            echo "" >> playlist.m3u
-            echo "# ===== $TITLE_TEXT =====" >> playlist.m3u
-            
-            grep -E "\t$TARGET_AREA\t" best_channels.txt | while IFS=$'\t' read -r LATENCY NAME URL AREA INFO; do
+            # 按 AREA 排序 (第 4 欄) 確保國家級分組順序，然後按 NORMALIZED_NAME 排序 (第 2 欄)
+            sort -t $'\t' -k4,4 -k2,2 best_channels.txt | while IFS=$'\t' read -r LATENCY NORMALIZED_NAME URL AREA INFO; do
               
-              CLEAN_NAME=$(echo "$NAME" | tr -dc '[:alnum:][:alpha:]')
-          
-              LOGO_URL="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/${CLEAN_NAME}.png"
-              TVG_ID=${EPG_MAP[$NAME]}
-          
-              PROVINCE_CH=""
+              DISPLAY_NAME=$(echo "$INFO" | sed 's/.*,//')
+
+              # === 判斷 Group Title (核心邏輯：新增 "全國" 處理) ===
+              GROUP_TITLE=""
               if [[ "$AREA" == "China" ]]; then
-                PROVINCE_KEY=$(echo "$NAME" | awk '{print $1}')
+                PROVINCE_KEY=$(echo "$DISPLAY_NAME" | awk '{print $1}')
                 PROVINCE_CH=${PROVINCE_MAP[$PROVINCE_KEY]}
+                
+                if [[ -n "$PROVINCE_CH" ]]; then
+                  GROUP_TITLE="中国: ${PROVINCE_CH}"
+                else
+                  # 【關鍵修改】如果無法識別省份，歸類到 "全国"
+                  GROUP_TITLE="中国: 全国"
+                fi
+              elif [[ "$AREA" == "Hong Kong" ]]; then
+                GROUP_TITLE="香港"
+              elif [[ "$AREA" == "Taiwan" ]]; then
+                GROUP_TITLE="台湾"
+              else
+                GROUP_TITLE="$AREA"
               fi
-          
+
+              # 檢查是否需要插入新的分組標題
+              if [[ "$GROUP_TITLE" != "$CURRENT_GROUP" ]]; then
+                  echo "" >> playlist.m3u
+                  echo "# ===== $GROUP_TITLE =====" >> playlist.m3u
+                  CURRENT_GROUP="$GROUP_TITLE"
+              fi
+
+              # === 構建 M3U EXTINF 標籤 ===
+              CLEAN_NAME=$(echo "$DISPLAY_NAME" | tr -dc '[:alnum:][:alpha:]')
+              LOGO_URL="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/${CLEAN_NAME}.png"
+              TVG_ID=${EPG_MAP[$DISPLAY_NAME]}
+              
               EXT="#EXTINF:-1"
               [[ -n "$TVG_ID" ]] && EXT="${EXT} tvg-id=\"${TVG_ID}\""
               EXT="${EXT} tvg-logo=\"${LOGO_URL}\""
-              
-              if [[ -n "$PROVINCE_CH" ]]; then
-                EXT="${EXT} group-title=\"中国: ${PROVINCE_CH}\",${NAME}"
-              elif [[ "$AREA" == "Hong Kong" ]]; then
-                EXT="${EXT} group-title=\"香港\",${NAME}"
-              elif [[ "$AREA" == "Taiwan" ]]; then
-                EXT="${EXT} group-title=\"台湾\",${NAME}"
-              else
-                EXT="${EXT} group-title=\"${AREA}\",${NAME}"
-              fi
+              EXT="${EXT} group-title=\"${GROUP_TITLE}\",${DISPLAY_NAME}"
               
               echo "$EXT" >> playlist.m3u
               echo "$URL" >> playlist.m3u
             done
           }
-
-          # 按顺序写入 M3U 文件
-          write_playlist "China" "中国频道"
-          write_playlist "Hong Kong" "香港频道"
-          write_playlist "Taiwan" "台湾频道"
+          
+          # 調用寫入函數
+          write_playlist
           
           echo "Final playlist generated."
-          # 清理临时文件
+          # 清理臨時文件
           rm valid_channels.txt best_channels.txt epg.xml
 
 
-      # 6. Commit & Push (修正 date 语法)
-      - name: ⬆️ Commit and Push Playlist
+      # 6. Commit & Push
+      - name: Commit and Push Playlist
         run: |
           git config --global user.email "actions@github.com"
           git config --global user.name "GitHub Actions"
@@ -180,7 +195,6 @@ jobs:
             echo "No changes detected. Skipping commit."
           else
             git add playlist.m3u
-            # 修正 date 格式字符串语法
-            git commit -m "🚀 Update playlist (Serial Stable): $(date +'%Y-%m-%d %H:%M:%S')" 
+            git commit -m "🚀 Update playlist (Serial Stable - Top 3 Normalized & Grouped): $(date +'%Y-%m-%d %H:%M:%S')" 
             git push
           fi
