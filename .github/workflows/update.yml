@@ -211,5 +211,10 @@ jobs:
           else
             git add playlist.m3u
             git commit -m "🚀 Update playlist (Top 5 Speed, Normalized & Grouped): $(date +'%Y-%m-%d %H:%M:%S')" 
+            
+            # 【核心修復】解決同步問題
+            echo "Attempting git pull --rebase before pushing..."
+            git pull --rebase origin main
+            
             git push
           fi
