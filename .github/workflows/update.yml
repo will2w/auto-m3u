@@ -1,47 +1,55 @@
 name: IPTV Auto Builder Pro
 
 on:
+  # 调度任务：每 4 小时自动更新
   schedule:
-    - cron: "0 */4 * * *"   # 每 4 小时自动更新
+    - cron: "0 */4 * * *"
+  # 手动触发：允许在 Actions 页面手动运行
   workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
-    steps: # <-- 步骤必须在此层级，对齐 `runs-on`
+    steps:
       # 1. Checkout repository 使用 PAT
-      - name: Checkout repository # <-- `- name` 必须缩进
+      - name: 📦 Checkout repository (using PAT)
         uses: actions/checkout@v3
         with:
-          token: ${{ secrets.PAT_TOKEN }}
+          # 使用 PAT 密钥确保可以推送更新
+          token: ${{ secrets.PAT_TOKEN }} 
 
       # 2. 安装必需工具
-      - name: Install Tools
-        run: | # <-- run 块下的命令可以自由缩进，但在 YAML 中要保持一致
+      - name: 🛠️ Install Tools (jq, curl)
+        run: |
           sudo apt-get update
           sudo apt-get install -y jq curl
 
       # 3. 下载 M3U 源列表
-      - name: Download Source Lists
+      - name: ⬇️ Download Source Lists
         run: |
-          curl -L --retry 3 -o china.m3u    [https://freetv.fun/test_channels_china_new.m3u](https://freetv.fun/test_channels_china_new.m3u)
-          curl -L --retry 3 -o hongkong.m3u [https://freetv.fun/test_channels_hong_kong_new.m3u](https://freetv.fun/test_channels_hong_kong_new.m3u)
-          curl -L --retry 3 -o taiwan.m3u   [https://freetv.fun/test_channels_taiwan_new.m3u](https://freetv.fun/test_channels_taiwan_new.m3u)
-
+          echo "Downloading China, Hong Kong, and Taiwan M3U sources..."
+          curl -L --retry 3 -o china.m3u    https://freetv.fun/test_channels_china_new.m3u
+          curl -L --retry 3 -o hongkong.m3u https://freetv.fun/test_channels_hong_kong_new.m3u
+          curl -L --retry 3 -o taiwan.m3u   https://freetv.fun/test_channels_taiwan_new.m3u
+          
       # 4. 下载 EPG
-      - name: Download EPG
-        run: curl -L --retry 3 -o epg.xml [http://epg.51zmt.top:8000/e.xml](http://epg.51zmt.top:8000/e.xml)
+      - name: ⬇️ Download EPG Data
+        run: |
+          echo "Downloading EPG file..."
+          curl -L --retry 3 -o epg.xml http://epg.51zmt.top:8000/e.xml
 
       # 5. 生成 playlist
-      - name: Build Playlist
+      - name: ⚙️ Build and Filter Playlist
+        # 所有 Shell 逻辑都放在这个 run 块中
         run: |
+          echo "Starting playlist build and filtering process..."
           mkdir -p output
           cat << 'EOF' > output/playlist.m3u
-
 #EXTM3U
 EOF
 
+          # 声明用于去重和映射的关联数组
           declare -A seen_urls
           declare -A seen_names
 
@@ -57,6 +65,7 @@ EOF
             ["Shandong"]="山东" 
           )
 
+          # 定义处理函数的逻辑
           parse_area () {
             AREA=$1
             FILE=$2
@@ -72,44 +81,58 @@ EOF
               echo "# ===== 台湾频道 =====" >> output/playlist.m3u
             fi
 
+            # 使用 awk 提取 info 和 url
             awk '
               /^#EXTINF/ {
                 info=$0;
                 getline url;
-                print info "\t" url;
+                # 仅处理包含 http/https 的 URL，避免空行
+                if (url ~ /^http/) {
+                    print info "\t" url;
+                }
               }
             ' "$FILE" | while IFS=$'\t' read -r INFO URL; do
 
+              # 提取频道名称并规范化
               NAME=$(echo "$INFO" | sed 's/.*,//')
               CLEAN_NAME=$(echo "$NAME" | tr -dc '[:alnum:][:alpha:]')
 
+              # 检查是否重复
               if [[ ${seen_urls[$URL]} || ${seen_names[$CLEAN_NAME]} ]]; then
+                echo "Skipping duplicate: $NAME"
                 continue
               fi
 
+              # 检查链接可用性 (只获取 HTTP 状态码)
               STATUS=$(curl -I --max-time 5 -o /dev/null -s -w "%{http_code}" "$URL" || echo "000")
               if [[ "$STATUS" != "200" ]]; then
-                echo "跳过不可访问频道: $NAME ($URL)"
+                echo "Skipping unreachable: $NAME ($URL) - Status $STATUS"
                 continue
               fi
 
+              # 标记为已处理
               seen_urls[$URL]=1
               seen_names[$CLEAN_NAME]=1
 
-              LOGO_URL="[https://raw.githubusercontent.com/fanmingming/live/main/tvicon/$](https://raw.githubusercontent.com/fanmingming/live/main/tvicon/$){CLEAN_NAME}.png"
+              # 查找 Logo URL
+              LOGO_URL="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/${CLEAN_NAME}.png"
               if ! curl --output /dev/null --silent --head --fail "$LOGO_URL"; then
-                LOGO_URL=""
+                LOGO_URL="" # 如果 404，则清空 URL
               fi
 
+              # 查找 TVG ID
               TVG_ID=$(grep -iF "$NAME" epg.xml | head -1 | sed -n 's/.*tvg-id="\([^"]*\)".*/\1/p')
 
+              # 处理中国频道的分组标题
               if [[ "$AREA" == "China" ]]; then
+                # 尝试提取省份关键字 (通常是第一个词)
                 PROVINCE_KEY=$(echo "$NAME" | awk '{print $1}')
                 PROVINCE_CH=${PROVINCE_MAP[$PROVINCE_KEY]}
               else
                 PROVINCE_CH=""
               fi
 
+              # 构建 EXTFINF 行
               EXT="#EXTINF:-1"
               [[ -n "$TVG_ID" ]] && EXT="${EXT} tvg-id=\"${TVG_ID}\""
               [[ -n "$LOGO_URL" ]] && EXT="${EXT} tvg-logo=\"${LOGO_URL}\""
@@ -124,22 +147,32 @@ EOF
                 EXT="${EXT} group-title=\"${AREA}\",${NAME}"
               fi
 
+              # 写入最终的 M3U 内容
               echo "$EXT" >> output/playlist.m3u
               echo "$URL" >> output/playlist.m3u
 
             done
           }
 
+          # 循环调用函数处理所有区域
           declare -A AREAS=( ["China"]="china.m3u" ["Hong Kong"]="hongkong.m3u" ["Taiwan"]="taiwan.m3u" )
           for AREA in "${!AREAS[@]}"; do
             parse_area "$AREA" "${AREAS[$AREA]}"
           done
+          echo "Playlist build complete."
 
       # 6. Commit & Push
-      - name: Commit Playlist
+      - name: ⬆️ Commit and Push Playlist
         run: |
           git config --global user.email "actions@github.com"
           git config --global user.name "GitHub Actions"
-          git add output/playlist.m3u
-          git commit -am "自动更新 playlist" --allow-empty
-          git push
+          
+          # 检查文件是否有实际变化 (防止空提交)
+          if git diff --quiet output/playlist.m3u; then
+            echo "No changes in playlist.m3u. Skipping commit."
+          else
+            git add output/playlist.m3u
+            git commit -m "🤖 Auto update playlist: $(date +%Y-%m-%d %H:%M:%S)" 
+            git push
+          fi
+          echo "Commit and Push done."
