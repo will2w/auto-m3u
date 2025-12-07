@@ -2,7 +2,7 @@ name: IPTV Auto Builder Pro
 
 on:
   schedule:
-    - cron: "*/240 * * * *"   # 每 4 小時自動更新
+    - cron: "*/240 * * * *"   # 每 4 小时自动更新
   workflow_dispatch:
 
 jobs:
@@ -94,11 +94,13 @@ jobs:
           parse_area "Hong Kong" hongkong.m3u
           parse_area "Taiwan" taiwan.m3u
 
-      # 6. Commit and Push Playlist
+      # 6. Commit and Push Playlist using PAT
       - name: Commit Playlist
         run: |
           git config --global user.email "actions@github.com"
           git config --global user.name "GitHub Actions"
           git add output/playlist.m3u
           git commit -m "Auto update playlist" || echo "No change"
+          # 使用 PAT 拼接 URL，保证 push 权限
+          git remote set-url origin https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/will2w/auto-m3u.git
           git push origin main
