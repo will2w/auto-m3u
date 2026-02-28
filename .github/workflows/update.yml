@@ -2,7 +2,6 @@ name: IPTV Auto Builder Pro
 
 on:
   schedule:
-    # 每 4 小时运行一次 (修正后的标准 Cron)
     - cron: "0 */4 * * *"
   workflow_dispatch:
 
@@ -11,79 +10,65 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Checkout repository
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.PAT_TOKEN }}
 
-      # 2. 安装必需工具
       - name: Install Tools
         run: |
           sudo apt-get update
           sudo apt-get install -y jq curl gawk
 
-      # 3. 下载数据 (M3U 和 EPG)
       - name: Download Data
         run: |
           echo "Downloading sources..."
-          curl -L --retry 3 -o china.m3u    https://freetv.fun/test_channels_china_new.m3u
-          curl -L --retry 3 -o hongkong.m3u https://freetv.fun/test_channels_hong_kong_new.m3u
-          curl -L --retry 3 -o taiwan.m3u   https://freetv.fun/test_channels_taiwan_new.m3u
-          curl -L --retry 3 -o epg.xml      http://epg.51zmt.top:8000/e.xml
+          curl -L --retry 3 -o source_china.m3u    https://freetv.fun/test_channels_china_new.m3u
+          curl -L --retry 3 -o source_hongkong.m3u https://freetv.fun/test_channels_hong_kong_new.m3u
+          curl -L --retry 3 -o source_taiwan.m3u   https://freetv.fun/test_channels_taiwan_new.m3u
+          curl -L --retry 3 -o epg.xml             http://epg.51zmt.top:8000/e.xml
 
-      # 4. 核心处理逻辑
       - name: Build Playlist
         run: |
-          # 初始化
+          # 1. 初始化
           echo "#EXTM3U" > playlist.m3u
           touch valid_raw_data.txt
           
-          # 省份列表 (用于后续中文关键字匹配)
           PROVINCES="北京 上海 天津 重庆 河北 山西 内蒙古 辽宁 吉林 黑龙江 江苏 浙江 安徽 福建 江西 山东 河南 湖北 湖南 广东 广西 海南 四川 贵州 云南 西藏 陕西 甘肃 青海 宁夏 新疆"
 
-          # 归一化函数：用于将不同格式的频道名转化为唯一 ID（例如 [BD]CCTV-1 和 CCTV1 都变成 CCTV1）
+          # 归一化 ID 函数 (用于合并同名频道)
           normalize_id() {
               echo "$1" | sed -E 's/\[[^]]*\]//g; s/\([^)]*\)//g; s/(高清|HD|超清|UHD|4K|FHD|标清|SD)//ig' | tr -d ' \-()（）' | tr '[:lower:]' '[:upper:]'
           }
 
-          # === 第一步：遍历并测速 (提取所有在线的源) ===
+          # 2. 遍历并测速
           collect_and_test () {
             local AREA=$1
             local FILE=$2
-            echo "Testing channels in $AREA..."
-            
-            # 提取 #EXTINF 和 URL
+            echo "Testing $AREA..."
             awk '/^#EXTINF/ {info=$0; getline url; if (url ~ /^http/) print info "\t" url}' "$FILE" | while IFS=$'\t' read -r INFO URL; do
-              # 测速：连接超时 3s，总耗时 5s
               CHECK_RESULT=$(curl -s -w "%{http_code}\t%{speed_download}" -o /dev/null --connect-timeout 3 --max-time 5 "$URL" || echo -e "000\t0")
               HTTP_CODE=$(echo "$CHECK_RESULT" | cut -f1)
               SPEED=$(echo "$CHECK_RESULT" | cut -f2)
 
               if [[ "$HTTP_CODE" == "200" ]]; then
-                  # 暂时保存原始数据：速度 | 地区 | URL | 原始信息
                   echo -e "${SPEED}\t${AREA}\t${URL}\t${INFO}" >> valid_raw_data.txt
               fi
             done
           }
 
-          collect_and_test "China" "china.m3u"
-          collect_and_test "Hong Kong" "hongkong.m3u"
-          collect_and_test "Taiwan" "taiwan.m3u"
+          collect_and_test "China" "source_china.m3u"
+          collect_and_test "Hong Kong" "source_hongkong.m3u"
+          collect_and_test "Taiwan" "source_taiwan.m3u"
 
-          # === 第二步：清洗名称、归一化并筛选 Top 5 ===
-          echo "Cleaning names and selecting top 5 by speed..."
-          
+          # 3. 清洗名称、筛选 Top 5
+          echo "Cleaning names and selecting top 5..."
           while IFS=$'\t' read -r SPEED AREA URL INFO; do
               RAW_NAME=$(echo "$INFO" | sed 's/.*,//')
-              
-              # 1. 彻底清洗显示名称：变成 "CCTV-1" 这种干净格式
+              # 清理显示名称 (移除 [BD] 等)
               CLEAN_NAME=$(echo "$RAW_NAME" | sed -E 's/\[[^]]*\]//g' | sed -E 's/^[[:space:]\-]+|[[:space:]\-]+$//g')
-              
-              # 2. 生成对比 ID：用于合并同类项
               MID=$(normalize_id "$CLEAN_NAME")
               
-              # 3. 确定分组 (Group Title)
               GROUP="其他"
               if [[ "$AREA" == "China" ]]; then
                   GROUP="中国: 全国"
@@ -93,33 +78,25 @@ jobs:
               elif [[ "$AREA" == "Hong Kong" ]]; then GROUP="香港"
               elif [[ "$AREA" == "Taiwan" ]]; then GROUP="台湾"
               fi
-
-              # 汇总待排序列：MID | SPEED | GROUP | CLEAN_NAME | URL
               echo -e "${MID}\t${SPEED}\t${GROUP}\t${CLEAN_NAME}\t${URL}" >> pre_sort.txt
           done < valid_raw_data.txt
 
-          # 按 MID 分组并按速度降序，取每组前 5
           sort -t $'\t' -k1,1 -k2,2nr pre_sort.txt | \
           awk -F '\t' '{ if (count[$1] < 5) { print; count[$1]++; } }' > final_list.txt
 
-          # === 第三步：构建 EPG 映射 (加速查找) ===
+          # 4. EPG 映射
           declare -A EPG_MAP
-          echo "Building EPG Map..."
           while IFS='|' read -r ID NAME; do
               [[ -n "$NAME" ]] && EPG_MAP["$NAME"]="$ID"
           done < <(grep 'channel id' epg.xml | sed -n 's/.*id="\([^"]*\)".*display-name="\([^"]*\)".*/\1|\2/p')
 
-          # === 第四步：写入 M3U (按组排序避免标题重复) ===
-          echo "Generating final M3U..."
+          # 5. 生成最终 M3U
           CURRENT_GROUP=""
-          # 排序依据：Group(k3) -> Name(k4)
           sort -t $'\t' -k3,3 -k4,4 final_list.txt | while IFS=$'\t' read -r MID SPEED GROUP NAME URL; do
               if [[ "$GROUP" != "$CURRENT_GROUP" ]]; then
                   echo -e "\n# ===== $GROUP =====" >> playlist.m3u
                   CURRENT_GROUP="$GROUP"
               fi
-              
-              # 生成图标和查找 EPG
               ICON_NAME=$(echo "$NAME" | tr -dc '[:alnum:]')
               TVG_ID=${EPG_MAP[$NAME]}
               
@@ -132,23 +109,19 @@ jobs:
               echo "$URL" >> playlist.m3u
           done
 
-          # 清理
-          rm -f *.m3u epg.xml valid_raw_data.txt pre_sort.txt final_list.txt
-          mv playlist.m3u backup_playlist.m3u && mv backup_playlist.m3u playlist.m3u
+          # 6. 安全清理临时文件 (不再使用 rm *.m3u)
+          rm -f source_*.m3u epg.xml valid_raw_data.txt pre_sort.txt final_list.txt
 
-      # 5. Commit & Push
       - name: Commit and Push Playlist
         run: |
           git config --global user.email "actions@github.com"
           git config --global user.name "GitHub Actions"
           
           if git diff --quiet playlist.m3u; then
-            echo "No changes detected. Skipping commit."
+            echo "No changes detected."
           else
             git add playlist.m3u
             git commit -m "🚀 Update: Top 5 Speed & Cleaned Names ($(date +'%Y-%m-%d %H:%M'))"
-            
-            # 这里的同步策略：强制拉取最新的远程更改
             git pull --rebase origin main
             git push
           fi
