@@ -6,6 +6,10 @@ on:
     - cron: "0 */12 * * *"
   workflow_dispatch: # 支持手动触发
 
+# 关键：添加写入权限，防止 Push 失败
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -15,13 +19,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          token: ${{ secrets.PAT_TOKEN }}
+          # 如果你配置了 PAT_TOKEN，请保留；否则默认使用 github.token
+          token: ${{ secrets.PAT_TOKEN || github.token }}
 
-      # 2. 安装必要工具
+      # 2. 安装必需工具 (修正：移除 awk，系统已内置)
       - name: Install Tools
         run: |
           sudo apt-get update
-          sudo apt-get install -y jq curl sed awk
+          sudo apt-get install -y jq curl sed
 
       # 3. 下载源数据
       - name: Download Sources
@@ -41,7 +46,7 @@ jobs:
           # 定义省份映射字典
           declare -A PROVINCE_MAP=(
             ["Beijing"]="北京" ["Shanghai"]="上海" ["Tianjin"]="天津" ["Chongqing"]="重庆" 
-            ["Hebei"]="河北" ["Shanxi"]="山西" ["InnerMongolia"]="内蒙古" ["Liaoning"]="辽宁" 
+            ["Hebei"]="河北" ["Shanxi"]="山西" ["Inner"]="内蒙古" ["Liaoning"]="辽宁" 
             ["Jilin"]="吉林" ["Heilongjiang"]="黑龙江" ["Jiangsu"]="江苏" ["Zhejiang"]="浙江" 
             ["Anhui"]="安徽" ["Fujian"]="福建" ["Jiangxi"]="江西" ["Shandong"]="山东" 
             ["Henan"]="河南" ["Hubei"]="湖北" ["Hunan"]="湖南" ["Guangdong"]="广东" 
@@ -50,11 +55,11 @@ jobs:
             ["Qinghai"]="青海" ["Ningxia"]="宁夏" ["Xinjiang"]="新疆"
           )
 
-          # --- 函数：标准化与过滤 ---
+          # --- 函数：标准化与过滤 (包含购物频道过滤) ---
           normalize_and_filter() {
               local name="$1"
-              # 过滤黑名单：购物、商城、测试、临时、广告
-              if [[ "$name" =~ "购物" || "$name" =~ "商城" || "$name" =~ "测试" || "$name" =~ "价" || "$name" =~ "体验" ]]; then
+              # 过滤黑名单：购物、商城、测试、临时、广告、价
+              if [[ "$name" =~ "购物" || "$name" =~ "商城" || "$name" =~ "测试" || "$name" =~ "价" || "$name" =~ "体验" || "$name" =~ "广播" ]]; then
                   echo "FILTERED"
                   return
               fi
@@ -67,9 +72,10 @@ jobs:
           collect_channels () {
             local AREA=$1
             local FILE=$2
+            [ ! -f "$FILE" ] && return
             echo "正在处理区域: $AREA ..."
 
-            # 提取 #EXTINF 行并获取下一行的 URL
+            # 提取名称和 URL
             grep "#EXTINF" "$FILE" | while read -r LINE; do
                 ORIG_NAME=$(echo "$LINE" | sed 's/.*,//')
                 URL=$(grep -A 1 "$LINE" "$FILE" | grep "http" | head -n 1)
@@ -80,14 +86,13 @@ jobs:
                 NORM_NAME=$(normalize_and_filter "$ORIG_NAME")
                 [ "$NORM_NAME" == "FILTERED" ] && continue
 
-                # 测速：连接超时 2s，总耗时 4s，使用 Head 请求
+                # 测速：连接 2s，总耗时 4s，使用 Head 请求提升效率
                 CHECK=$(curl -I -s -w "%{http_code} %{time_connect} %{speed_download}" -o /dev/null --connect-timeout 2 --max-time 4 "$URL" || echo "000 0 0")
                 HTTP_CODE=$(echo $CHECK | awk '{print $1}')
                 
                 if [ "$HTTP_CODE" = "200" ]; then
                     TIME_CONN=$(echo $CHECK | awk '{print $2}')
                     SPEED_DL=$(echo $CHECK | awk '{print $3}')
-                    # 格式：连接时间 [TAB] 下载速度 [TAB] 规范名 [TAB] URL [TAB] 区域 [TAB] 原始名
                     echo -e "${TIME_CONN}\t${SPEED_DL}\t${NORM_NAME}\t${URL}\t${AREA}\t${ORIG_NAME}" >> valid_channels.txt
                 fi
             done
@@ -99,11 +104,15 @@ jobs:
           collect_channels "Taiwan" "taiwan.m3u"
 
           # --- 择优：按规范名分组，速度(第2列)倒序，取每组前 5 名 ---
-          sort -t$'\t' -k3,3 -k2,2nr valid_channels.txt | awk -F'\t' '!x[$3]++ || count[$3]++ < 5' > best_channels.txt
+          if [ -s valid_channels.txt ]; then
+              sort -t$'\t' -k3,3 -k2,2nr valid_channels.txt | awk -F'\t' '!x[$3]++ || count[$3]++ < 5' > best_channels.txt
+          else
+              echo "警告：未发现有效线路！"
+              touch best_channels.txt
+          fi
 
           # --- 组装最终 M3U ---
           CURRENT_GROUP=""
-          # 按区域(第5列)和规范名(第3列)排序，确保分组整齐
           while IFS=$'\t' read -r TIME SPEED NORM URL AREA ORIG; do
               
               # 分组逻辑
@@ -124,24 +133,21 @@ jobs:
               elif [[ "$AREA" == "Taiwan" ]]; then GROUP_TITLE="台湾";
               fi
 
-              # 插入组标题（仅在变化时）
+              # 插入组标题
               if [[ "$GROUP_TITLE" != "$CURRENT_GROUP" ]]; then
                   echo -e "\n# === $GROUP_TITLE ===" >> playlist.m3u
                   CURRENT_GROUP="$GROUP_TITLE"
               fi
 
-              # 生成图标名
+              # 生成图标关键字符
               LOGO_NAME=$(echo "$NORM" | tr -dc '[:alnum:]')
               
-              # 写入条目
               echo "#EXTINF:-1 tvg-logo=\"https://raw.githubusercontent.com/fanmingming/live/main/tvicon/${LOGO_NAME}.png\" group-title=\"$GROUP_TITLE\",$ORIG" >> playlist.m3u
               echo "$URL" >> playlist.m3u
 
           done < <(sort -t$'\t' -k5,5 -k3,3 best_channels.txt)
 
-          echo "播放列表构建完成，有效线路: $(wc -l < best_channels.txt) 条。"
-
-      # 5. 提交变更到仓库
+      # 5. 提交变更
       - name: Commit and Push
         run: |
           git config --global user.name "github-actions[bot]"
@@ -149,13 +155,13 @@ jobs:
           
           git add playlist.m3u
           if git diff --staged --quiet; then
-            echo "没有检测到更新，跳过提交。"
+            echo "无变动，跳过提交。"
           else
-            git commit -m "🚀 自动更新播放列表 (Top 5 优选): $(date +'%Y-%m-%d %H:%M')"
+            git commit -m "🚀 自动更新播放列表: $(date +'%Y-%m-%d %H:%M')"
             git pull --rebase origin main
-            git push
+            git push origin main
           fi
 
-      # 6. 清理临时文件 (可选)
+      # 6. 清理
       - name: Cleanup
         run: rm -f *.m3u valid_channels.txt best_channels.txt
