@@ -18,56 +18,49 @@ jobs:
       - name: Install Tools
         run: |
           sudo apt-get update
-          sudo apt-get install -y jq curl gawk dos2unix
+          sudo apt-get install -y jq curl gawk
 
       - name: Download Data
         run: |
           echo "Downloading sources..."
-          # 1. 使用正確的 RAW 網址下載
           curl -L --retry 3 -o source_china.m3u    https://raw.githubusercontent.com/iptv-org/iptv/master/streams/cn.m3u
           curl -L --retry 3 -o source_hongkong.m3u https://raw.githubusercontent.com/iptv-org/iptv/master/streams/hk.m3u
           curl -L --retry 3 -o source_taiwan.m3u   https://freetv.fun/test_channels_taiwan_new.m3u
           curl -L --retry 3 -o epg.xml              http://epg.51zmt.top:8000/e.xml
 
-          # 核心修復：強制將所有下載的 M3U 轉換為 Linux 換行符，清除隱藏的 \r
+          # 清除 Windows 換行符
           sed -i 's/\r//g' source_china.m3u
           sed -i 's/\r//g' source_hongkong.m3u
           sed -i 's/\r//g' source_taiwan.m3u
 
       - name: Build Playlist
         run: |
-          # 初始化
+          # 1. 初始化
           echo "#EXTM3U" > playlist.m3u
           touch valid_raw_data.txt
-          
-          PROVINCES="北京 上海 天津 重庆 河北 山西 内蒙古 辽宁 吉林 黑龙江 江苏 浙江 安徽 福建 江西 山东 河南 湖北 湖南 广东 广西 海南 四川 贵州 云南 西藏 陕西 甘肃 青海 宁夏 新疆"
 
+          # 歸一化 ID 函數 (維持原有邏輯用於合併同名流)
           normalize_id() {
               echo "$1" | sed -E 's/\[[^]]*\]//g; s/\([^)]*\)//g; s/(高清|HD|超清|UHD|4K|FHD|标清|SD)//ig' | tr -d ' \-()（）' | tr '[:lower:]' '[:upper:]'
           }
 
-          # 測試函數
+          # 2. 遍歷並測速
           collect_and_test () {
             local AREA=$1
             local FILE=$2
             echo "Testing $AREA..."
             
-            # 使用進程替換，防止標準輸入被 curl 吞掉
             while IFS=$'\t' read -r INFO URL; do
-              # 如果是 YouTube 連結，不進行實時流測試，直接給予預設高速度（因為 curl 測不出 YouTube 直播流）
               if [[ "$URL" == *"youtube.com"* || "$URL" == *"youtu.be"* ]]; then
                   echo -e "5000000\t${AREA}\t${URL}\t${INFO}" >> valid_raw_data.txt
                   continue
               fi
 
-              # 使用 cURL 測試普通直播流，限制超時時間
               CHECK_RESULT=$(curl -s -I -w "%{http_code}\t%{speed_download}" -o /dev/null --connect-timeout 3 --max-time 4 "$URL" || echo -e "000\t0")
               HTTP_CODE=$(echo "$CHECK_RESULT" | cut -f1)
               SPEED=$(echo "$CHECK_RESULT" | cut -f2)
 
-              # 允許 200 (OK) 或 302/301 (重新導向) 的連結通過
               if [[ "$HTTP_CODE" == "200" || "$HTTP_CODE" == "301" || "$HTTP_CODE" == "302" ]]; then
-                  # 如果速度為 0（HEAD 請求可能不返回下載速度），給一個基礎權重 1000
                   if [ "$SPEED" = "0" ] || [ "$SPEED" = "0.000" ]; then SPEED=1000; fi
                   echo -e "${SPEED}\t${AREA}\t${URL}\t${INFO}" >> valid_raw_data.txt
               fi
@@ -78,28 +71,68 @@ jobs:
           collect_and_test "Hong Kong" "source_hongkong.m3u"
           collect_and_test "Taiwan" "source_taiwan.m3u"
 
-          # 檢查是否有成功抓到數據
           if [ ! -s valid_raw_data.txt ]; then
               echo "警告: 沒有任何有效頻道通過測速！"
               exit 0
           fi
 
-          # 3. 清洗名稱、篩選 Top 5
+          # 3. 大一統省份矩陣
+          PROV_MAP=(
+            "北京,Beijing,BJ" "上海,Shanghai,SH" "天津,Tianjin,TJ" "重庆,Chongqing,CQ"
+            "广东,Guangdong,GD,Canton,Guangzhou,Shenzhen,Zhuhai,Shantou,Foshan,Dongguan,Zhongshan,Huizhou,广州,深圳,珠海,汕头,佛山,东莞,中山,惠州" 
+            "浙江,Zhejiang,ZJ,Hangzhou,Ningbo,Wenzhou,Shaoxing,Jinhua,杭州,宁波,温州,绍兴,金华" 
+            "江苏,Jiangsu,JS,Nanjing,Suzhou,Wuxi,Changzhou,Nantong,Yangzhou,南京,苏州,无锡,常州,南通,扬州" 
+            "福建,Fujian,FJ,Fuzhou,Xiamen,Quanzhou,福州,厦门,泉州"
+            "湖南,Hunan,HN,Changsha,长沙" "湖北,Hubei,HB,Wuhan,武汉" "四川,Sichuan,SC,Chengdu,成都" "陕西,Shaanxi,SX,Xian,西安"
+            "山东,Shandong,SD,Jinan,Qingdao,Yantai,济南,青岛,烟台" "安徽,Anhui,AH,Hefei,合肥" "河北,Hebei,Shijiazhuang,石家庄" 
+            "山西,Shanxi,Taiyuan,太原" "内蒙古,Inner Mongolia,Neimenggu,Hohhot,呼和浩特" "辽宁,Liaoning,LN,Shenyang,Dalian,沈阳,大连" 
+            "吉林,Jilin,Changchun,长春" "黑龙江,Heilongjiang,HLJ,Harbin,哈爾濱" "江西,Jiangxi,JX,Nanchang,南昌" 
+            "河南,Henan,Zhengzhou,郑州" "广西,Guangxi,GX,Nanning,南宁" "海南,Hainan,Haikou,Sanya,海口,三亚"
+            "贵州,Guizhou,GZ,Guiyang,贵阳" "云南,Yunnan,YN,Kunming,昆明" "西藏,Tibet,Xizang,Lhasa,拉萨" 
+            "甘肃,Gansu,Lanzhou,兰州" "青海,Qinghai,Xining,西宁" "宁夏,Ningxia,Yinchuan,银川" "新疆,Xinjiang,Urumqi,乌鲁木齐"
+          )
+
           echo "Cleaning names and selecting top 5..."
           while IFS=$'\t' read -r SPEED AREA URL INFO; do
               RAW_NAME=$(echo "$INFO" | sed 's/.*,//')
-              CLEAN_NAME=$(echo "$RAW_NAME" | sed -E 's/\[[^]]*\]//g' | sed -E 's/^[[:space:]\-]+|[[:space:]\-]+$//g')
+              
+              # 【關鍵修復】終極名稱清洗：
+              # 1. 移除中英文各式括號及其內部的所有東西：[], (), {}, 【】
+              # 2. 移除常見的分辨率標籤（不區分大小寫）
+              # 3. 清除前後的多餘空格
+              CLEAN_NAME=$(echo "$RAW_NAME" | \
+                sed -E 's/\[[^]]*\]//g; s/\([^)]*\)//g; s/\{[^}]*\}//g; s/【[^】]*】//g' | \
+                sed -E 's/(高清|超清|标清|FHD|UHD|HD|4K|2K|SD)//ig' | \
+                sed -E 's/^[[:space:]\-]+|[[:space:]\-]+$//g')
+              
               MID=$(normalize_id "$CLEAN_NAME")
+              UPPER_NAME=$(echo "$CLEAN_NAME" | tr '[:lower:]' '[:upper:]')
               
               GROUP="其他"
-              if [[ "$AREA" == "China" ]]; then
+              
+              # 【關鍵修復】優先判定是否為央視 (CCTV / CGTN)
+              if [[ "$UPPER_NAME" == *"CCTV"* || "$UPPER_NAME" == *"CGTN"* ]]; then
+                  GROUP="央视"
+              elif [[ "$AREA" == "China" ]]; then
                   GROUP="中国: 全国"
-                  for P in $PROVINCES; do
-                      if [[ "$CLEAN_NAME" == *"$P"* ]]; then GROUP="中国: $P"; break; fi
+                  
+                  # 遍歷大一統省份矩陣進行多關鍵字匹配
+                  for item in "${PROV_MAP[@]}"; do
+                      IFS=',' read -r -a keywords <<< "$item"
+                      CHINESE_PROV="${keywords[0]}"
+                      
+                      for kw in "${keywords[@]}"; do
+                          UPPER_KW=$(echo "$kw" | tr '[:lower:]' '[:upper:]' | sed -E 's/^[[:space:]]+|[[:space:]]+$//g')
+                          if [[ "$UPPER_NAME" == *"$UPPER_KW"* ]]; then
+                              GROUP="中国: $CHINESE_PROV"
+                              break 2
+                          fi
+                      done
                   done
               elif [[ "$AREA" == "Hong Kong" ]]; then GROUP="香港"
               elif [[ "$AREA" == "Taiwan" ]]; then GROUP="台湾"
               fi
+              
               echo -e "${MID}\t${SPEED}\t${GROUP}\t${CLEAN_NAME}\t${URL}" >> pre_sort.txt
           done < valid_raw_data.txt
 
@@ -139,7 +172,7 @@ jobs:
             done
           fi
 
-          # 安全清理
+          # 清理臨時文件
           rm -f source_*.m3u epg.xml valid_raw_data.txt pre_sort.txt final_list.txt
 
       - name: Commit and Push Playlist
@@ -151,7 +184,7 @@ jobs:
             echo "No changes detected."
           else
             git add playlist.m3u
-            git commit -m "🚀 Update: Top 5 Speed & Cleaned Names ($(date +'%Y-%m-%d %H:%M'))"
+            git commit -m "🚀 Update: CCTV Grouped & Name Cleaned ($(date +'%Y-%m-%d %H:%M'))"
             git pull --rebase origin main
             git push
           fi
