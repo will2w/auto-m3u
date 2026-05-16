@@ -18,54 +18,76 @@ jobs:
       - name: Install Tools
         run: |
           sudo apt-get update
-          sudo apt-get install -y jq curl gawk
+          sudo apt-get install -y jq curl gawk dos2unix
 
       - name: Download Data
         run: |
           echo "Downloading sources..."
+          # 1. 使用正確的 RAW 網址下載
           curl -L --retry 3 -o source_china.m3u    https://raw.githubusercontent.com/iptv-org/iptv/master/streams/cn.m3u
           curl -L --retry 3 -o source_hongkong.m3u https://raw.githubusercontent.com/iptv-org/iptv/master/streams/hk.m3u
           curl -L --retry 3 -o source_taiwan.m3u   https://freetv.fun/test_channels_taiwan_new.m3u
-          curl -L --retry 3 -o epg.xml             http://epg.51zmt.top:8000/e.xml
+          curl -L --retry 3 -o epg.xml              http://epg.51zmt.top:8000/e.xml
+
+          # 核心修復：強制將所有下載的 M3U 轉換為 Linux 換行符，清除隱藏的 \r
+          sed -i 's/\r//g' source_china.m3u
+          sed -i 's/\r//g' source_hongkong.m3u
+          sed -i 's/\r//g' source_taiwan.m3u
 
       - name: Build Playlist
         run: |
-          # 1. 初始化
+          # 初始化
           echo "#EXTM3U" > playlist.m3u
           touch valid_raw_data.txt
           
           PROVINCES="北京 上海 天津 重庆 河北 山西 内蒙古 辽宁 吉林 黑龙江 江苏 浙江 安徽 福建 江西 山东 河南 湖北 湖南 广东 广西 海南 四川 贵州 云南 西藏 陕西 甘肃 青海 宁夏 新疆"
 
-          # 归一化 ID 函数 (用于合并同名频道)
           normalize_id() {
               echo "$1" | sed -E 's/\[[^]]*\]//g; s/\([^)]*\)//g; s/(高清|HD|超清|UHD|4K|FHD|标清|SD)//ig' | tr -d ' \-()（）' | tr '[:lower:]' '[:upper:]'
           }
 
-          # 2. 遍历并测速
+          # 測試函數
           collect_and_test () {
             local AREA=$1
             local FILE=$2
             echo "Testing $AREA..."
-            awk '/^#EXTINF/ {info=$0; getline url; if (url ~ /^http/) print info "\t" url}' "$FILE" | while IFS=$'\t' read -r INFO URL; do
-              CHECK_RESULT=$(curl -s -w "%{http_code}\t%{speed_download}" -o /dev/null --connect-timeout 3 --max-time 5 "$URL" || echo -e "000\t0")
+            
+            # 使用進程替換，防止標準輸入被 curl 吞掉
+            while IFS=$'\t' read -r INFO URL; do
+              # 如果是 YouTube 連結，不進行實時流測試，直接給予預設高速度（因為 curl 測不出 YouTube 直播流）
+              if [[ "$URL" == *"youtube.com"* || "$URL" == *"youtu.be"* ]]; then
+                  echo -e "5000000\t${AREA}\t${URL}\t${INFO}" >> valid_raw_data.txt
+                  continue
+              fi
+
+              # 使用 cURL 測試普通直播流，限制超時時間
+              CHECK_RESULT=$(curl -s -I -w "%{http_code}\t%{speed_download}" -o /dev/null --connect-timeout 3 --max-time 4 "$URL" || echo -e "000\t0")
               HTTP_CODE=$(echo "$CHECK_RESULT" | cut -f1)
               SPEED=$(echo "$CHECK_RESULT" | cut -f2)
 
-              if [[ "$HTTP_CODE" == "200" ]]; then
+              # 允許 200 (OK) 或 302/301 (重新導向) 的連結通過
+              if [[ "$HTTP_CODE" == "200" || "$HTTP_CODE" == "301" || "$HTTP_CODE" == "302" ]]; then
+                  # 如果速度為 0（HEAD 請求可能不返回下載速度），給一個基礎權重 1000
+                  if [ "$SPEED" = "0" ] || [ "$SPEED" = "0.000" ]; then SPEED=1000; fi
                   echo -e "${SPEED}\t${AREA}\t${URL}\t${INFO}" >> valid_raw_data.txt
               fi
-            done
+            done < <(awk '/^#EXTINF/ {info=$0; getline url; if (url ~ /^http/) print info "\t" url}' "$FILE")
           }
 
           collect_and_test "China" "source_china.m3u"
           collect_and_test "Hong Kong" "source_hongkong.m3u"
           collect_and_test "Taiwan" "source_taiwan.m3u"
 
-          # 3. 清洗名称、筛选 Top 5
+          # 檢查是否有成功抓到數據
+          if [ ! -s valid_raw_data.txt ]; then
+              echo "警告: 沒有任何有效頻道通過測速！"
+              exit 0
+          fi
+
+          # 3. 清洗名稱、篩選 Top 5
           echo "Cleaning names and selecting top 5..."
           while IFS=$'\t' read -r SPEED AREA URL INFO; do
               RAW_NAME=$(echo "$INFO" | sed 's/.*,//')
-              # 清理显示名称 (移除 [BD] 等)
               CLEAN_NAME=$(echo "$RAW_NAME" | sed -E 's/\[[^]]*\]//g' | sed -E 's/^[[:space:]\-]+|[[:space:]\-]+$//g')
               MID=$(normalize_id "$CLEAN_NAME")
               
@@ -81,35 +103,43 @@ jobs:
               echo -e "${MID}\t${SPEED}\t${GROUP}\t${CLEAN_NAME}\t${URL}" >> pre_sort.txt
           done < valid_raw_data.txt
 
-          sort -t $'\t' -k1,1 -k2,2nr pre_sort.txt | \
-          awk -F '\t' '{ if (count[$1] < 5) { print; count[$1]++; } }' > final_list.txt
+          if [ -f pre_sort.txt ]; then
+             sort -t $'\t' -k1,1 -k2,2nr pre_sort.txt | \
+             awk -F '\t' '{ if (count[$1] < 5) { print; count[$1]++; } }' > final_list.txt
+          else
+             touch final_list.txt
+          fi
 
           # 4. EPG 映射
           declare -A EPG_MAP
-          while IFS='|' read -r ID NAME; do
-              [[ -n "$NAME" ]] && EPG_MAP["$NAME"]="$ID"
-          done < <(grep 'channel id' epg.xml | sed -n 's/.*id="\([^"]*\)".*display-name="\([^"]*\)".*/\1|\2/p')
+          if [ -f epg.xml ]; then
+             while IFS='|' read -r ID NAME; do
+                 [[ -n "$NAME" ]] && EPG_MAP["$NAME"]="$ID"
+             done < <(grep 'channel id' epg.xml | sed -n 's/.*id="\([^"]*\)".*display-name="\([^"]*\)".*/\1|\2/p' 2>/dev/null || true)
+          fi
 
-          # 5. 生成最终 M3U
+          # 5. 生成最終 M3U
           CURRENT_GROUP=""
-          sort -t $'\t' -k3,3 -k4,4 final_list.txt | while IFS=$'\t' read -r MID SPEED GROUP NAME URL; do
-              if [[ "$GROUP" != "$CURRENT_GROUP" ]]; then
-                  echo -e "\n# ===== $GROUP =====" >> playlist.m3u
-                  CURRENT_GROUP="$GROUP"
-              fi
-              ICON_NAME=$(echo "$NAME" | tr -dc '[:alnum:]')
-              TVG_ID=${EPG_MAP[$NAME]}
-              
-              EXT="#EXTINF:-1"
-              [[ -n "$TVG_ID" ]] && EXT="${EXT} tvg-id=\"${TVG_ID}\""
-              EXT="${EXT} tvg-logo=\"https://raw.githubusercontent.com/fanmingming/live/main/tvicon/${ICON_NAME}.png\""
-              EXT="${EXT} group-title=\"${GROUP}\",${NAME}"
-              
-              echo "$EXT" >> playlist.m3u
-              echo "$URL" >> playlist.m3u
-          done
+          if [ -s final_list.txt ]; then
+            sort -t $'\t' -k3,3 -k4,4 final_list.txt | while IFS=$'\t' read -r MID SPEED GROUP NAME URL; do
+                if [[ "$GROUP" != "$CURRENT_GROUP" ]]; then
+                    echo -e "\n# ===== $GROUP =====" >> playlist.m3u
+                    CURRENT_GROUP="$GROUP"
+                fi
+                ICON_NAME=$(echo "$NAME" | tr -dc '[:alnum:]')
+                TVG_ID=${EPG_MAP[$NAME]}
+                
+                EXT="#EXTINF:-1"
+                [[ -n "$TVG_ID" ]] && EXT="${EXT} tvg-id=\"${TVG_ID}\""
+                EXT="${EXT} tvg-logo=\"https://raw.githubusercontent.com/fanmingming/live/main/tvicon/${ICON_NAME}.png\""
+                EXT="${EXT} group-title=\"${GROUP}\",${NAME}"
+                
+                echo "$EXT" >> playlist.m3u
+                echo "$URL" >> playlist.m3u
+            done
+          fi
 
-          # 6. 安全清理临时文件 (不再使用 rm *.m3u)
+          # 安全清理
           rm -f source_*.m3u epg.xml valid_raw_data.txt pre_sort.txt final_list.txt
 
       - name: Commit and Push Playlist
