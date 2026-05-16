@@ -23,8 +23,8 @@ jobs:
       - name: Download Data
         run: |
           echo "Downloading sources..."
-          curl -L --retry 3 -o source_china.m3u    https://freetv.fun/test_channels_china_new.m3u
-          curl -L --retry 3 -o source_hongkong.m3u https://freetv.fun/test_channels_hong_kong_new.m3u
+          curl -L --retry 3 -o source_china.m3u    https://github.com/iptv-org/iptv/blob/master/streams/cn.m3u
+          curl -L --retry 3 -o source_hongkong.m3u https://github.com/iptv-org/iptv/blob/master/streams/hk.m3u
           curl -L --retry 3 -o source_taiwan.m3u   https://freetv.fun/test_channels_taiwan_new.m3u
           curl -L --retry 3 -o epg.xml             http://epg.51zmt.top:8000/e.xml
 
