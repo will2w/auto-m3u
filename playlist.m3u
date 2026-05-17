@@ -21,6 +21,8 @@ http://lsfb.avap.jilintv.cn/zqvk7vpj/channel/43ea5771aa44421591f9dfd2b71f1b9b/in
 https://lsfb.avap.jilintv.cn/zqvk7vpj/channel/43ea5771aa44421591f9dfd2b71f1b9b/index.m3u8
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/VOA.png" group-title="中国: 全国",VOA美国之音
 https://voa-ingest.akamaized.net/hls/live/2033878/tvmc08/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="中国: 全国",上虞經濟文化
+https://l.cztvcloud.com/channels/lantian/SXshangyu2/720p.m3u8
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="中国: 全国",之江纪录
 https://ali-m-l.cztv.com/channels/lantian/channel012/1080p.m3u8
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="中国: 全国",余姚姚江文化
@@ -63,6 +65,8 @@ https://live.wjyanghu.com/live/CH2.m3u8
 http://222.179.155.21:1935/ch1.m3u8
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="中国: 全国",江津经济生活
 http://222.179.155.21:1935/ch0.m3u8
+#EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="中国: 全国",河源综合
+https://tmpstream.hyrtv.cn/xwzh/sd/live.m3u8
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="中国: 全国",白城新闻综合
 https://stream2.jlntv.cn/baicheng1/sd/live.m3u8
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="中国: 全国",白山新闻综合
@@ -79,6 +83,8 @@ http://123.146.162.24:8017/d4ceB1a/1000/live.m3u8
 http://123.146.162.24:8017/Cz7WPb8/800/live.m3u8
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="中国: 全国",萬州綜合頻道
 http://123.146.162.24:8017/iTXwrGs/800/live.m3u8
+#EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="中国: 全国",蕭山生活頻道
+https://l.cztvcloud.com/channels/lantian/SXxiaoshan2/720p.m3u8
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="中国: 全国",辽源新闻综合
 https://stream2.jlntv.cn/liaoyuan1/sd/live.m3u8
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="中国: 全国",通化新闻
@@ -245,6 +251,8 @@ http://183.207.248.71/cntv/live1/HD-2500k-1080P-heilongjiangstv/HD-2500k-1080P-h
 # ===== 台湾 =====
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/BloombergTVAsiaLiveEvent.png" group-title="台湾",Bloomberg TV Asia Live Event
 https://bloomberg.com/media-manifest/streams/asia-event.m3u8
+#EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/HOYTV.png" group-title="台湾",HOY TV
+http://media.fantv.hk/m3u8/archive/channel2.m3u8
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/PetClubTV.png" group-title="台湾",Pet Club TV
 https://cdn-apse1-prod.tsv2.amagi.tv/linear/amg01076-lightningintern-petclub-samsungnz/playlist.m3u8
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/TVBNewsChannel.png" group-title="台湾",TVB News Channel
@@ -319,6 +327,8 @@ http://cdn.163189.xyz/163189/now
 https://uycyyuuzyh.turknet.ercdn.net/nphindgytw/nowtv/nowtv.m3u8
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/Now14.png" group-title="香港",Now 14
 https://r.il.cdn-redge.media/livehls/oil/ch14/live/ch14/live.livx/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/Now.png" group-title="香港",Now星影台
+http://aktv.top/AKTV/live/aktv/now/AKTV.m3u8
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/RTHK31.png" group-title="香港",RTHK 31
 https://www.rthk.hk/feeds/dtt/rthktv31_https.m3u8
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/RTHK32.png" group-title="香港",RTHK 32
@@ -329,12 +339,12 @@ https://rthklive1-lh.akamaihd.net/i/rthk31_1@167495/master.m3u8
 http://php.jdshipin.com:8880/TVOD/iptv.php?id=rthk31
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/RTHK32.png" group-title="香港",RTHK32
 http://php.jdshipin.com:8880/TVOD/iptv.php?id=rthk32
-#EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/RTHKTV31.png" group-title="香港",RTHKTV31
-https://rthktv31-live.akamaized.net/hls/live/2036818/RTHKTV31/master.m3u8
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/TVB1080P.png" group-title="香港",TVB翡翠台 1080P
 http://php.jdshipin.com:8880/TVOD/iptv.php?id=fct3
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/Viutv.png" group-title="香港",Viutv
 https://turkmedya-live.ercdn.net/tv360/tv360.m3u8$LR•IPV4『线路1』
+#EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="香港",明珠台
+http://aktv.top/AKTV/live/aktv/null-2/AKTV.m3u8$LR•IPV4
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="香港",明珠台
 http://iptv.4666888.xyz/iptv2A.php?id=29
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="香港",明珠台
@@ -349,6 +359,8 @@ http://61.10.2.141/live_freedirect/freehd209_h.live/playlist.m3u
 http://iptv.4666888.xyz/iptv2A.php?id=31
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="香港",有線新聞台
 http://cm61-10-2-143.hkcable.com.hk/live_freedirect/freehd209_h.live/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="香港",有線新聞台
+https://epg.pm/stream/7f7227d59a7dce31cf6910bcdb4ed741f8fb5994cecb87d2bba38adf33e6c490.m3u8
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="香港",有線財經信息台
 https://epg.pw/stream/0fddc0600d3868b05ad741d46294410aebca0fdc4fada5028dc54e624b7b17ca.m3u8
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/31.png" group-title="香港",港台電視31
@@ -359,6 +371,8 @@ https://rthklive2-lh.akamaihd.net/i/rthk32_1@168450/index_2052_av-b.m3u8
 http://php.jdshipin.com/TVOD/iptv.php?id=wxxw
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="香港",無線新聞
 http://r.jdshipin.com/CkuBd
+#EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="香港",無線新聞
+http://www.liveviptv.xyz/tv/tvb.php?vid=wxxw
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="香港",翡翠
 http://php.jdshipin.com/TVOD/iptv.php?id=fct2
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="香港",翡翠
@@ -368,11 +382,11 @@ http://122.152.202.33/s/81a8a44f/index.m3u8?id=53$LR•IPV4『线路26』
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="香港",翡翠台
 http://8.138.7.223/tv/gdmzyd.php?id=1$LR•IPV4『线路20』
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="香港",翡翠台
+http://aktv.top/AKTV/live/aktv/null/AKTV.m3u8$LR•IPV4『线路1』
+#EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="香港",翡翠台
 http://cdn6.163189.xyz/163189/fct4k
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="香港",翡翠台
 http://fm1077.serv00.net/Smart.php?id=jade_twn$LR•IPV4『线路41』
-#EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="香港",翡翠台
-http://iptv.4666888.xyz/iptv2A.php?id=34
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="香港",翡翠台北美版
 http://php.jdshipin.com:8880/TVOD/iptv.php?id=j1
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="香港",香港有線新聞
