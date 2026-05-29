@@ -21,6 +21,10 @@ http://lsfb.avap.jilintv.cn/zqvk7vpj/channel/43ea5771aa44421591f9dfd2b71f1b9b/in
 https://lsfb.avap.jilintv.cn/zqvk7vpj/channel/43ea5771aa44421591f9dfd2b71f1b9b/index.m3u8
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/VOA.png" group-title="中国: 全国",VOA美国之音
 https://voa-ingest.akamaized.net/hls/live/2033878/tvmc08/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/1.png" group-title="中国: 全国",上虞1新闻综合
+https://l.cztvcloud.com/channels/lantian/SXshangyu1/720p.m3u8
+#EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/3.png" group-title="中国: 全国",上虞3新商都
+https://l.cztvcloud.com/channels/lantian/SXshangyu3/720p.m3u8
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="中国: 全国",上虞經濟文化
 https://l.cztvcloud.com/channels/lantian/SXshangyu2/720p.m3u8
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="中国: 全国",之江纪录
@@ -45,12 +49,12 @@ http://183.207.248.71/cntv/live1/wmyx/wmyx
 http://183.207.248.71/cntv/live1/SD-1500k-576P-jiayougw/SD-1500k-576P-jiayougw
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="中国: 全国",宿州公共
 http://live.ahsz.tv/video/s10001-ggpd/index.m3u8
+#EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="中国: 全国",宿州新闻综合
+http://live.ahsz.tv/video/s10001-szzh/index.m3u8
+#EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="中国: 全国",宿州科教
+http://live.ahsz.tv/video/s10001-kxjy/index.m3u8
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="中国: 全国",延边新闻综合
 https://stream2.jlntv.cn/jlyb/sd/live.m3u8
-#EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="中国: 全国",新昌休闲影视
-https://l.cztvcloud.com/channels/lantian/SXxinchang2/720p.m3u8
-#EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="中国: 全国",新昌新聞綜合
-https://l.cztvcloud.com/channels/lantian/SXxinchang1/720p.m3u8
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="中国: 全国",松原新闻综合
 https://stream2.jlntv.cn/sytv/sd/live.m3u8
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="中国: 全国",武进新闻
@@ -194,8 +198,6 @@ http://live.shaoxing.com.cn/video/s10001-sxtv3/index.m3u8
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="中国: 浙江",浙江 Ⅰ 绍兴综合
 http://live.shaoxing.com.cn/video/s10001-sxtv1/index.m3u8
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="中国: 浙江",浙江卫视
-http://183.207.248.71/cntv/live1/HD-2500k-1080P-zhejiangstv/HD-2500k-1080P-zhejiangstv
-#EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="中国: 浙江",浙江卫视
 http://183.207.248.71/cntv/live1/zhejiangstv/zhejiangstv
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="中国: 浙江",浙江卫视
 http://183.207.248.71/gitv/live1/G_ZHEJIANG/G_ZHEJIANG
@@ -234,8 +236,6 @@ http://183.207.248.71/gitv/live1/G_GUIZHOU/G_GUIZHOU
 
 # ===== 中国: 辽宁 =====
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="中国: 辽宁",辽宁卫视
-http://183.207.248.71/cntv/live1/liaoningstv/liaoningstv
-#EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="中国: 辽宁",辽宁卫视
 http://183.207.249.71/PLTV/3/224/3221225566/index.m3u8
 
 # ===== 中国: 黑龙江 =====
@@ -251,8 +251,6 @@ http://183.207.248.71/cntv/live1/HD-2500k-1080P-heilongjiangstv/HD-2500k-1080P-h
 # ===== 台湾 =====
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/BloombergTVAsiaLiveEvent.png" group-title="台湾",Bloomberg TV Asia Live Event
 https://bloomberg.com/media-manifest/streams/asia-event.m3u8
-#EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/HOYTV.png" group-title="台湾",HOY TV
-http://media.fantv.hk/m3u8/archive/channel2.m3u8
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/PetClubTV.png" group-title="台湾",Pet Club TV
 https://cdn-apse1-prod.tsv2.amagi.tv/linear/amg01076-lightningintern-petclub-samsungnz/playlist.m3u8
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/TVBNewsChannel.png" group-title="台湾",TVB News Channel
