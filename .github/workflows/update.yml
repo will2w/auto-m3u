@@ -23,10 +23,10 @@ jobs:
       - name: Download Data
         run: |
           echo "Downloading sources..."
-          # 定義強兼容性下載函數：強制 TLS 1.0 + 偽裝 User-Agent + 不校驗憑證
+          # 強制 HTTP/1.1 並忽略 SSL 證書驗證，繞過 OpenSSL 握手衝突
           dl_safe() {
             curl -L --retry 5 --connect-timeout 20 --max-time 60 \
-                 -k --tlsv1.0 --ciphers 'DEFAULT:!DH' \
+                 --insecure --http1.1 \
                  -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36" \
                  -o "$1" "$2"
           }
@@ -94,4 +94,18 @@ jobs:
           sort -t $'\t' -k4,4n -k5,5 -k6,6 final_list.txt | while IFS=$'\t' read -r MID PRIO SPD SORT GRP NAME URL; do
               [[ "$GRP" != "$CUR" ]] && { echo -e "\n# ===== $GRP =====" >> playlist.m3u; CUR="$GRP"; }
               ICON=$(echo "$NAME" | tr -dc '[:alnum:]')
-              EXT="#EXTINF:-1 $([[ -n "${EPG[$NAME]}" ]] && echo "tvg-id=\"${EPG
+              EXT="#EXTINF:-1 $([[ -n "${EPG[$NAME]}" ]] && echo "tvg-id=\"${EPG[$NAME]}\"") tvg-logo=\"https://raw.githubusercontent.com/fanmingming/live/main/tvicon/${ICON}.png\" group-title=\"$GRP\",$NAME"
+              echo -e "$EXT\n$URL" >> playlist.m3u
+          done
+          rm -f source_*.m3u epg.xml previous_urls.txt raw_extracted.txt valid_raw_data.txt pre_sort.txt final_list.txt
+
+      - name: Commit and Push
+        run: |
+          git config --global user.email "actions@github.com"
+          git config --global user.name "GitHub Actions"
+          if ! git diff --quiet playlist.m3u; then
+            git add playlist.m3u
+            git commit -m "🚀 Update: Structured IPTV list with Final Fix ($(date +'%Y-%m-%d %H:%M'))"
+            git remote set-url origin https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/${{ github.repository }}.git
+            git pull --rebase origin main && git push origin main
+          fi
