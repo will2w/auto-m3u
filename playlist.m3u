@@ -3,6 +3,8 @@
 # ===== 中国: 云南 =====
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="中国: 云南",云南卫视
 http://183.207.248.71/cntv/live1/yunnanstv/yunnanstv
+#EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="中国: 云南",云南卫视
+http://183.207.248.71/gitv/live1/G_YUNNAN/G_YUNNAN
 
 # ===== 中国: 全国 =====
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/BreadTV.png" group-title="中国: 全国",Bread TV面包台
@@ -31,8 +33,14 @@ https://jwcdnqx.hebyun.com.cn/live/xlzh/1500k/tzwj_video.m3u8
 https://stream2.jlntv.cn/naxw/sd/live.m3u8
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="中国: 全国",前郭综合
 https://stream2.jlntv.cn/qg/sd/live.m3u8
+#EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="中国: 全国",动画王国
+http://183.207.248.71/cntv/live1/donghuawg/donghuawg
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="中国: 全国",四平新闻综合
 https://stream2.jlntv.cn/sptv/sd/live.m3u8
+#EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="中国: 全国",完美游戏
+http://183.207.248.71/cntv/live1/wmyx/wmyx
+#EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="中国: 全国",家有购物
+http://183.207.248.71/cntv/live1/SD-1500k-576P-jiayougw/SD-1500k-576P-jiayougw
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="中国: 全国",宿州公共
 http://live.ahsz.tv/video/s10001-ggpd/index.m3u8
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="中国: 全国",宿州新闻综合
@@ -51,8 +59,6 @@ https://live.wjyanghu.com/live/CH2.m3u8
 http://222.179.155.21:1935/ch1.m3u8
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="中国: 全国",江津经济生活
 http://222.179.155.21:1935/ch0.m3u8
-#EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="中国: 全国",河源综合
-https://tmpstream.hyrtv.cn/xwzh/sd/live.m3u8
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="中国: 全国",白城新闻综合
 https://stream2.jlntv.cn/baicheng1/sd/live.m3u8
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="中国: 全国",白山新闻综合
@@ -81,10 +87,16 @@ https://stream2.jlntv.cn/tonghua1/sd/live.m3u8
 https://stream2.jlntv.cn/ja/sd/live.m3u8
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="中国: 全国",靖江新闻綜合
 http://visit.jjbctv.com:1935/live/xwzhmb/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="中国: 全国",风尚购物
+http://183.207.248.71/cntv/live1/fengshanggw/fengshanggw
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="中国: 全国",餘姚姚江文化
 https://l.cztvcloud.com/channels/lantian/SXyuyao2/720p.m3u8
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="中国: 全国",鹤壁新闻综合
 http://pili-live-hls.hebitv.com/hebi/hebi.m3u8
+
+# ===== 中国: 内蒙古 =====
+#EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="中国: 内蒙古",内蒙古卫视
+http://183.207.248.71/gitv/live1/G_NEIMENGGU/G_NEIMENGGU
 
 # ===== 中国: 吉林 =====
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="中国: 吉林",吉林市新闻综合
@@ -97,6 +109,14 @@ https://stream2.jlntv.cn/jlcc/sd/live.m3u8
 http://30814.hlsplay.aodianyun.com/lms_30814/tv_channel_246.flv
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="中国: 四川",四川卫视
 http://183.207.248.71/gitv/live1/SCWS/SCWS
+
+# ===== 中国: 天津 =====
+#EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="中国: 天津",天津卫视
+http://183.207.248.71/cntv/live1/HD-2500k-1080P-tianjinstv/HD-2500k-1080P-tianjinstv
+
+# ===== 中国: 宁夏 =====
+#EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="中国: 宁夏",宁夏卫视
+http://183.207.248.71/gitv/live1/G_NINGXIA/G_NINGXIA
 
 # ===== 中国: 安徽 =====
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="中国: 安徽",安徽卫视
@@ -125,12 +145,28 @@ http://120.70.60.179:9901/tsfile/live/1006_1.m3u8?authid=0&key=txiptv&playlive=1
 http://218.84.35.38:3000/m3u8/live/tctv-2/index.m3u8
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/XinjiangTV8.png" group-title="中国: 新疆",Xinjiang TV 8
 http://120.70.60.179:9901/tsfile/live/1002_1.m3u8?authid=0&key=txiptv&playlive=1
+#EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="中国: 新疆",新疆卫视
+http://183.207.248.71/cntv/live1/xinjiangstv/xinjiangstv
+#EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="中国: 新疆",新疆卫视
+http://183.207.248.71/gitv/live1/G_XINJIANG/G_XINJIANG
 
 # ===== 中国: 江苏 =====
+#EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="中国: 江苏",南京十八
+http://183.207.248.71/gitv/live1/G_NJSB/G_NJSB
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="中国: 江苏",南京教科
 http://183.207.248.71/gitv/live1/G_NJJK/G_NJJK
+#EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="中国: 江苏",江苏体育
+http://183.207.248.71/gitv/live1/G_JSTY/G_JSTY
+#EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="中国: 江苏",江苏公共
+http://183.207.248.71/gitv/live1/G_JSGG/G_JSGG
+#EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="中国: 江苏",江苏卫视
+http://183.207.248.71/cntv/live1/HD-2500k-1080P-jiangsustv/HD-2500k-1080P-jiangsustv
+#EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="中国: 江苏",江苏卫视
+http://183.207.248.71/cntv/live1/jiangsustv/jiangsustv
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="中国: 江苏",江苏卫视
 http://183.207.248.71/gitv/live1/JSWS-HD/JSWS-HD
+#EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="中国: 江苏",江苏城市
+http://183.207.248.71/gitv/live1/G_JSCS/G_JSCS
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="中国: 江苏",江苏影视
 http://183.207.248.71/gitv/live1/G_JSYS/G_JSYS
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="中国: 江苏",江苏教育
@@ -157,6 +193,8 @@ http://live.shaoxing.com.cn/video/s10001-sxtv3/index.m3u8
 http://live.shaoxing.com.cn/video/s10001-sxtv1/index.m3u8
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="中国: 浙江",浙江卫视
 http://183.207.248.71/cntv/live1/HD-2500k-1080P-zhejiangstv/HD-2500k-1080P-zhejiangstv
+#EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="中国: 浙江",浙江卫视
+http://183.207.248.71/cntv/live1/zhejiangstv/zhejiangstv
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="中国: 浙江",浙江卫视
 http://183.207.248.71/gitv/live1/G_ZHEJIANG/G_ZHEJIANG
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="中国: 浙江",浙江国际
@@ -201,6 +239,8 @@ http://183.207.249.71/PLTV/3/224/3221225566/index.m3u8
 https://stream.hrbtv.net/xwzh/playlist.m3u8?_upt=ef41dd531755913594
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/HarbinMovieChannel.png" group-title="中国: 黑龙江",Harbin Movie Channel
 https://stream.hrbtv.net/yspd/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="中国: 黑龙江",黑龙江
+http://183.207.248.71/gitv/live1/G_HEILONGJIANG/G_HEILONGJIANG
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="中国: 黑龙江",黑龙江卫
 http://183.207.248.71/cntv/live1/HD-2500k-1080P-heilongjiangstv/HD-2500k-1080P-heilongjiangstv
 
@@ -291,20 +331,16 @@ http://fm1077.serv00.net/Smart.php?id=j2_twn$LR•IPV4
 http://cdn.163189.xyz/163189/now
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/NOWTV.png" group-title="香港",NOW TV
 https://uycyyuuzyh.turknet.ercdn.net/nphindgytw/nowtv/nowtv.m3u8
+#EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/Now14.png" group-title="香港",Now 14
+https://r.il.cdn-redge.media/livehls/oil/ch14/live/ch14/live.livx/playlist.m3u8
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/NowMediaTelevision.png" group-title="香港",NowMedia Television
 https://stream-204968.castr.net/64e0c91d08bff3041638aee3/live_a4243540d4b911f0b624bda5e9a32aa9/tracks-v1/index.fmp4.m3u8
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/RTHK31.png" group-title="香港",RTHK 31
 https://www.rthk.hk/feeds/dtt/rthktv31_https.m3u8
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/RTHK32.png" group-title="香港",RTHK 32
 https://www.rthk.hk/feeds/dtt/rthktv32_https.m3u8
-#EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/RTHKTV31.png" group-title="香港",RTHK TV 31
-https://rthklive1-lh.akamaihd.net/i/rthk31_1@167495/master.m3u8
-#EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/RTHK31.png" group-title="香港",RTHK31
-http://php.jdshipin.com:8880/TVOD/iptv.php?id=rthk31
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/RTHK32.png" group-title="香港",RTHK32
 http://php.jdshipin.com:8880/TVOD/iptv.php?id=rthk32
-#EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/TVB1080P.png" group-title="香港",TVB翡翠台 1080P
-http://php.jdshipin.com:8880/TVOD/iptv.php?id=fct3
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/VIUTV.png" group-title="香港",VIUTV
 http://php.jdshipin.com/TVOD/iptv.php?id=viutv
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/VIUTV.png" group-title="香港",VIUTV
