@@ -2,7 +2,7 @@ name: IPTV Auto Builder Pro
 
 on:
   schedule:
-    - cron: "0 */4 * * *"
+    - cron: "0 */12 * * *"
   workflow_dispatch:
 
 jobs:
@@ -45,7 +45,6 @@ jobs:
       - name: Build Playlist
         run: |
           set +e
-          # 初始化清理
           rm -f playlist.m3u previous_urls.txt raw_extracted.txt pre_sort.txt final_list.txt valid_raw_data.txt
           touch previous_urls.txt raw_extracted.txt pre_sort.txt
           [ -f playlist.m3u ] && grep -E '^http' playlist.m3u > previous_urls.txt || true
@@ -61,12 +60,18 @@ jobs:
           extract_m3u "China" "source_china.m3u"; extract_m3u "Hong Kong" "source_hongkong.m3u"; extract_m3u "Taiwan" "source_taiwan.m3u"
           extract_m3u "China" "source_freetv_cn.m3u"; extract_m3u "Hong Kong" "source_freetv_hk.m3u"; extract_m3u "Taiwan" "source_freetv_tw.m3u"
 
+          # 測試串流 (升級版：Range Request 驗證數據真實傳輸)
           test_stream() {
               IFS=$'\t' read -r AREA URL INFO <<< "$1"
-              [[ "$URL" == *"youtube.com"* || "$URL" == *"youtu.be"* ]] && { echo -e "5000000\t${AREA}\t${URL}\t${INFO}"; return; }
-              CHECK=$(curl -s -I -w "%{http_code}\t%{speed_download}" -o /dev/null --connect-timeout 3 --max-time 4 "$URL" || echo -e "000\t0")
-              HTTP=$(echo "$CHECK" | cut -f1); SPEED=$(echo "$CHECK" | cut -f2 | awk '{print int($1)}')
-              [[ "$HTTP" =~ ^(200|301|302)$ ]] && echo -e "${SPEED:-1000}\t${AREA}\t${URL}\t${INFO}"
+              if [[ "$URL" == *"youtube.com"* || "$URL" == *"youtu.be"* ]]; then
+                  echo -e "5000000\t${AREA}\t${URL}\t${INFO}"
+                  return
+              fi
+              # 請求前 10KB 數據，確認伺服器確實能吐出影片流 (狀態碼 200 或 206)
+              VALID=$(curl -s -L --connect-timeout 2 --max-time 5 -r 0-10240 -w "%{http_code}" -o /dev/null "$URL")
+              if [[ "$VALID" == "200" || "$VALID" == "206" ]]; then
+                  echo -e "2000\t${AREA}\t${URL}\t${INFO}"
+              fi
           }
           
           # 讀取處理
@@ -87,10 +92,8 @@ jobs:
               echo -e "${MID}\t${PRIO}\t${SPEED}\t${SORT}\t${GROUP}\t${CLEAN}\t${URL}" >> pre_sort.txt
           done < valid_raw_data.txt
 
-          # 排序選優
           [ -s pre_sort.txt ] && sort -t $'\t' -k1,1 -k2,2nr -k3,3nr pre_sort.txt | awk -F '\t' '{ if (count[$1] < 5) { print; count[$1]++; } }' > final_list.txt
 
-          # 最終輸出
           declare -A EPG
           [ -f epg.xml ] && while IFS='|' read -r i n; do EPG["$n"]="$i"; done < <(gawk 'match($0, /id="([^"]+)"/, a) {id=a[1]} match($0, /<display-name[^>]*>([^<]+)<\/display-name>/, b) {print id "|" b[1]}' epg.xml)
           
@@ -108,9 +111,12 @@ jobs:
         run: |
           git config --global user.email "actions@github.com"
           git config --global user.name "GitHub Actions"
-          if ! git diff --quiet playlist.m3u; then
+          if [[ -n $(git status -s) ]]; then
             git add playlist.m3u
             git commit -m "🚀 Update: Playlist Updated ($(date +'%Y-%m-%d %H:%M'))"
             git remote set-url origin https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/${{ github.repository }}.git
-            git pull --rebase origin main && git push origin main
+            git pull --rebase origin main
+            git push origin main
+          else
+            echo "No changes to commit."
           fi
