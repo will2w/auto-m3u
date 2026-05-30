@@ -36,7 +36,7 @@ jobs:
           dl_safe "source_china.m3u"    "https://raw.githubusercontent.com/iptv-org/iptv/master/streams/cn.m3u"
           dl_safe "source_hongkong.m3u" "https://raw.githubusercontent.com/sammy0101/hk-iptv-auto/refs/heads/main/hk_live.m3u"
           dl_safe "source_taiwan.m3u"   "https://raw.githubusercontent.com/will2w/auto-m3u/refs/heads/main/HK.m3u8"
-          dl_safe "source_freetv_cn.m3u" "https://t.freetv.fun/m3u/playlist_banned_cn_original.m3u"
+          dl_safe "source_freetv_cn.m3u" "https://t.freetv.fun/m3u/china_original.m3u"
           dl_safe "source_freetv_hk.m3u" "https://t.freetv.fun/m3u/hong_kong_original.m3u"
           dl_safe "source_freetv_tw.m3u" "https://t.freetv.fun/m3u/taiwan_original.m3u"
           dl_safe "epg.xml"             "https://epg.pw/xmltv/epg_CN.xml"
