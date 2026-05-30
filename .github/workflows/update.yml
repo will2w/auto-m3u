@@ -18,7 +18,8 @@ jobs:
       - name: Install Tools
         run: |
           sudo apt-get update
-          sudo apt-get install -y jq curl gawk xargs
+          # xargs 屬於 findutils 套件，一般預設已安裝
+          sudo apt-get install -y jq curl gawk findutils
 
       - name: Download Data
         run: |
@@ -29,8 +30,6 @@ jobs:
           curl -L --retry 3 --connect-timeout 10 -o source_freetv_cn.m3u https://t.freetv.fun/m3u/playlist_banned_cn_original.m3u
           curl -L --retry 3 --connect-timeout 10 -o source_freetv_hk.m3u https://t.freetv.fun/m3u/hong_kong_original.m3u
           curl -L --retry 3 --connect-timeout 10 -o source_freetv_tw.m3u https://t.freetv.fun/m3u/taiwan_original.m3u
-          
-          # 更新 EPG 接口
           curl -L --retry 3 --connect-timeout 10 -o epg.xml https://epg.pw/xmltv/epg_CN.xml
 
           sed -i 's/\r//g' source_*.m3u
@@ -86,20 +85,4 @@ jobs:
           [ -f epg.xml ] && while IFS='|' read -r i n; do EPG["$n"]="$i"; done < <(gawk 'match($0, /id="([^"]+)"/, a) {id=a[1]} match($0, /<display-name[^>]*>([^<]+)<\/display-name>/, b) {print id "|" b[1]}' epg.xml)
           
           sort -t $'\t' -k4,4n -k5,5 -k6,6 final_list.txt | while IFS=$'\t' read -r MID PRIO SPD SORT GRP NAME URL; do
-              [[ "$GRP" != "$CUR" ]] && { echo -e "\n# ===== $GRP =====" >> playlist.m3u; CUR="$GRP"; }
-              ICON=$(echo "$NAME" | tr -dc '[:alnum:]')
-              EXT="#EXTINF:-1 $([[ -n "${EPG[$NAME]}" ]] && echo "tvg-id=\"${EPG[$NAME]}\"") tvg-logo=\"https://raw.githubusercontent.com/fanmingming/live/main/tvicon/${ICON}.png\" group-title=\"$GRP\",$NAME"
-              echo -e "$EXT\n$URL" >> playlist.m3u
-          done
-          rm -f source_*.m3u epg.xml previous_urls.txt raw_extracted.txt valid_raw_data.txt pre_sort.txt final_list.txt
-
-      - name: Commit and Push
-        run: |
-          git config --global user.email "actions@github.com"
-          git config --global user.name "GitHub Actions"
-          if ! git diff --quiet playlist.m3u; then
-            git add playlist.m3u
-            git commit -m "🚀 Update: EPG to epg.pw & Optimized Build ($(date +'%Y-%m-%d %H:%M'))"
-            git remote set-url origin https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/${{ github.repository }}.git
-            git pull --rebase origin main && git push origin main
-          fi
+              [
