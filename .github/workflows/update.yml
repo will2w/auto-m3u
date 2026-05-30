@@ -18,19 +18,23 @@ jobs:
       - name: Install Tools
         run: |
           sudo apt-get update
-          # xargs 屬於 findutils 套件，一般預設已安裝
           sudo apt-get install -y jq curl gawk findutils
 
       - name: Download Data
         run: |
           echo "Downloading sources..."
-          curl -L --retry 3 --connect-timeout 10 -o source_china.m3u    https://raw.githubusercontent.com/iptv-org/iptv/master/streams/cn.m3u
-          curl -L --retry 3 --connect-timeout 10 -o source_hongkong.m3u https://raw.gh.registry.cyou/sammy0101/hk-iptv-auto/refs/heads/main/hk_live.m3u
-          curl -L --retry 3 --connect-timeout 10 -o source_taiwan.m3u   https://raw.githubusercontent.com/will2w/auto-m3u/refs/heads/main/HK.m3u8
-          curl -L --retry 3 --connect-timeout 10 -o source_freetv_cn.m3u https://t.freetv.fun/m3u/playlist_banned_cn_original.m3u
-          curl -L --retry 3 --connect-timeout 10 -o source_freetv_hk.m3u https://t.freetv.fun/m3u/hong_kong_original.m3u
-          curl -L --retry 3 --connect-timeout 10 -o source_freetv_tw.m3u https://t.freetv.fun/m3u/taiwan_original.m3u
-          curl -L --retry 3 --connect-timeout 10 -o epg.xml https://epg.pw/xmltv/epg_CN.xml
+          # 定義一個兼容性強的下載函數，處理 SSL 握手失敗問題
+          dl_safe() {
+            curl -L --retry 3 --connect-timeout 15 --max-time 30 --insecure --tls-max 1.2 -o "$1" "$2"
+          }
+          
+          dl_safe "source_china.m3u"    "https://raw.githubusercontent.com/iptv-org/iptv/master/streams/cn.m3u"
+          dl_safe "source_hongkong.m3u" "https://raw.gh.registry.cyou/sammy0101/hk-iptv-auto/refs/heads/main/hk_live.m3u"
+          dl_safe "source_taiwan.m3u"   "https://raw.githubusercontent.com/will2w/auto-m3u/refs/heads/main/HK.m3u8"
+          dl_safe "source_freetv_cn.m3u" "https://t.freetv.fun/m3u/playlist_banned_cn_original.m3u"
+          dl_safe "source_freetv_hk.m3u" "https://t.freetv.fun/m3u/hong_kong_original.m3u"
+          dl_safe "source_freetv_tw.m3u" "https://t.freetv.fun/m3u/taiwan_original.m3u"
+          dl_safe "epg.xml"             "https://epg.pw/xmltv/epg_CN.xml"
 
           sed -i 's/\r//g' source_*.m3u
 
@@ -85,4 +89,20 @@ jobs:
           [ -f epg.xml ] && while IFS='|' read -r i n; do EPG["$n"]="$i"; done < <(gawk 'match($0, /id="([^"]+)"/, a) {id=a[1]} match($0, /<display-name[^>]*>([^<]+)<\/display-name>/, b) {print id "|" b[1]}' epg.xml)
           
           sort -t $'\t' -k4,4n -k5,5 -k6,6 final_list.txt | while IFS=$'\t' read -r MID PRIO SPD SORT GRP NAME URL; do
-              [
+              [[ "$GRP" != "$CUR" ]] && { echo -e "\n# ===== $GRP =====" >> playlist.m3u; CUR="$GRP"; }
+              ICON=$(echo "$NAME" | tr -dc '[:alnum:]')
+              EXT="#EXTINF:-1 $([[ -n "${EPG[$NAME]}" ]] && echo "tvg-id=\"${EPG[$NAME]}\"") tvg-logo=\"https://raw.githubusercontent.com/fanmingming/live/main/tvicon/${ICON}.png\" group-title=\"$GRP\",$NAME"
+              echo -e "$EXT\n$URL" >> playlist.m3u
+          done
+          rm -f source_*.m3u epg.xml previous_urls.txt raw_extracted.txt valid_raw_data.txt pre_sort.txt final_list.txt
+
+      - name: Commit and Push
+        run: |
+          git config --global user.email "actions@github.com"
+          git config --global user.name "GitHub Actions"
+          if ! git diff --quiet playlist.m3u; then
+            git add playlist.m3u
+            git commit -m "🚀 Update: EPG to epg.pw & Optimized Build ($(date +'%Y-%m-%d %H:%M'))"
+            git remote set-url origin https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/${{ github.repository }}.git
+            git pull --rebase origin main && git push origin main
+          fi
