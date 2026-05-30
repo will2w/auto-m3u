@@ -44,15 +44,16 @@ jobs:
 
       - name: Build Playlist
         run: |
-          touch previous_urls.txt
+          set +e
+          # 初始化清理
+          rm -f playlist.m3u previous_urls.txt raw_extracted.txt pre_sort.txt final_list.txt valid_raw_data.txt
+          touch previous_urls.txt raw_extracted.txt pre_sort.txt
           [ -f playlist.m3u ] && grep -E '^http' playlist.m3u > previous_urls.txt || true
           echo "#EXTM3U" > playlist.m3u
-          touch raw_extracted.txt
 
           normalize_id() {
               echo "$1" | sed -E 's/\[[^]]*\]//g; s/\([^)]*\)//g; s/(高清|HD|超清|UHD|4K|FHD|标清|SD)//ig' | tr -d ' \-()（）' | tr '[:lower:]' '[:upper:]'
           }
-          export -f normalize_id
           
           extract_m3u() {
               [ -s "$2" ] && awk -v area="$1" '/^#EXTINF/ {info=$0; gsub(/'"'"'/, "", info); getline url; if (url ~ /^http/) print area "\t" url "\t" info}' "$2" >> raw_extracted.txt
@@ -68,10 +69,14 @@ jobs:
               [[ "$HTTP" =~ ^(200|301|302)$ ]] && echo -e "${SPEED:-1000}\t${AREA}\t${URL}\t${INFO}"
           }
           
-          while IFS= read -r line; do test_stream "$line"; done < raw_extracted.txt > valid_raw_data.txt
+          # 讀取處理
+          while IFS= read -r line || [ -n "$line" ]; do 
+              [ -n "$line" ] && test_stream "$line"
+          done < raw_extracted.txt > valid_raw_data.txt
 
-          # 測試並標準化名稱
+          # 標準化與排序分組
           while IFS=$'\t' read -r SPEED AREA URL INFO; do
+              [ -z "$URL" ] && continue
               NAME_RAW=$(echo "$INFO" | sed 's/.*,//')
               CLEAN=$(echo "$NAME_RAW" | sed -E 's/\[[^]]*\]|\([^)]*\)|\{[^}]*\}|【[^】]*】//g; s/(高清|超清|标清|FHD|UHD|HD|4K|2K|SD)//ig; s/^[[:space:]\-]+|[[:space:]\-]+$//g')
               MID=$(normalize_id "$CLEAN")
@@ -83,11 +88,9 @@ jobs:
           done < valid_raw_data.txt
 
           # 排序選優
-          if [ -s pre_sort.txt ]; then
-              sort -t $'\t' -k1,1 -k2,2nr -k3,3nr pre_sort.txt | awk -F '\t' '{ if (count[$1] < 5) { print; count[$1]++; } }' > final_list.txt
-          fi
+          [ -s pre_sort.txt ] && sort -t $'\t' -k1,1 -k2,2nr -k3,3nr pre_sort.txt | awk -F '\t' '{ if (count[$1] < 5) { print; count[$1]++; } }' > final_list.txt
 
-          # 構建播放列表
+          # 最終輸出
           declare -A EPG
           [ -f epg.xml ] && while IFS='|' read -r i n; do EPG["$n"]="$i"; done < <(gawk 'match($0, /id="([^"]+)"/, a) {id=a[1]} match($0, /<display-name[^>]*>([^<]+)<\/display-name>/, b) {print id "|" b[1]}' epg.xml)
           
@@ -99,7 +102,7 @@ jobs:
                   echo -e "$EXT\n$URL" >> playlist.m3u
               done
           fi
-          rm -f source_*.m3u epg.xml previous_urls.txt raw_extracted.txt pre_sort.txt final_list.txt
+          set -e
 
       - name: Commit and Push
         run: |
@@ -107,7 +110,7 @@ jobs:
           git config --global user.name "GitHub Actions"
           if ! git diff --quiet playlist.m3u; then
             git add playlist.m3u
-            git commit -m "🚀 Update: Playlist Fixed ($(date +'%Y-%m-%d %H:%M'))"
+            git commit -m "🚀 Update: Playlist Updated ($(date +'%Y-%m-%d %H:%M'))"
             git remote set-url origin https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/${{ github.repository }}.git
             git pull --rebase origin main && git push origin main
           fi
