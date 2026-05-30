@@ -23,27 +23,23 @@ jobs:
       - name: Download Data
         run: |
           echo "Downloading sources..."
-          # 若下載失敗，不中斷腳本，輸出警告並繼續
           dl_safe() {
-            echo "Downloading $1 from $2..."
             if wget --no-check-certificate --quiet --timeout=15 --tries=3 \
                  --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36" \
                  -O "$1" "$2"; then
-                 echo "Successfully downloaded $1"
+                 echo "Downloaded $1"
             else
-                 echo "Warning: Failed to download $1, skipping..."
-                 touch "$1" # 建立一個空檔，防止後續 sed 報錯
+                 echo "Warning: $1 failed, skipping."
+                 touch "$1"
             fi
           }
-          
           dl_safe "source_china.m3u"    "https://raw.githubusercontent.com/iptv-org/iptv/master/streams/cn.m3u"
-          dl_safe "source_hongkong.m3u" "https://raw.gh.registry.cyou/sammy0101/hk-iptv-auto/refs/heads/main/hk_live.m3u"
+          dl_safe "source_hongkong.m3u" "https://raw.githubusercontent.com/sammy0101/hk-iptv-auto/refs/heads/main/hk_live.m3u"
           dl_safe "source_taiwan.m3u"   "https://raw.githubusercontent.com/will2w/auto-m3u/refs/heads/main/HK.m3u8"
           dl_safe "source_freetv_cn.m3u" "https://t.freetv.fun/m3u/playlist_banned_cn_original.m3u"
           dl_safe "source_freetv_hk.m3u" "https://t.freetv.fun/m3u/hong_kong_original.m3u"
           dl_safe "source_freetv_tw.m3u" "https://t.freetv.fun/m3u/taiwan_original.m3u"
           dl_safe "epg.xml"             "https://epg.pw/xmltv/epg_CN.xml"
-
           sed -i 's/\r//g' source_*.m3u
 
       - name: Build Playlist
@@ -53,49 +49,51 @@ jobs:
           echo "#EXTM3U" > playlist.m3u
           touch raw_extracted.txt
 
+          # 提取並清理名稱
           normalize_id() {
               echo "$1" | sed -E 's/\[[^]]*\]//g; s/\([^)]*\)//g; s/(高清|HD|超清|UHD|4K|FHD|标清|SD)//ig' | tr -d ' \-()（）' | tr '[:lower:]' '[:upper:]'
           }
           export -f normalize_id
 
           extract_m3u() {
-              # 僅當檔案不為空時才處理
-              if [ -s "$2" ]; then
-                  awk -v area="$1" '/^#EXTINF/ {info=$0; getline url; if (url ~ /^http/) print area "\t" url "\t" info}' "$2" >> raw_extracted.txt
-              fi
+              [ -s "$2" ] && awk -v area="$1" '/^#EXTINF/ {info=$0; gsub(/'"'"'/, "", info); getline url; if (url ~ /^http/) print area "\t" url "\t" info}' "$2" >> raw_extracted.txt
           }
-          extract_m3u "China" "source_china.m3u"
-          extract_m3u "Hong Kong" "source_hongkong.m3u"
-          extract_m3u "Taiwan" "source_taiwan.m3u"
-          extract_m3u "China" "source_freetv_cn.m3u"
-          extract_m3u "Hong Kong" "source_freetv_hk.m3u"
-          extract_m3u "Taiwan" "source_freetv_tw.m3u"
+          extract_m3u "China" "source_china.m3u"; extract_m3u "Hong Kong" "source_hongkong.m3u"; extract_m3u "Taiwan" "source_taiwan.m3u"
+          extract_m3u "China" "source_freetv_cn.m3u"; extract_m3u "Hong Kong" "source_freetv_hk.m3u"; extract_m3u "Taiwan" "source_freetv_tw.m3u"
 
           test_stream() {
-              local LINE="$1"; local AREA=$(echo "$LINE" | cut -f1); local URL=$(echo "$LINE" | cut -f2); local INFO=$(echo "$LINE" | cut -f3)
+              IFS=$'\t' read -r AREA URL INFO <<< "$1"
               [[ "$URL" == *"youtube.com"* || "$URL" == *"youtu.be"* ]] && { echo -e "5000000\t${AREA}\t${URL}\t${INFO}"; return; }
               CHECK=$(curl -s -I -w "%{http_code}\t%{speed_download}" -o /dev/null --connect-timeout 3 --max-time 4 "$URL" || echo -e "000\t0")
               HTTP=$(echo "$CHECK" | cut -f1); SPEED=$(echo "$CHECK" | cut -f2 | awk '{print int($1)}')
               [[ "$HTTP" =~ ^(200|301|302)$ ]] && echo -e "${SPEED:-1000}\t${AREA}\t${URL}\t${INFO}"
           }
-          export -f test_stream
-          cat raw_extracted.txt | xargs -I {} -P 16 bash -c 'test_stream "{}"' > valid_raw_data.txt
-
-          PROV_MAP=("北京,Beijing,BJ,Peking" "上海,Shanghai,SH" "天津,Tianjin,TJ" "重庆,Chongqing,CQ" "广东,Guangdong,GD,Canton,Guangzhou,Shenzhen,Zhuhai,Shantou,Foshan,Dongguan,Zhongshan,Huizhou,Jiangmen,Zhanjiang,Maoming,Zhaoqing,Meizhou,Shanwei,Heyuan,Yangjiang,Qingyuan,Chaozhou,Jieyang,Yunfu,广州,深圳,珠海,汕头,佛山,东莞,中山,惠州,江门,湛江,茂名,肇庆,梅州,汕尾,河源,阳江,清远,潮州,揭阳,云浮" "浙江,Zhejiang,ZJ,Hangzhou,Ningbo,Wenzhou,Shaoxing,Jinhua,Taizhou,Jiaxing,Huzhou,Lishui,Quzhou,Zhushans,杭州,宁波,温州,绍兴,金华,台州,嘉兴,湖州,丽水,衢州,舟山" "江苏,Jiangsu,JS,Nanjing,Suzhou,Wuxi,Changzhou,Nantong,Yangzhou,Zhenjiang,Taizhou,Xuzhou,Huaiand,Suqian,Lianyungang,Yancheng,南京,苏州,无锡,常州,南通,扬州,镇江,泰州,徐州,淮安,宿迁,连云港,盐城" "福建,Fujian,FJ,Fuzhou,Xiamen,Quanzhou,Zhangzhou,Putian,Longyan,Sanming,Nanping,Ningde,福州,厦门,泉州,漳州,莆田,龙岩,三明,南平,宁德" "湖南,Hunan,HN,Changsha,Zhuzhou,Xiangtan,Hengyang,Shaoyang,Yueyang,Changde,Zhangjiajie,Yiyang,Chenzhou,Yongzhou,Huaihua,Loudi,Xiangxi,长沙,株洲,湘潭,衡阳,邵阳,岳阳,常德,张家界,益阳,郴州,永州,怀化,娄底,湘西" "湖北,Hubei,HB,Wuhan,Xiangyang,Yichang,Huangshi,Shiyan,Ezhou,Jingmen,Xiaogan,Jingzhou,Huanggang,Xianning,Suizhou,Enshi,Xiantao,Tianmen,Qianjiang,武汉,襄阳,宜昌,黄石,十堰,鄂州,荆门,孝感,荆州,黄冈,咸宁,随州,恩施,仙桃,天门,潜江" "四川,Sichuan,SC,Chengdu,Mianyang,Nanchong,Zigong,Panzhihua,Luzhou,Deyang,Guangyuan,Suining,Neijiang,Leshan,Yibin,Guangan,Dazhou,Yaan,Bazhong,Ziyang,Aba,Ganzi,Liangshan,成都,绵阳,南充,自贡,攀枝花,泸州,德阳,广元,遂宁,内江,乐山,宜宾,广安,达州,雅安,巴中,资阳,阿坝,甘孜,凉山" "陕西,Shaanxi,SX,Xian,Xianyang,Baoji,Tongchuan,Weinan,Yanan,Hanzhong,Yulin,Ankang,Shangluo,西安,咸阳,宝鸡,铜川,渭南,延安,汉中,榆林,安康,商洛" "山东,Shandong,SD,Jinan,Qingdao,Yantai,Weifang,Zibo,Zaozhuang,Dongying,Jining,Taian,Weihai,Rizhao,Linyi,Dezhou,Liaocheng,Binzhou,Heze,济南,青岛,烟台,潍坊,淄博,枣庄,东营,济宁,泰安,威海,日照,临沂,德州,聊城,滨州,菏泽" "安徽,Anhui,AH,Hefei,Wuhu,Bengbu,Huainan,Maanshan,Huaibei,Tongling,Anqing,Huangshan,Chuzhou,Fuyang,Suzhou,Luan,Bozhou,Chizhou,Xuancheng,合肥,芜湖,蚌埠,淮南,马鞍山,淮北,铜陵,安庆,黄山,滁州,阜阳,宿州,六安,亳州,池州,宣城" "河北,Hebei,HE,Shijiazhuang,Tangshan,Qinhuangdao,Handan,Xingtai,Baoding,Zhangjiakou,Chengde,Cangzhou,Langfang,Hengshui,石家庄,唐山,秦皇岛,邯郸,邢台,保定,张家口,承德,沧州,廊坊,衡水" "山西,Shanxi,SX,Taiyuan,Datong,Yangquan,Changzhi,Jincheng,Shuozhou,Jinzhong,Yuncheng,Xinzhou,Linfen,Luliang,太原,大同,阳泉,长治,晋城,朔州,晋中,运城,忻州,临汾,吕梁" "内蒙古,Inner Mongolia,Neimenggu,Hohhot,Baotou,Wuhai,Chifeng,Tongliao,Ordos,Hulunbuir,Bayannur,Ulanqab,Xinggan,XilinGol,Alxa,呼和浩特,包头,乌海,赤峰,通辽,鄂尔多斯,呼伦贝尔,巴彦淖尔,乌兰察布,兴安,锡林郭勒,阿拉善" "辽宁,Liaoning,LN,Shenyang,Dalian,Anshan,Fushun,Benxi,Dandong,Jinzhou,Yingkou,Fuxin,Liaoyang,Panjin,Tieling,Chaoyang,Huludao,沈阳,大连,鞍山,抚顺,本溪,丹东,锦州,营口,阜新,辽阳,盘锦,铁岭,朝阳,葫芦岛" "吉林,Jilin,JL,Changchun,JilinCity,Siping,Liaoyuan,Tonghua,Baishan,Songyuan,Baicheng,Yanbian,长春,吉林市,四平,辽源,通化,白山,松原,白城,延边" "黑龙江,Heilongjiang,HLJ,Harbin,Daqing,Qiqihar,Jixi,Hegang,Shuangyashan,Yichun,Jiamusi,Qitaihe,Mudanjiang,Heihe,Suihua,Daxinganling,哈尔滨,大庆,齐齐哈尔,鸡西,鹤岗,双鸭山,伊春,佳木斯,七台河,牡丹江,黑河,绥化,大兴安岭" "江西,Jiangxi,JX,Nanchang,Jiujiang,Ganzhou,Jingdezhen,Pingxiang,Xinyu,Yingtan,Jian,Yichun,Fuzhou,Shangrao,南昌,九江,赣州,景德镇,萍乡,新余,鹰潭,吉安,宜春,抚州,上饶" "河南,Henan,HA,Zhengzhou,Luoyang,Kaifeng,Pingdingshan,Anyang,Hebi,Xinxiang,Jiaozuo,Puyang,Xuchang,Luohe,Sanmenxia,Nanyang,Shangqiu,Xinyang,Zhoukou,Zhumadian,Jiyuan,郑州,洛阳,开封,平顶山,安阳,鹤壁,新乡,焦作,濮阳,许昌,漯河,三门峡,南阳,商丘,信阳,周口,驻马店,济源" "广西,Guangxi,GX,Nanning,Guilin,Liuzhou,Wuzhou,Beihai,Fangchenggang,Qinzhou,Guigang,Yulin,Baise,Hezhou,Hechi,Laibin,Chongzuo,南宁,桂林,柳州,梧州,北海,防城港,钦州,贵港,玉林,百色,贺州,河池,来宾,崇左" "海南,Hainan,HI,Haikou,Sanya,Sansha,Danzhou,海口,三亚,三沙,儋州" "贵州,Guizhou,GZ,Guiyang,Zunyi,Liupanshui,Anshun,Bijie,Tongren,Qianxinan,Qiandongnan,Qiannan,贵阳,遵义,六盘水,安顺,毕节,铜仁,黔西南,黔东南,黔南" "云南,Yunnan,YN,Kunming,Dali,Qujing,Yuxi,Baoshan,Zhaotong,Lijiang,Puer,Lincang,Chuxiong,Honghe,Wenshan,Xishuangbanna,Dehong,Nujiang,Diqing,昆明,大理,曲靖,玉溪,保山,昭通,丽江,普洱,临沧,楚雄,红河,文山,西双版纳,德宏,怒江,迪庆" "西藏,Tibet,XZ,Lhasa,Shigatse,Qamdo,Nyingchi,Shannan,Nagqu,Ngari,拉萨,日喀则,昌都,林芝,山南,那曲,阿里" "甘肃,Gansu,GS,Lanzhou,Jiayuguan,Jinchang,Baiyin,Tianshui,Wuwei,Zhangye,Pingliang,Jiuquan,Qingyang,Dingxi,Longnan,Linxia,Gannan,兰州,嘉峪关,金昌,白银,天水,武威,张掖,平凉,酒泉,庆阳,定西,陇南,临夏,甘南" "青海,Qinghai,QH,Xining,Haidong,Haibei,Huangnan,Hainan,Golog,Yushu,Haixi,西宁,海东,海北,黄南,海南,果洛,玉树,海西" "宁夏,Ningxia,NX,Yinchuan,Shizuishan,Wuzhong,Guyuan,Zhongwei,银川,石嘴山,吴忠,固原,中卫" "新疆,Xinjiang,XJ,Urumqi,Karamay,Turpan,Hami,Changji,Bortala,Bayingolin,Aksu,Kizilsu,Kashgar,Hotan,Ili,Tacheng,Altay,乌鲁木齐,克拉玛依,吐鲁番,哈密,昌吉,博尔塔拉,巴音郭楞,阿克苏,克孜勒苏,喀什,和田,伊犁,塔城,阿勒泰")
-
-          while IFS=$'\t' read -r SPEED AREA URL INFO; do
-              NAME=$(echo "$INFO" | sed 's/.*,//'); CLEAN=$(echo "$NAME" | sed -E 's/\[[^]]*\]|\([^)]*\)|\{[^}]*\}|【[^】]*】//g; s/(高清|超清|标清|FHD|UHD|HD|4K|2K|SD)//ig; s/^[[:space:]\-]+|[[:space:]\-]+$//g')
-              MID=$(normalize_id "$CLEAN"); U_NAME=$(echo "$CLEAN" | tr '[:lower:]' '[:upper:]')
+          
+          # 測試並標準化名稱，放入預排序
+          while IFS=$'\t' read -r AREA URL INFO; do
+              # 進行速度測試
+              RESULT=$(test_stream "$AREA\t$URL\t$INFO")
+              [ -z "$RESULT" ] && continue
+              
+              SPEED=$(echo "$RESULT" | cut -f1)
+              # 提取並標準化名稱
+              NAME_RAW=$(echo "$INFO" | sed 's/.*,//')
+              CLEAN=$(echo "$NAME_RAW" | sed -E 's/\[[^]]*\]|\([^)]*\)|\{[^}]*\}|【[^】]*】//g; s/(高清|超清|标清|FHD|UHD|HD|4K|2K|SD)//ig; s/^[[:space:]\-]+|[[:space:]\-]+$//g')
+              MID=$(normalize_id "$CLEAN")
+              U_NAME=$(echo "$CLEAN" | tr '[:lower:]' '[:upper:]')
+              
+              # 分組
               GROUP="全国"; SORT=4
-              [[ "$U_NAME" == *"CCTV"* || "$U_NAME" == *"CGTN"* ]] && { GROUP="央视"; SORT=1; } || [[ "$AREA" == "Hong Kong" || "$U_NAME" == *"澳門"* || "$U_NAME" == *"MACAU"* ]] && { GROUP="港澳"; SORT=2; } || [[ "$AREA" == "Taiwan" ]] && { GROUP="台湾"; SORT=3; } || {
-                  for item in "${PROV_MAP[@]}"; do IFS=',' read -r -a kws <<< "$item"; for kw in "${kws[@]}"; do if [[ "$U_NAME" == *"${kw^^}"* ]]; then GROUP="${kws[0]}"; SORT=4; break 2; fi; done; done
-              }
+              [[ "$U_NAME" == *"CCTV"* || "$U_NAME" == *"CGTN"* ]] && { GROUP="央视"; SORT=1; } || [[ "$AREA" == "Hong Kong" || "$U_NAME" == *"澳門"* ]] && { GROUP="港澳"; SORT=2; } || [[ "$AREA" == "Taiwan" ]] && { GROUP="台湾"; SORT=3; }
+              
               grep -Fxq "$URL" previous_urls.txt 2>/dev/null && PRIO=1 || PRIO=0
               echo -e "${MID}\t${PRIO}\t${SPEED}\t${SORT}\t${GROUP}\t${CLEAN}\t${URL}" >> pre_sort.txt
-          done < valid_raw_data.txt
+          done < raw_extracted.txt
 
+          # 對標準化後的 MID 進行篩選，每個頻道 ID 只取速度最快的前 5
           sort -t $'\t' -k1,1 -k2,2nr -k3,3nr pre_sort.txt | awk -F '\t' '{ if (count[$1] < 5) { print; count[$1]++; } }' > final_list.txt
 
+          # 構建播放列表
           declare -A EPG
           [ -f epg.xml ] && while IFS='|' read -r i n; do EPG["$n"]="$i"; done < <(gawk 'match($0, /id="([^"]+)"/, a) {id=a[1]} match($0, /<display-name[^>]*>([^<]+)<\/display-name>/, b) {print id "|" b[1]}' epg.xml)
           
@@ -105,7 +103,7 @@ jobs:
               EXT="#EXTINF:-1 $([[ -n "${EPG[$NAME]}" ]] && echo "tvg-id=\"${EPG[$NAME]}\"") tvg-logo=\"https://raw.githubusercontent.com/fanmingming/live/main/tvicon/${ICON}.png\" group-title=\"$GRP\",$NAME"
               echo -e "$EXT\n$URL" >> playlist.m3u
           done
-          rm -f source_*.m3u epg.xml previous_urls.txt raw_extracted.txt valid_raw_data.txt pre_sort.txt final_list.txt
+          rm -f source_*.m3u epg.xml previous_urls.txt raw_extracted.txt pre_sort.txt final_list.txt
 
       - name: Commit and Push
         run: |
@@ -113,7 +111,7 @@ jobs:
           git config --global user.name "GitHub Actions"
           if ! git diff --quiet playlist.m3u; then
             git add playlist.m3u
-            git commit -m "🚀 Update: Playlist Build ($(date +'%Y-%m-%d %H:%M'))"
+            git commit -m "🚀 Update: Normalized IPTV list ($(date +'%Y-%m-%d %H:%M'))"
             git remote set-url origin https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/${{ github.repository }}.git
             git pull --rebase origin main && git push origin main
           fi
