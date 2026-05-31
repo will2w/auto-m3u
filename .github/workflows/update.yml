@@ -1,4 +1,4 @@
-name: IPTV Auto Builder Pro
+nname: IPTV Auto Builder Pro
 
 on:
   schedule:
@@ -56,20 +56,20 @@ jobs:
           
           extract_m3u() {
               local weight=$3
-              [ -s "$2" ] && awk -v area="$1" -v w="$weight" '/^#EXTINF/ {info=$0; gsub(/'"'"'/, "", info); getline url; if (url ~ /^http/) print area "\t" url "\t" info "\t" w}' "$2" >> raw_extracted.txt
+              [ -s "$2" ] && awk -v w="$weight" '/^#EXTINF/ {info=$0; gsub(/'"'"'/, "", info); getline url; if (url ~ /^http/) print url "\t" info "\t" w}' "$2" >> raw_extracted.txt
           }
           extract_m3u "China" "source_china.m3u" 9; extract_m3u "Hong Kong" "source_hongkong.m3u" 9; extract_m3u "Taiwan" "source_taiwan.m3u" 9
           extract_m3u "China" "source_freetv_cn.m3u" 0; extract_m3u "Hong Kong" "source_freetv_hk.m3u" 0; extract_m3u "Taiwan" "source_freetv_tw.m3u" 0
 
           test_stream() {
-              IFS=$'\t' read -r AREA URL INFO WEIGHT <<< "$1"
+              IFS=$'\t' read -r URL INFO WEIGHT <<< "$1"
               if [[ "$URL" == *"youtube.com"* || "$URL" == *"youtu.be"* ]]; then
-                  echo -e "5000000\t${AREA}\t${URL}\t${INFO}\t${WEIGHT}"
+                  echo -e "5000000\t${URL}\t${INFO}\t${WEIGHT}"
                   return
               fi
               VALID=$(curl -s -L --connect-timeout 2 --max-time 5 -r 0-10240 -w "%{http_code}" -o /dev/null "$URL")
               if [[ "$VALID" == "200" || "$VALID" == "206" ]]; then
-                  echo -e "2000\t${AREA}\t${URL}\t${INFO}\t${WEIGHT}"
+                  echo -e "2000\t${URL}\t${INFO}\t${WEIGHT}"
               fi
           }
           
@@ -77,7 +77,7 @@ jobs:
               [ -n "$line" ] && test_stream "$line"
           done < raw_extracted.txt > valid_raw_data.txt
 
-          while IFS=$'\t' read -r SPEED AREA URL INFO WEIGHT; do
+          while IFS=$'\t' read -r SPEED URL INFO WEIGHT; do
               [ -z "$URL" ] && continue
               NAME_RAW=$(echo "$INFO" | sed 's/.*,//')
               U_NAME=$(echo "$NAME_RAW" | tr '[:lower:]' '[:upper:]')
@@ -90,8 +90,13 @@ jobs:
               CLEAN=$(echo "$NAME_RAW" | sed -E 's/\[[^]]*\]|\([^)]*\)|\{[^}]*\}|【[^】]*】//g; s/(高清|超清|标清|FHD|UHD|HD|4K|2K|SD)//ig; s/^[[:space:]\-]+|[[:space:]\-]+$//g')
               MID=$(normalize_id "$CLEAN")
               
-              GROUP="全国"; SORT=4
-              [[ "$U_NAME" == *"CCTV"* || "$U_NAME" == *"CGTN"* ]] && { GROUP="央视"; SORT=1; } || [[ "$AREA" == "Hong Kong" || "$U_NAME" == *"澳門"* ]] && { GROUP="港澳"; SORT=2; } || [[ "$AREA" == "Taiwan" ]] && { GROUP="台湾"; SORT=3; }
+              # 新分類邏輯：只看名字
+              GROUP="其他"; SORT=4
+              case "$U_NAME" in
+                  *CCTV*|*CGTN*|*央視*) GROUP="央视"; SORT=1 ;;
+                  *澳門*|*澳门*|*TVB*|*VTV*|*HK*|*港*) GROUP="港澳"; SORT=2 ;;
+                  *台*|*民視*|*三立*|*東森*|*中視*|*華視*|*公視*|*TVBS*) GROUP="台湾"; SORT=3 ;;
+              esac
               
               grep -Fxq "$URL" previous_urls.txt 2>/dev/null && PRIO=1 || PRIO=0
               echo -e "${MID}\t${PRIO}\t${WEIGHT}\t${QUAL}\t${SPEED}\t${SORT}\t${GROUP}\t${CLEAN}\t${URL}" >> pre_sort.txt
