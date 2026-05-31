@@ -55,50 +55,55 @@ jobs:
           }
           
           extract_m3u() {
-              [ -s "$2" ] && awk -v area="$1" '/^#EXTINF/ {info=$0; gsub(/'"'"'/, "", info); getline url; if (url ~ /^http/) print area "\t" url "\t" info}' "$2" >> raw_extracted.txt
+              local weight=$3
+              [ -s "$2" ] && awk -v area="$1" -v w="$weight" '/^#EXTINF/ {info=$0; gsub(/'"'"'/, "", info); getline url; if (url ~ /^http/) print area "\t" url "\t" info "\t" w}' "$2" >> raw_extracted.txt
           }
-          extract_m3u "China" "source_china.m3u"; extract_m3u "Hong Kong" "source_hongkong.m3u"; extract_m3u "Taiwan" "source_taiwan.m3u"
-          extract_m3u "China" "source_freetv_cn.m3u"; extract_m3u "Hong Kong" "source_freetv_hk.m3u"; extract_m3u "Taiwan" "source_freetv_tw.m3u"
+          extract_m3u "China" "source_china.m3u" 9; extract_m3u "Hong Kong" "source_hongkong.m3u" 9; extract_m3u "Taiwan" "source_taiwan.m3u" 9
+          extract_m3u "China" "source_freetv_cn.m3u" 0; extract_m3u "Hong Kong" "source_freetv_hk.m3u" 0; extract_m3u "Taiwan" "source_freetv_tw.m3u" 0
 
-          # 測試串流 (升級版：Range Request 驗證數據真實傳輸)
           test_stream() {
-              IFS=$'\t' read -r AREA URL INFO <<< "$1"
+              IFS=$'\t' read -r AREA URL INFO WEIGHT <<< "$1"
               if [[ "$URL" == *"youtube.com"* || "$URL" == *"youtu.be"* ]]; then
-                  echo -e "5000000\t${AREA}\t${URL}\t${INFO}"
+                  echo -e "5000000\t${AREA}\t${URL}\t${INFO}\t${WEIGHT}"
                   return
               fi
-              # 請求前 10KB 數據，確認伺服器確實能吐出影片流 (狀態碼 200 或 206)
               VALID=$(curl -s -L --connect-timeout 2 --max-time 5 -r 0-10240 -w "%{http_code}" -o /dev/null "$URL")
               if [[ "$VALID" == "200" || "$VALID" == "206" ]]; then
-                  echo -e "2000\t${AREA}\t${URL}\t${INFO}"
+                  echo -e "2000\t${AREA}\t${URL}\t${INFO}\t${WEIGHT}"
               fi
           }
           
-          # 讀取處理
           while IFS= read -r line || [ -n "$line" ]; do 
               [ -n "$line" ] && test_stream "$line"
           done < raw_extracted.txt > valid_raw_data.txt
 
-          # 標準化與排序分組
-          while IFS=$'\t' read -r SPEED AREA URL INFO; do
+          while IFS=$'\t' read -r SPEED AREA URL INFO WEIGHT; do
               [ -z "$URL" ] && continue
               NAME_RAW=$(echo "$INFO" | sed 's/.*,//')
+              U_NAME=$(echo "$NAME_RAW" | tr '[:lower:]' '[:upper:]')
+              
+              QUAL=1
+              [[ "$U_NAME" =~ (4K|UHD) ]] && QUAL=5
+              [[ "$U_NAME" =~ (FHD|1080) ]] && QUAL=4
+              [[ "$U_NAME" =~ (HD|720|高清) ]] && QUAL=3
+              
               CLEAN=$(echo "$NAME_RAW" | sed -E 's/\[[^]]*\]|\([^)]*\)|\{[^}]*\}|【[^】]*】//g; s/(高清|超清|标清|FHD|UHD|HD|4K|2K|SD)//ig; s/^[[:space:]\-]+|[[:space:]\-]+$//g')
               MID=$(normalize_id "$CLEAN")
-              U_NAME=$(echo "$CLEAN" | tr '[:lower:]' '[:upper:]')
+              
               GROUP="全国"; SORT=4
               [[ "$U_NAME" == *"CCTV"* || "$U_NAME" == *"CGTN"* ]] && { GROUP="央视"; SORT=1; } || [[ "$AREA" == "Hong Kong" || "$U_NAME" == *"澳門"* ]] && { GROUP="港澳"; SORT=2; } || [[ "$AREA" == "Taiwan" ]] && { GROUP="台湾"; SORT=3; }
+              
               grep -Fxq "$URL" previous_urls.txt 2>/dev/null && PRIO=1 || PRIO=0
-              echo -e "${MID}\t${PRIO}\t${SPEED}\t${SORT}\t${GROUP}\t${CLEAN}\t${URL}" >> pre_sort.txt
+              echo -e "${MID}\t${PRIO}\t${WEIGHT}\t${QUAL}\t${SPEED}\t${SORT}\t${GROUP}\t${CLEAN}\t${URL}" >> pre_sort.txt
           done < valid_raw_data.txt
 
-          [ -s pre_sort.txt ] && sort -t $'\t' -k1,1 -k2,2nr -k3,3nr pre_sort.txt | awk -F '\t' '{ if (count[$1] < 5) { print; count[$1]++; } }' > final_list.txt
+          [ -s pre_sort.txt ] && sort -t $'\t' -k1,1 -k2,2nr -k3,3nr -k4,4nr -k5,5nr pre_sort.txt | awk -F '\t' '{ if (count[$1] < 3) { print; count[$1]++; } }' > final_list.txt
 
           declare -A EPG
           [ -f epg.xml ] && while IFS='|' read -r i n; do EPG["$n"]="$i"; done < <(gawk 'match($0, /id="([^"]+)"/, a) {id=a[1]} match($0, /<display-name[^>]*>([^<]+)<\/display-name>/, b) {print id "|" b[1]}' epg.xml)
           
           if [ -s final_list.txt ]; then
-              sort -t $'\t' -k4,4n -k5,5 -k6,6 final_list.txt | while IFS=$'\t' read -r MID PRIO SPD SORT GRP NAME URL; do
+              sort -t $'\t' -k6,6n -k8,8 final_list.txt | while IFS=$'\t' read -r MID PRIO WEIGHT QUAL SPD SORT GRP NAME URL; do
                   [[ "$GRP" != "$CUR" ]] && { echo -e "\n# ===== $GRP =====" >> playlist.m3u; CUR="$GRP"; }
                   ICON=$(echo "$NAME" | tr -dc '[:alnum:]' || echo "default")
                   EXT="#EXTINF:-1 $([[ -n "${EPG[$NAME]}" ]] && echo "tvg-id=\"${EPG[$NAME]}\"") tvg-logo=\"https://raw.githubusercontent.com/fanmingming/live/main/tvicon/${ICON}.png\" group-title=\"$GRP\",$NAME"
