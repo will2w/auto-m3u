@@ -1,4 +1,4 @@
-nname: IPTV Auto Builder Pro
+name: IPTV Auto Builder Pro
 
 on:
   schedule:
@@ -18,7 +18,7 @@ jobs:
       - name: Install Tools
         run: |
           sudo apt-get update
-          sudo apt-get install -y jq curl gawk findutils wget
+          sudo apt-get install -y jq curl gawk findutils wget ffmpeg
 
       - name: Download Data
         run: |
@@ -54,6 +54,16 @@ jobs:
               echo "$1" | sed -E 's/\[[^]]*\]//g; s/\([^)]*\)//g; s/(高清|HD|超清|UHD|4K|FHD|标清|SD)//ig' | tr -d ' \-()（）' | tr '[:lower:]' '[:upper:]'
           }
           
+          # 偵測解析度函數
+          detect_resolution() {
+              local width=$(ffprobe -v error -select_streams v:0 -show_entries stream=width -of csv=s=x:p=0 -t 2 -timeout 3000000 "$1" 2>/dev/null | head -n 1)
+              [ -z "$width" ] && echo 1 && return
+              if [ "$width" -ge 3800 ]; then echo 5
+              elif [ "$width" -ge 1900 ]; then echo 4
+              elif [ "$width" -ge 1200 ]; then echo 3
+              else echo 1; fi
+          }
+          
           extract_m3u() {
               local weight=$3
               [ -s "$2" ] && awk -v w="$weight" '/^#EXTINF/ {info=$0; gsub(/'"'"'/, "", info); getline url; if (url ~ /^http/) print url "\t" info "\t" w}' "$2" >> raw_extracted.txt
@@ -63,10 +73,6 @@ jobs:
 
           test_stream() {
               IFS=$'\t' read -r URL INFO WEIGHT <<< "$1"
-              if [[ "$URL" == *"youtube.com"* || "$URL" == *"youtu.be"* ]]; then
-                  echo -e "5000000\t${URL}\t${INFO}\t${WEIGHT}"
-                  return
-              fi
               VALID=$(curl -s -L --connect-timeout 2 --max-time 5 -r 0-10240 -w "%{http_code}" -o /dev/null "$URL")
               if [[ "$VALID" == "200" || "$VALID" == "206" ]]; then
                   echo -e "2000\t${URL}\t${INFO}\t${WEIGHT}"
@@ -82,15 +88,20 @@ jobs:
               NAME_RAW=$(echo "$INFO" | sed 's/.*,//')
               U_NAME=$(echo "$NAME_RAW" | tr '[:lower:]' '[:upper:]')
               
+              # 1. 名稱匹配優先
               QUAL=1
-              [[ "$U_NAME" =~ (4K|UHD) ]] && QUAL=5
+              [[ "$U_NAME" =~ (4K|UHD|2160) ]] && QUAL=5
               [[ "$U_NAME" =~ (FHD|1080) ]] && QUAL=4
               [[ "$U_NAME" =~ (HD|720|高清) ]] && QUAL=3
+              
+              # 2. 名稱無標識時自動偵測
+              if [ "$QUAL" -eq 1 ]; then
+                  QUAL=$(detect_resolution "$URL")
+              fi
               
               CLEAN=$(echo "$NAME_RAW" | sed -E 's/\[[^]]*\]|\([^)]*\)|\{[^}]*\}|【[^】]*】//g; s/(高清|超清|标清|FHD|UHD|HD|4K|2K|SD)//ig; s/^[[:space:]\-]+|[[:space:]\-]+$//g')
               MID=$(normalize_id "$CLEAN")
               
-              # 新分類邏輯：只看名字
               GROUP="其他"; SORT=4
               case "$U_NAME" in
                   *CCTV*|*CGTN*|*央視*) GROUP="央视"; SORT=1 ;;
