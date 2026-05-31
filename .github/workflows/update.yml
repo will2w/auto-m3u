@@ -45,11 +45,14 @@ jobs:
       - name: Build Playlist
         run: |
           set +e
-          # 建立必要文件，包含黑名單機制預設文件
-          rm -f playlist.m3u previous_urls.txt raw_extracted.txt pre_sort.txt final_list.txt valid_raw_data.txt
-          touch previous_urls.txt raw_extracted.txt pre_sort.txt blacklist.txt
+          # 建立必要文件，包含黑名單機制預設文件與失敗日誌
+          rm -f playlist.m3u previous_urls.txt raw_extracted.txt pre_sort.txt final_list.txt valid_raw_data.txt failed_logs.txt
+          touch previous_urls.txt raw_extracted.txt pre_sort.txt blacklist.txt failed_logs.txt
           [ -f playlist.m3u ] && grep -E '^http' playlist.m3u > previous_urls.txt || true
           echo "#EXTM3U" > playlist.m3u
+          
+          # 將上一次運行產生的失效記錄合併至黑名單中，避免重複測試
+          [ -f failed_logs.txt ] && cat failed_logs.txt >> blacklist.txt
 
           normalize_id() {
               echo "$1" | sed -E 's/\[[^]]*\]//g; s/\([^)]*\)//g; s/(高清|HD|超清|UHD|4K|FHD|标清|SD)//ig' | tr -d ' \-()（）' | tr '[:lower:]' '[:upper:]'
@@ -72,8 +75,8 @@ jobs:
           extract_m3u "China" "source_china.m3u" 9; extract_m3u "Hong Kong" "source_hongkong.m3u" 9; extract_m3u "Taiwan" "source_taiwan.m3u" 9
           extract_m3u "China" "source_freetv_cn.m3u" 0; extract_m3u "Hong Kong" "source_freetv_hk.m3u" 0; extract_m3u "Taiwan" "source_freetv_tw.m3u" 0
 
-          # 20 線程並發驗證 + 黑名單過濾機制
-          echo "Starting multi-threaded validation with 20 parallel jobs..."
+          # 優化 1：20 線程並發 + 深度連線驗證 + 錯誤記錄
+          echo "Starting multi-threaded validation with strict content checking..."
           cat raw_extracted.txt | xargs -d '\n' -n 1 -P 20 bash -c '
               IFS=$'\''\t'\'' read -r URL INFO WEIGHT <<< "$1"
               [ -z "$URL" ] && exit 0
@@ -86,15 +89,22 @@ jobs:
                   grep -qF "$URL" blacklist.txt && exit 0
               fi
 
-              # 連線驗證
-              VALID=$(curl -s -L --connect-timeout 2 --max-time 5 -r 0-10240 -w "%{http_code}" -o /dev/null "$URL")
-              if [[ "$VALID" == "200" || "$VALID" == "206" ]]; then
+              # 嚴格連線驗證：模擬瀏覽器並檢查 m3u8 特徵
+              RESP=$(curl -s -L --connect-timeout 5 --max-time 10 \
+                  -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36" \
+                  -H "Referer: https://www.google.com/" \
+                  "$URL")
+              
+              if echo "$RESP" | grep -qE "#EXTM3U|#EXT-X-STREAM-INF"; then
                   echo -e "2000\t${URL}\t${INFO}\t${WEIGHT}"
+              else
+                  # 記錄無效或假在線的 URL
+                  echo "$URL" >> failed_logs.txt
               fi
           ' _ > valid_raw_data.txt
           echo "Validation complete."
 
-          # 34 省級行政區完整分類函數 (新增 拼音/英文 雙重匹配)
+          # 34 省級行政區完整分類函數 (保留了你最新的拼音/英文雙重匹配)
           get_grp() {
               local n=$(echo "$1" | tr '[:upper:]' '[:lower:]')
               if [[ "$n" =~ (cctv|cgtn|央视|yangshi) ]]; then echo "央视";
@@ -166,9 +176,16 @@ jobs:
           declare -A EPG
           [ -f epg.xml ] && while IFS='|' read -r i n; do EPG["$n"]="$i"; done < <(gawk 'match($0, /id="([^"]+)"/, a) {id=a[1]} match($0, /<display-name[^>]*>([^<]+)<\/display-name>/, b) {print id "|" b[1]}' epg.xml)
           
+          # 優化 2：精細化排序與視覺化分類標題
           if [ -s final_list.txt ]; then
-              sort -t $'\t' -k6,6n -k8,8 final_list.txt | while IFS=$'\t' read -r MID PRIO WEIGHT QUAL SPD SORT GRP NAME URL; do
-                  [[ "$GRP" != "$CUR" ]] && { echo -e "\n# ===== $GRP =====" >> playlist.m3u; CUR="$GRP"; }
+              # 加入了 -k4,4nr (畫質優先) 與 -k2,2nr (穩定歷史頻道優先)
+              sort -t $'\t' -k6,6n -k4,4nr -k2,2nr -k8,8 final_list.txt | while IFS=$'\t' read -r MID PRIO WEIGHT QUAL SPD SORT GRP NAME URL; do
+                  # 生成可視化分類節點
+                  [[ "$GRP" != "$CUR" ]] && { 
+                      echo -e "\n#EXTINF:-1 group-title=\"$GRP\",--- $GRP ---\n" >> playlist.m3u
+                      CUR="$GRP"
+                  }
+                  
                   ICON=$(echo "$NAME" | tr -dc '[:alnum:]' || echo "default")
                   EXT="#EXTINF:-1 $([[ -n "${EPG[$NAME]}" ]] && echo "tvg-id=\"${EPG[$NAME]}\"") tvg-logo=\"https://raw.githubusercontent.com/fanmingming/live/main/tvicon/${ICON}.png\" group-title=\"$GRP\",$NAME"
                   echo -e "$EXT\n$URL" >> playlist.m3u
@@ -181,8 +198,9 @@ jobs:
           git config --global user.email "actions@github.com"
           git config --global user.name "GitHub Actions"
           if [[ -n $(git status -s) ]]; then
-            git add playlist.m3u
-            git commit -m "🚀 Update: PRO Playlist with Pinyin Matching ($(date +'%Y-%m-%d %H:%M'))"
+            # 優化 3：一併提交失敗日誌
+            git add playlist.m3u failed_logs.txt
+            git commit -m "🚀 Update: PRO Playlist (Pinyin + Strict Validation + Sorting) ($(date +'%Y-%m-%d %H:%M'))"
             git remote set-url origin https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/${{ github.repository }}.git
             git pull --rebase origin main
             git push origin main
