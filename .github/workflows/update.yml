@@ -9,7 +9,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      FILTER_YOUTUBE: true   # 改為 false 可保留 YouTube 鏈接
+      FILTER_YOUTUBE: true
 
     steps:
       - name: Checkout repository
@@ -34,22 +34,18 @@ jobs:
                  touch "$1"
             fi
           }
-          # 優先源 (Weight: 9)
           dl_safe "source_china.m3u"     "https://raw.githubusercontent.com/iptv-org/iptv/master/streams/cn.m3u"
           dl_safe "source_hongkong.m3u"  "https://raw.githubusercontent.com/sammy0101/hk-iptv-auto/refs/heads/main/hk_live.m3u"
           dl_safe "source_taiwan.m3u"    "https://raw.githubusercontent.com/will2w/auto-m3u/refs/heads/main/HK.m3u8"
-          # 備用源 (Weight: 0)
           dl_safe "source_freetv_cn.m3u" "https://t.freetv.fun/m3u/china_original.m3u"
           dl_safe "source_freetv_hk.m3u" "https://t.freetv.fun/m3u/hong_kong_original.m3u"
           dl_safe "source_freetv_tw.m3u" "https://t.freetv.fun/m3u/taiwan_original.m3u"
-
           dl_safe "epg.xml"             "https://epg.pw/xmltv/epg_CN.xml"
 
       - name: Build Playlist
         run: |
           set +e
 
-          # 初始化
           rm -f playlist.m3u raw_extracted.txt valid_raw_data.txt pre_sort.txt final_list.txt failed_logs.txt
           touch raw_extracted.txt valid_raw_data.txt blacklist.txt failed_logs.txt
           echo "#EXTM3U" > playlist.m3u
@@ -73,7 +69,6 @@ jobs:
           }
           export -f detect_resolution
 
-          # 提取 M3U8（排除 YouTube）
           extract_m3u() {
               local AREA=$1 FILE=$2 WEIGHT=$3
               if [ -s "$FILE" ]; then
@@ -95,7 +90,6 @@ jobs:
           extract_m3u "Hong Kong" "source_freetv_hk.m3u" 0
           extract_m3u "Taiwan" "source_freetv_tw.m3u" 0
 
-          # 並行測速
           echo "Starting multi-threaded validation (M3U8 Only)..."
           cat raw_extracted.txt | xargs -d '\n' -n 1 -P 20 bash -c '
               IFS=$'\''\t'\'' read -r AREA INFO URL WEIGHT <<< "$1"
@@ -430,11 +424,12 @@ jobs:
                   GROUP="台湾"; GROUP_PINYIN="${CITY_TO_PROV_PINYIN["台湾"]}"
               elif [[ "$AREA" == "China" ]]; then
                   MATCHED=0
-                  for直辖 in "北京" "上海" "天津" "重庆" "beijing" "shanghai" "tianjin" "chongqing"; do
-                      UPPER直辖=$(echo "$直辖" | tr '[:lower:]' '[:upper:]')
-                      if [[ "$UPPER_NAME" == *"$UPPER直辖"* || "$LOWER_NAME" == *"$直辖"* ]]; then
-                          case "$直辖" in beijing) 直辖="北京";; shanghai) 直辖="上海";; tianjin) 直辖="天津";; chongqing) 直辖="重庆";; esac
-                          GROUP="$直辖"; GROUP_PINYIN="${CITY_TO_PROV_PINYIN[$直辖]}"; MATCHED=1; break
+                  # 修正：使用純英文變數名稱
+                  for municipality in "北京" "上海" "天津" "重庆" "beijing" "shanghai" "tianjin" "chongqing"; do
+                      UPPER_municipality=$(echo "$municipality" | tr '[:lower:]' '[:upper:]')
+                      if [[ "$UPPER_NAME" == *"$UPPER_municipality"* || "$LOWER_NAME" == *"$municipality"* ]]; then
+                          case "$municipality" in beijing) municipality="北京";; shanghai) municipality="上海";; tianjin) municipality="天津";; chongqing) municipality="重庆";; esac
+                          GROUP="$municipality"; GROUP_PINYIN="${CITY_TO_PROV_PINYIN[$municipality]}"; MATCHED=1; break
                       fi
                   done
                   if [ "$MATCHED" -eq 0 ]; then
@@ -472,12 +467,10 @@ jobs:
               echo -e "${MID}\t${QUAL}\t${SPEED}\t${WEIGHT}\t${GROUP_PINYIN}\t${GROUP}\t${CLEAN_NAME}\t${URL}" >> pre_sort.txt
           done < valid_raw_data.txt
 
-          # 排序與 Top 3
           echo "Sorting and keeping top 3..."
           [ -s pre_sort.txt ] && sort -t $'\t' -k1,1 -k2,2nr -k3,3nr -k4,4nr pre_sort.txt | \
               awk -F '\t' '{ if (count[$1] < 3) { print; count[$1]++ } }' > final_list.txt || touch final_list.txt
 
-          # EPG
           declare -A EPG_MAP
           if [ -s epg.xml ]; then
               while IFS='|' read -r ID DISPLAY_NAME; do
@@ -488,7 +481,6 @@ jobs:
               done)
           fi
 
-          # 生成最終 M3U（嚴格格式）
           echo "Generating final playlist..."
           if [ -s final_list.txt ]; then
               sort -t $'\t' -k5,5 -k6,6 -k2,2nr -k3,3nr final_list.txt | while IFS=$'\t' read -r MID QUAL SPEED WEIGHT GROUP_PINYIN GROUP NAME URL; do
@@ -507,14 +499,12 @@ jobs:
                       EXT="#EXTINF:-1 tvg-logo=\"${TVG_LOGO}\" group-title=\"${GROUP}\",${NAME}"
                   fi
 
-                  # 去除 URL 前後空白
                   URL_CLEAN=$(echo "$URL" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
                   printf '%s\n' "$EXT" >> playlist.m3u
                   printf '%s\n' "$URL_CLEAN" >> playlist.m3u
               done
           fi
 
-          # 最終清理：移除回車符、多餘空行、確保換行一致
           sed -i 's/\r//g; /^[[:space:]]*$/d' playlist.m3u
 
           TOTAL_CHANNELS=$(grep -c "^#EXTINF" playlist.m3u 2>/dev/null || echo 0)
