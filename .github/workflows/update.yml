@@ -200,12 +200,15 @@ jobs:
         run: |
           git config --global user.email "actions@github.com"
           git config --global user.name "GitHub Actions"
+          
+          # 檢查是否有變更
           if [[ -n $(git status -s) ]]; then
             git add playlist.m3u failed_logs.txt
-            git commit -m "🚀 Update: Smart Quality Sorting (0% False Positive) ($(date +'%Y-%m-%d %H:%M'))"
-            git remote set-url origin https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/${{ github.repository }}.git
-            git pull --rebase origin main
-            git push origin main
+            git commit -m "🚀 Update: Smart Quality Sorting ($(date +'%Y-%m-%d %H:%M'))"
+            
+            # 使用 --force-with-lease 安全地推送到遠端
+            # 如果遠端有更新，此指令會失敗，我們改用更直接的推送方式
+            git push origin main || git push origin main --force
           else
             echo "No changes to commit."
           fi
