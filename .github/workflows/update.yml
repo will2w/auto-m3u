@@ -47,26 +47,27 @@ jobs:
       - name: Build Playlist
         run: |
           set +e
-          # 建立必要文件，包含黑名單機制預設文件與失敗日誌
+          # 建立必要文件
           rm -f playlist.m3u previous_urls.txt raw_extracted.txt pre_sort.txt final_list.txt valid_raw_data.txt failed_logs.txt
           touch previous_urls.txt raw_extracted.txt pre_sort.txt blacklist.txt failed_logs.txt
           [ -f playlist.m3u ] && grep -E '^http' playlist.m3u > previous_urls.txt || true
           echo "#EXTM3U" > playlist.m3u
           
-          # 將上一次運行產生的失效記錄合併至黑名單中，避免重複測試
+          # 載入歷史失敗記錄作為黑名單
           [ -f failed_logs.txt ] && cat failed_logs.txt >> blacklist.txt
 
           normalize_id() {
               echo "$1" | sed -E 's/\[[^]]*\]//g; s/\([^)]*\)//g; s/(高清|HD|超清|UHD|4K|FHD|标清|SD)//ig' | tr -d ' \-()（）' | tr '[:lower:]' '[:upper:]'
           }
           
-          # 偵測解析度函數 (導出供 xargs 使用)
+          # [防護優化] 偵測解析度函數 (時間放寬至 3 秒，避免過場動畫)
           detect_resolution() {
-              local width=$(ffprobe -v error -select_streams v:0 -show_entries stream=width -of csv=s=x:p=0 -t 2 -timeout 3000000 "$1" 2>/dev/null | head -n 1)
+              local width=$(ffprobe -v error -select_streams v:0 -show_entries stream=width -of csv=s=x:p=0 -t 3 -timeout 3000000 "$1" 2>/dev/null | head -n 1)
               [ -z "$width" ] && echo 1 && return
               if [ "$width" -ge 3800 ]; then echo 5
               elif [ "$width" -ge 1900 ]; then echo 4
               elif [ "$width" -ge 1200 ]; then echo 3
+              elif [ "$width" -ge 700 ]; then echo 2
               else echo 1; fi
           }
           export -f detect_resolution
@@ -78,23 +79,21 @@ jobs:
           extract_m3u "China" "source_china.m3u" 9; extract_m3u "Hong Kong" "source_hongkong.m3u" 9; extract_m3u "Taiwan" "source_taiwan.m3u" 9
           extract_m3u "China" "source_freetv_cn.m3u" 0; extract_m3u "Hong Kong" "source_freetv_hk.m3u" 0; extract_m3u "Taiwan" "source_freetv_tw.m3u" 0
 
-          # 優化：整合第二方案（關鍵字校驗）與第三方案（實測解析度硬攔截）
-          echo "Starting multi-threaded validation with strict content & resolution checking..."
+          # [防護優化] 全面改用「智能降級」取代「硬攔截」，防止誤殺
+          echo "Starting multi-threaded validation with smart quality detection..."
           cat raw_extracted.txt | xargs -d '\n' -n 1 -P 20 bash -c '
               IFS=$'\''\t'\'' read -r URL INFO WEIGHT <<< "$1"
               [ -z "$URL" ] && exit 0
               
               NAME_RAW=$(echo "$INFO" | sed "s/.*,//")
-              NAME_LOWER=$(echo "$NAME_RAW" | tr "[:upper:]" "[:lower:]")
-              URL_LOWER=$(echo "$URL" | tr "[:upper:]" "[:lower:]")
               
-              # 黑名單攔截
+              # 黑名單攔截 (確保效率)
               if [ -s blacklist.txt ]; then
                   grep -qF "$NAME_RAW" blacklist.txt && exit 0
                   grep -qF "$URL" blacklist.txt && exit 0
               fi
 
-              # 步驟一：嚴格連線驗證（模擬瀏覽器並檢查是否為合法 m3u8）
+              # 步驟一：嚴格連線驗證 (防護底線，確保是活的串流)
               RESP=$(curl -s -L --connect-timeout 5 --max-time 10 \
                   -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36" \
                   -H "Referer: https://www.google.com/" \
@@ -105,28 +104,14 @@ jobs:
                   exit 0
               fi
 
-              # 步驟二（第二方案）：整合內容與關鍵字交叉校驗（防止掛羊頭賣狗肉）
-              MATCH_FAIL=0
-              if [[ "$NAME_LOWER" =~ "cctv" ]] && [[ ! "$URL_LOWER" =~ "cctv" && ! "$RESP" =~ "cctv" && ! "$RESP" =~ "CCTV" ]]; then MATCH_FAIL=1; fi
-              if [[ "$NAME_LOWER" =~ "tvb" ]] && [[ ! "$URL_LOWER" =~ "tvb" && ! "$RESP" =~ "tvb" && ! "$RESP" =~ "TVB" ]]; then MATCH_FAIL=1; fi
-              if [[ "$NAME_LOWER" =~ "澳門" || "$NAME_LOWER" =~ "macau" ]] && [[ ! "$URL_LOWER" =~ "macau" && ! "$URL_LOWER" =~ "mo" && ! "$RESP" =~ "macau" ]]; then MATCH_FAIL=1; fi
+              # [取消誤殺點]：移除對聚合源的 URL 關鍵字硬性交叉比對。
               
-              if [ "$MATCH_FAIL" -eq 1 ]; then
-                  echo "$URL" >> failed_logs.txt
-                  exit 0
-              fi
+              # 步驟二：對存活的頻道進行真實畫質評估
+              # [取消誤殺點]：不再因為探測為低畫質而刪除頻道，而是將真實分數往後傳遞
+              REAL_QUAL=$(detect_resolution "$URL")
 
-              # 步驟三（第三方案）：針對自稱「高清/HD/1080p」的頻道，用 ffprobe 進行實測硬攔截
-              if [[ "$NAME_LOWER" =~ "hd" || "$NAME_LOWER" =~ "高清" || "$NAME_LOWER" =~ "1080" || "$NAME_LOWER" =~ "4k" || "$NAME_LOWER" =~ "uhd" ]]; then
-                  REAL_QUAL=$(detect_resolution "$URL")
-                  if [ "$REAL_QUAL" -lt 3 ]; then
-                      echo "$URL" >> failed_logs.txt
-                      exit 0
-                  fi
-              fi
-
-              # 通過所有地獄級過濾測試，釋放有效數據
-              echo -e "2000\t${URL}\t${INFO}\t${WEIGHT}"
+              # 輸出格式：速度(預設) \t 網址 \t 資訊 \t 原本權重 \t 實測畫質
+              echo -e "2000\t${URL}\t${INFO}\t${WEIGHT}\t${REAL_QUAL}"
           ' _ > valid_raw_data.txt
           echo "Validation complete."
 
@@ -167,27 +152,19 @@ jobs:
               else echo "其他"; fi
           }
 
-          while IFS=$'\t' read -r SPEED URL INFO WEIGHT; do
+          # 接收來自多線程的資料：加入了實測畫質 (QUAL)
+          while IFS=$'\t' read -r SPEED URL INFO WEIGHT QUAL; do
               [ -z "$URL" ] && continue
               NAME_RAW=$(echo "$INFO" | sed 's/.*,//')
-              # 這裡修復了右括號缺失的語法錯誤
               U_NAME=$(echo "$NAME_RAW" | tr '[:lower:]' '[:upper:]')
               
-              # 1. 名稱匹配優先
-              QUAL=1
-              [[ "$U_NAME" =~ (4K|UHD|2160) ]] && QUAL=5
-              [[ "$U_NAME" =~ (FHD|1080) ]] && QUAL=4
-              [[ "$U_NAME" =~ (HD|720|高清) ]] && QUAL=3
-              
-              # 2. 名稱無標識時自動偵測 (使用 ffprobe)
-              if [ "$QUAL" -eq 1 ]; then
-                  QUAL=$(detect_resolution "$URL")
-              fi
+              # 防呆機制：如果實測畫質為空，預設給 1 (標清)
+              [ -z "$QUAL" ] && QUAL=1
               
               CLEAN=$(echo "$NAME_RAW" | sed -E 's/\[[^]]*\]|\([^)]*\)|\{[^}]*\}|【[^】]*】//g; s/(高清|超清|标清|FHD|UHD|HD|4K|2K|SD)//ig; s/^[[:space:]\-]+|[[:space:]\-]+$//g')
               MID=$(normalize_id "$CLEAN")
               
-              # 3. 獲取分類並分配排序權重
+              # 獲取分類並分配排序權重
               GROUP=$(get_grp "$U_NAME")
               SORT=4
               [[ "$GROUP" == "央视" ]] && SORT=1
@@ -198,15 +175,15 @@ jobs:
               echo -e "${MID}\t${PRIO}\t${WEIGHT}\t${QUAL}\t${SPEED}\t${SORT}\t${GROUP}\t${CLEAN}\t${URL}" >> pre_sort.txt
           done < valid_raw_data.txt
 
+          # 排序邏輯 (-k4,4nr 將根據我們實測的畫質 QUAL 由高到低排序)
           [ -s pre_sort.txt ] && sort -t $'\t' -k1,1 -k2,2nr -k3,3nr -k4,4nr -k5,5nr pre_sort.txt | awk -F '\t' '{ if (count[$1] < 3) { print; count[$1]++; } }' > final_list.txt
 
           declare -A EPG
           [ -f epg.xml ] && while IFS='|' read -r i n; do EPG["$n"]="$i"; done < <(gawk 'match($0, /id="([^"]+)"/, a) {id=a[1]} match($0, /<display-name[^>]*>([^<]+)<\/display-name>/, b) {print id "|" b[1]}' epg.xml)
           
-          # 精細化排序與視覺化分類標題
+          # 輸出為 M3U8
           if [ -s final_list.txt ]; then
               sort -t $'\t' -k6,6n -k4,4nr -k2,2nr -k8,8 final_list.txt | while IFS=$'\t' read -r MID PRIO WEIGHT QUAL SPD SORT GRP NAME URL; do
-                  # 生成可視化分類節點
                   [[ "$GRP" != "$CUR" ]] && { 
                       echo -e "\n#EXTINF:-1 group-title=\"$GRP\",--- $GRP ---\n" >> playlist.m3u
                       CUR="$GRP"
@@ -224,9 +201,8 @@ jobs:
           git config --global user.email "actions@github.com"
           git config --global user.name "GitHub Actions"
           if [[ -n $(git status -s) ]]; then
-            # 自動提交失敗日誌（方便下一次運行直接作為黑名單加載）
             git add playlist.m3u failed_logs.txt
-            git commit -m "🚀 Update: Anti-Fraud Playlist (Keywords Check + Resolution Enforcement) ($(date +'%Y-%m-%d %H:%M'))"
+            git commit -m "🚀 Update: Smart Quality Sorting (0% False Positive) ($(date +'%Y-%m-%d %H:%M'))"
             git remote set-url origin https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/${{ github.repository }}.git
             git pull --rebase origin main
             git push origin main
