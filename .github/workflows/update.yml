@@ -18,7 +18,8 @@ jobs:
       - name: Install Tools
         run: |
           sudo apt-get update
-          sudo apt-get install -y jq curl gawk findutils wget ffmpeg
+          # 加入 opencc 用於全量繁簡轉換
+          sudo apt-get install -y jq curl gawk findutils wget ffmpeg opencc
 
       - name: Download Data
         run: |
@@ -48,8 +49,8 @@ jobs:
         run: |
           set +e
           # 建立必要文件
-          rm -f playlist.m3u previous_urls.txt raw_extracted.txt pre_sort.txt final_list.txt valid_raw_data.txt failed_logs.txt
-          touch previous_urls.txt raw_extracted.txt pre_sort.txt blacklist.txt failed_logs.txt
+          rm -f playlist.m3u previous_urls.txt raw_extracted.txt raw_extracted_raw.txt pre_sort.txt final_list.txt valid_raw_data.txt failed_logs.txt
+          touch previous_urls.txt raw_extracted.txt raw_extracted_raw.txt pre_sort.txt blacklist.txt failed_logs.txt
           [ -f playlist.m3u ] && grep -E '^http' playlist.m3u > previous_urls.txt || true
           
           # [優化 1] 加入 UTF-8 BOM 標頭，解決部分 IPTV 播放器無法識別清單的問題
@@ -76,10 +77,17 @@ jobs:
           
           extract_m3u() {
               local weight=$3
-              [ -s "$2" ] && awk -v w="$weight" '/^#EXTINF/ {info=$0; gsub(/'\''/, "", info); getline url; if (url ~ /^http/) print url "\t" info "\t" w}' "$2" >> raw_extracted.txt
+              [ -s "$2" ] && awk -v w="$weight" '/^#EXTINF/ {info=$0; gsub(/'\''/, "", info); getline url; if (url ~ /^http/) print url "\t" info "\t" w}' "$2" >> raw_extracted_raw.txt
           }
           extract_m3u "China" "source_china.m3u" 9; extract_m3u "Hong Kong" "source_hongkong.m3u" 9; extract_m3u "Taiwan" "source_taiwan.m3u" 9
           extract_m3u "China" "source_freetv_cn.m3u" 0; extract_m3u "Hong Kong" "source_freetv_hk.m3u" 0; extract_m3u "Taiwan" "source_freetv_tw.m3u" 0
+
+          # === 【核心修正點】全量轉換成簡體字 ===
+          if [ -s raw_extracted_raw.txt ]; then
+              opencc -c t2s.json -i raw_extracted_raw.txt -o raw_extracted.txt
+          else
+              touch raw_extracted.txt
+          fi
 
           # [防護優化] 全面改用「智能降級」取代「硬攔截」，防止誤殺
           echo "Starting multi-threaded validation with smart quality detection..."
@@ -118,12 +126,12 @@ jobs:
           ' _ > valid_raw_data.txt
           echo "Validation complete."
 
-          # 34 省級行政區完整分類函數 (拼音/英文雙重匹配)
+          # 34 省級行政區完整分類函數 (源頭已轉簡體，此處僅保留簡體/拼音/英文精準匹配)
           get_grp() {
               local n=$(echo "$1" | tr '[:upper:]' '[:lower:]')
               if [[ "$n" =~ (cctv|cgtn|央视|yangshi) ]]; then echo "央视";
-              elif [[ "$n" =~ (澳門|澳门|tvb|vtv|hk|港|macau|macao|hongkong) ]]; then echo "港澳";
-              elif [[ "$n" =~ (台|民視|三立|東森|中視|華視|公視|tvbs|taiwan|tw) ]]; then echo "台湾";
+              elif [[ "$n" =~ (澳门|tvb|vtv|hk|港|macau|macao|hongkong) ]]; then echo "港澳";
+              elif [[ "$n" =~ (台|民视|三立|东森|中视|华视|公视|tvbs|taiwan|tw|台湾) ]]; then echo "台湾";
               elif [[ "$n" =~ (北京|上海|天津|重庆|beijing|shanghai|tianjin|chongqing) ]]; then echo "直辖市";
               elif [[ "$n" =~ (广东|广州|深圳|东莞|佛山|中山|珠海|惠州|汕头|江门|湛江|茂名|肇庆|梅州|汕尾|河源|阳江|清远|潮州|揭阳|云浮|guangdong|guangzhou|shenzhen|dongguan|foshan|zhongshan|zhuhai) ]]; then echo "广东";
               elif [[ "$n" =~ (江苏|南京|苏州|无锡|常州|徐州|南通|连云港|淮安|盐城|扬州|镇江|泰州|宿迁|jiangsu|nanjing|suzhou|wuxi|changzhou|xuzhou|nantong) ]]; then echo "江苏";
@@ -133,15 +141,15 @@ jobs:
               elif [[ "$n" =~ (湖北|武汉|宜昌|襄阳|黄冈|荆州|孝感|黄石|十堰|鄂州|荆门|咸宁|随州|恩施|hubei|wuhan|yichang|xiangyang|jingzhou|huangshi) ]]; then echo "湖北";
               elif [[ "$n" =~ (湖南|长沙|株洲|湘潭|衡阳|邵阳|岳阳|常德|张家界|益阳|郴州|永州|怀化|娄底|湘西|hunan|changsha|zhuzhou|xiangtan|hengyang|yueyang|changde) ]]; then echo "湖南";
               elif [[ "$n" =~ (福建|福州|厦门|泉州|漳州|莆田|三明|南平|龙岩|宁德|fujian|fuzhou|xiamen|quanzhou|zhangzhou|putian|nanping) ]]; then echo "福建";
-              elif [[ "$n" =~ (辽宁|沈阳|大连|鞍山|抚顺|本溪|丹东|錦州|营口|盘锦|阜新|辽阳|铁岭|朝阳|葫芦岛|liaoning|shenyang|dalian|anshan|fushun|dandong|jinzhou) ]]; then echo "辽宁";
-              elif [[ "$n" =~ (河北|石家庄|唐山|保定|廊坊|邯郸|秦皇岛|沧州|张家口|承德|邢台|衡水|hebei|shijiazhuang|tangshan|baoding|langfang|handan|qinhuangdao|cangzhou) ]]; then echo "河北";
+              elif [[ "$n" =~ (辽宁|沈阳|大连|鞍山|抚顺|本溪|丹东|锦州|营口|盘锦|阜新|辽阳|铁岭|朝阳|葫芦岛|liaoning|shenyang|dalian|anshan|fushun|dandong|jinzhou) ]]; then echo "辽宁";
+              elif [[ "$n" =~ (河北|石家庄|唐山|保定|廊坊|and|秦皇岛|沧州|张家口|承德|邢台|衡水|hebei|shijiazhuang|tangshan|baoding|langfang|handan|qinhuangdao|cangzhou) ]]; then echo "河北";
               elif [[ "$n" =~ (河南|郑州|洛阳|南阳|新乡|许昌|安阳|平顶山|开封|鹤壁|焦作|濮阳|漯河|三门峡|商丘|信阳|周口|驻马店|henan|zhengzhou|luoyang|nanyang|xinxiang|xuchang|anyang|kaifeng) ]]; then echo "河南";
               elif [[ "$n" =~ (安徽|合肥|芜湖|蚌埠|淮南|马鞍山|安庆|黄山|滁州|阜阳|宿州|六安|亳州|池州|宣城|淮北|铜陵|anhui|hefei|wuhu|bengbu|huainan|anqing|huangshan|fuyang) ]]; then echo "安徽";
               elif [[ "$n" =~ (江西|南昌|赣州|九江|宜春|上饶|景德镇|萍乡|新余|鹰潭|吉安|抚州|jiangxi|nanchang|ganzhou|jiujiang|yichun|shangrao|jingdezhen) ]]; then echo "江西";
               elif [[ "$n" =~ (陕西|西安|宝鸡|咸阳|渭南|延安|汉中|榆林|安康|商洛|铜川|shaanxi|shanxi|xian|baoji|xianyang|weinan|yanan|hanzhong|yulin) ]]; then echo "陕西";
               elif [[ "$n" =~ (广西|南宁|柳州|桂林|北海|防城港|钦州|贵港|玉林|百色|贺州|河池|来宾|崇左|梧州|guangxi|nanning|liuzhou|guilin|beihai|qinzhou|yulin) ]]; then echo "广西";
               elif [[ "$n" =~ (云南|昆明|曲靖|玉溪|保山|昭通|丽江|普洱|临沧|楚雄|红河|文山|西双版纳|大理|德宏|怒江|迪庆|yunnan|kunming|qujing|yuxi|baoshan|zhaotong|lijiang|puer|dali) ]]; then echo "云南";
-              elif [[ "$n" =~ (甘肃|兰州|嘉峪关|金昌|白银|天水|武威|张掖|平凉|酒泉|庆阳|定西|陇南|临夏|甘南|gansu|lanzhou|jiayuguan|tianshui|wuwei|zhangye|jiuquan) ]]; then echo "甘肅";
+              elif [[ "$n" =~ (甘肃|兰州|嘉峪关|金昌|白银|天水|武威|张掖|平凉|酒泉|庆阳|定西|陇南|临夏|甘南|gansu|lanzhou|jiayuguan|tianshui|wuwei|zhangye|jiuquan) ]]; then echo "甘肃";
               elif [[ "$n" =~ (海南|海口|三亚|三沙|儋州|hainan|haikou|sanya|sansha|danzhou) ]]; then echo "海南";
               elif [[ "$n" =~ (贵州|贵阳|六盘水|遵义|安顺|毕节|铜仁|黔东南|黔南|黔西南|guizhou|guiyang|liupanshui|zunyi|anshun|bijie|tongren) ]]; then echo "贵州";
               elif [[ "$n" =~ (西藏|拉萨|日喀则|昌都|林芝|山南|那曲|阿里|xizang|tibet|lasa|rikaze|changdu|linzhi) ]]; then echo "西藏";
@@ -150,7 +158,7 @@ jobs:
               elif [[ "$n" =~ (新疆|乌鲁木齐|克拉玛依|吐鲁番|哈密|昌吉|博尔塔拉|巴音郭楞|阿克苏|克孜勒苏|喀什|和田|伊犁|塔城|阿勒泰|xinjiang|wulumuqi|kelamayi|tulufan|hami|kashi|heti|yili) ]]; then echo "新疆";
               elif [[ "$n" =~ (山西|太原|大同|阳泉|长治|晋城|朔州|晋中|运城|忻州|临汾|吕梁|shanxi|taiyuan|datong|yangquan|changzhi|jincheng|shuozhou|yuncheng|linfen) ]]; then echo "山西";
               elif [[ "$n" =~ (吉林|长春|四平|辽源|通化|白山|松原|白城|延边|jilin|changchun|siping|liaoyuan|tonghua|baishan|songyuan|baicheng|yanbian) ]]; then echo "吉林";
-              elif [[ "$n" =~ (黑龙江|哈爾濱|齐齐哈尔|鸡西|鹤岗|双鸭山|大庆|伊春|佳木斯|七台河|牡丹江|黑河|绥化|heilongjiang|haerbin|harbin|qiqihar|jixi|hegang|daqing|yichun|jiamusi|mudanjiang|heihe) ]]; then echo "黑龙江";
+              elif [[ "$n" =~ (黑龙江|哈尔滨|齐齐哈尔|鸡西|鹤岗|双鸭山|大庆|伊春|佳木斯|七台河|牡丹江|黑河|绥化|heilongjiang|haerbin|harbin|qiqihar|jixi|hegang|daqing|yichun|jiamusi|mudanjiang|heihe) ]]; then echo "黑龙江";
               elif [[ "$n" =~ (内蒙古|呼和浩特|包头|乌海|赤峰|通辽|鄂尔多斯|呼伦贝尔|巴彦淖尔|乌兰察布|neimenggu|innermongolia|huhehaote|baotou|wuhai|chifeng|tongliao|eerduosi|hulunbeier) ]]; then echo "内蒙古";
               else echo "其他"; fi
           }
@@ -159,7 +167,7 @@ jobs:
           while IFS=$'\t' read -r SPEED URL INFO WEIGHT QUAL; do
               [ -z "$URL" ] && continue
               NAME_RAW=$(echo "$INFO" | sed 's/.*,//')
-              U_NAME=$(echo "$NAME_RAW" | tr '[:lower:]' '[:upper:]')
+              U_NAME=$(echo "$NAME_RAW" | tr '[:lower:]' '[:upper:]' || echo "")
               
               # 防呆機制：如果實測畫質為空，預設給 1 (標清)
               [ -z "$QUAL" ] && QUAL=1
@@ -208,10 +216,9 @@ jobs:
           # 檢查是否有變更
           if [[ -n $(git status -s) ]]; then
             git add playlist.m3u failed_logs.txt
-            git commit -m "🚀 Update: Smart Quality Sorting ($(date +'%Y-%m-%d %H:%M'))"
+            git commit -m "🚀 Update: OpenCC T2S Pre-processed & Smart Sorting ($(date +'%Y-%m-%d %H:%M'))"
             
             # 使用 --force-with-lease 安全地推送到遠端
-            # 如果遠端有更新，此指令會失敗，我們改用更直接的推送方式
             git push origin main || git push origin main --force
           else
             echo "No changes to commit."
