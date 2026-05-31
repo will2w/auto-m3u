@@ -28,6 +28,9 @@ jobs:
                  --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36" \
                  -O "$1" "$2"; then
                  echo "Downloaded $1"
+                 # 清理非法空字元與 Windows 換行符 (解決 null byte 警告)
+                 tr -d '\000' < "$1" > "$1.tmp" && mv "$1.tmp" "$1"
+                 sed -i 's/\r//g' "$1"
             else
                  echo "Warning: $1 failed, skipping."
                  touch "$1"
@@ -40,7 +43,6 @@ jobs:
           dl_safe "source_freetv_hk.m3u" "https://t.freetv.fun/m3u/hong_kong_original.m3u"
           dl_safe "source_freetv_tw.m3u" "https://t.freetv.fun/m3u/taiwan_original.m3u"
           dl_safe "epg.xml"             "https://epg.pw/xmltv/epg_CN.xml"
-          sed -i 's/\r//g' source_*.m3u
 
       - name: Build Playlist
         run: |
@@ -71,7 +73,7 @@ jobs:
           
           extract_m3u() {
               local weight=$3
-              [ -s "$2" ] && awk -v w="$weight" '/^#EXTINF/ {info=$0; gsub(/'"'"'/, "", info); getline url; if (url ~ /^http/) print url "\t" info "\t" w}' "$2" >> raw_extracted.txt
+              [ -s "$2" ] && awk -v w="$weight" '/^#EXTINF/ {info=$0; gsub(/'\''/, "", info); getline url; if (url ~ /^http/) print url "\t" info "\t" w}' "$2" >> raw_extracted.txt
           }
           extract_m3u "China" "source_china.m3u" 9; extract_m3u "Hong Kong" "source_hongkong.m3u" 9; extract_m3u "Taiwan" "source_taiwan.m3u" 9
           extract_m3u "China" "source_freetv_cn.m3u" 0; extract_m3u "Hong Kong" "source_freetv_hk.m3u" 0; extract_m3u "Taiwan" "source_freetv_tw.m3u" 0
@@ -104,7 +106,6 @@ jobs:
               fi
 
               # 步驟二（第二方案）：整合內容與關鍵字交叉校驗（防止掛羊頭賣狗肉）
-              # 當名字包含特定台名，但網址與回應內容完全沒對應標記時，即為欺詐源
               MATCH_FAIL=0
               if [[ "$NAME_LOWER" =~ "cctv" ]] && [[ ! "$URL_LOWER" =~ "cctv" && ! "$RESP" =~ "cctv" && ! "$RESP" =~ "CCTV" ]]; then MATCH_FAIL=1; fi
               if [[ "$NAME_LOWER" =~ "tvb" ]] && [[ ! "$URL_LOWER" =~ "tvb" && ! "$RESP" =~ "tvb" && ! "$RESP" =~ "TVB" ]]; then MATCH_FAIL=1; fi
@@ -117,9 +118,7 @@ jobs:
 
               # 步驟三（第三方案）：針對自稱「高清/HD/1080p」的頻道，用 ffprobe 進行實測硬攔截
               if [[ "$NAME_LOWER" =~ "hd" || "$NAME_LOWER" =~ "高清" || "$NAME_LOWER" =~ "1080" || "$NAME_LOWER" =~ "4k" || "$NAME_LOWER" =~ "uhd" ]]; then
-                  # 實測真實解析度權重 (1=低清, 3=720p, 4=1080p, 5=4K)
                   REAL_QUAL=$(detect_resolution "$URL")
-                  # 如果真實畫質小於 3 (也就是小於 720p 標清)，判定為假冒高清的欺詐源，予以拉黑
                   if [ "$REAL_QUAL" -lt 3 ]; then
                       echo "$URL" >> failed_logs.txt
                       exit 0
@@ -171,7 +170,8 @@ jobs:
           while IFS=$'\t' read -r SPEED URL INFO WEIGHT; do
               [ -z "$URL" ] && continue
               NAME_RAW=$(echo "$INFO" | sed 's/.*,//')
-              U_NAME=$(echo "$NAME_RAW" | tr '[:lower:]' '[:upper:]'
+              # 這裡修復了右括號缺失的語法錯誤
+              U_NAME=$(echo "$NAME_RAW" | tr '[:lower:]' '[:upper:]')
               
               # 1. 名稱匹配優先
               QUAL=1
