@@ -58,7 +58,7 @@ jobs:
               echo "$1" | sed -E 's/\[[^]]*\]//g; s/\([^)]*\)//g; s/(高清|HD|超清|UHD|4K|FHD|标清|SD)//ig' | tr -d ' \-()（）' | tr '[:lower:]' '[:upper:]'
           }
           
-          # 偵測解析度函數
+          # 偵測解析度函數 (導出供 xargs 使用)
           detect_resolution() {
               local width=$(ffprobe -v error -select_streams v:0 -show_entries stream=width -of csv=s=x:p=0 -t 2 -timeout 3000000 "$1" 2>/dev/null | head -n 1)
               [ -z "$width" ] && echo 1 && return
@@ -67,6 +67,7 @@ jobs:
               elif [ "$width" -ge 1200 ]; then echo 3
               else echo 1; fi
           }
+          export -f detect_resolution
           
           extract_m3u() {
               local weight=$3
@@ -75,13 +76,15 @@ jobs:
           extract_m3u "China" "source_china.m3u" 9; extract_m3u "Hong Kong" "source_hongkong.m3u" 9; extract_m3u "Taiwan" "source_taiwan.m3u" 9
           extract_m3u "China" "source_freetv_cn.m3u" 0; extract_m3u "Hong Kong" "source_freetv_hk.m3u" 0; extract_m3u "Taiwan" "source_freetv_tw.m3u" 0
 
-          # 優化 1：20 線程並發 + 深度連線驗證 + 錯誤記錄
-          echo "Starting multi-threaded validation with strict content checking..."
+          # 優化：整合第二方案（關鍵字校驗）與第三方案（實測解析度硬攔截）
+          echo "Starting multi-threaded validation with strict content & resolution checking..."
           cat raw_extracted.txt | xargs -d '\n' -n 1 -P 20 bash -c '
               IFS=$'\''\t'\'' read -r URL INFO WEIGHT <<< "$1"
               [ -z "$URL" ] && exit 0
               
               NAME_RAW=$(echo "$INFO" | sed "s/.*,//")
+              NAME_LOWER=$(echo "$NAME_RAW" | tr "[:upper:]" "[:lower:]")
+              URL_LOWER=$(echo "$URL" | tr "[:upper:]" "[:lower:]")
               
               # 黑名單攔截
               if [ -s blacklist.txt ]; then
@@ -89,22 +92,46 @@ jobs:
                   grep -qF "$URL" blacklist.txt && exit 0
               fi
 
-              # 嚴格連線驗證：模擬瀏覽器並檢查 m3u8 特徵
+              # 步驟一：嚴格連線驗證（模擬瀏覽器並檢查是否為合法 m3u8）
               RESP=$(curl -s -L --connect-timeout 5 --max-time 10 \
                   -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36" \
                   -H "Referer: https://www.google.com/" \
                   "$URL")
               
-              if echo "$RESP" | grep -qE "#EXTM3U|#EXT-X-STREAM-INF"; then
-                  echo -e "2000\t${URL}\t${INFO}\t${WEIGHT}"
-              else
-                  # 記錄無效或假在線的 URL
+              if ! echo "$RESP" | grep -qE "#EXTM3U|#EXT-X-STREAM-INF"; then
                   echo "$URL" >> failed_logs.txt
+                  exit 0
               fi
+
+              # 步驟二（第二方案）：整合內容與關鍵字交叉校驗（防止掛羊頭賣狗肉）
+              # 當名字包含特定台名，但網址與回應內容完全沒對應標記時，即為欺詐源
+              MATCH_FAIL=0
+              if [[ "$NAME_LOWER" =~ "cctv" ]] && [[ ! "$URL_LOWER" =~ "cctv" && ! "$RESP" =~ "cctv" && ! "$RESP" =~ "CCTV" ]]; then MATCH_FAIL=1; fi
+              if [[ "$NAME_LOWER" =~ "tvb" ]] && [[ ! "$URL_LOWER" =~ "tvb" && ! "$RESP" =~ "tvb" && ! "$RESP" =~ "TVB" ]]; then MATCH_FAIL=1; fi
+              if [[ "$NAME_LOWER" =~ "澳門" || "$NAME_LOWER" =~ "macau" ]] && [[ ! "$URL_LOWER" =~ "macau" && ! "$URL_LOWER" =~ "mo" && ! "$RESP" =~ "macau" ]]; then MATCH_FAIL=1; fi
+              
+              if [ "$MATCH_FAIL" -eq 1 ]; then
+                  echo "$URL" >> failed_logs.txt
+                  exit 0
+              fi
+
+              # 步驟三（第三方案）：針對自稱「高清/HD/1080p」的頻道，用 ffprobe 進行實測硬攔截
+              if [[ "$NAME_LOWER" =~ "hd" || "$NAME_LOWER" =~ "高清" || "$NAME_LOWER" =~ "1080" || "$NAME_LOWER" =~ "4k" || "$NAME_LOWER" =~ "uhd" ]]; then
+                  # 實測真實解析度權重 (1=低清, 3=720p, 4=1080p, 5=4K)
+                  REAL_QUAL=$(detect_resolution "$URL")
+                  # 如果真實畫質小於 3 (也就是小於 720p 標清)，判定為假冒高清的欺詐源，予以拉黑
+                  if [ "$REAL_QUAL" -lt 3 ]; then
+                      echo "$URL" >> failed_logs.txt
+                      exit 0
+                  fi
+              fi
+
+              # 通過所有地獄級過濾測試，釋放有效數據
+              echo -e "2000\t${URL}\t${INFO}\t${WEIGHT}"
           ' _ > valid_raw_data.txt
           echo "Validation complete."
 
-          # 34 省級行政區完整分類函數 (保留了你最新的拼音/英文雙重匹配)
+          # 34 省級行政區完整分類函數 (拼音/英文雙重匹配)
           get_grp() {
               local n=$(echo "$1" | tr '[:upper:]' '[:lower:]')
               if [[ "$n" =~ (cctv|cgtn|央视|yangshi) ]]; then echo "央视";
@@ -119,7 +146,7 @@ jobs:
               elif [[ "$n" =~ (湖北|武汉|宜昌|襄阳|黄冈|荆州|孝感|黄石|十堰|鄂州|荆门|咸宁|随州|恩施|hubei|wuhan|yichang|xiangyang|jingzhou|huangshi) ]]; then echo "湖北";
               elif [[ "$n" =~ (湖南|长沙|株洲|湘潭|衡阳|邵阳|岳阳|常德|张家界|益阳|郴州|永州|怀化|娄底|湘西|hunan|changsha|zhuzhou|xiangtan|hengyang|yueyang|changde) ]]; then echo "湖南";
               elif [[ "$n" =~ (福建|福州|厦门|泉州|漳州|莆田|三明|南平|龙岩|宁德|fujian|fuzhou|xiamen|quanzhou|zhangzhou|putian|nanping) ]]; then echo "福建";
-              elif [[ "$n" =~ (辽宁|沈阳|大连|鞍山|抚顺|本溪|丹东|锦州|营口|盘锦|阜新|辽阳|铁岭|朝阳|葫芦岛|liaoning|shenyang|dalian|anshan|fushun|dandong|jinzhou) ]]; then echo "辽宁";
+              elif [[ "$n" =~ (辽宁|沈阳|大连|鞍山|抚顺|本溪|丹东|錦州|营口|盘锦|阜新|辽阳|铁岭|朝阳|葫芦岛|liaoning|shenyang|dalian|anshan|fushun|dandong|jinzhou) ]]; then echo "辽宁";
               elif [[ "$n" =~ (河北|石家庄|唐山|保定|廊坊|邯郸|秦皇岛|沧州|张家口|承德|邢台|衡水|hebei|shijiazhuang|tangshan|baoding|langfang|handan|qinhuangdao|cangzhou) ]]; then echo "河北";
               elif [[ "$n" =~ (河南|郑州|洛阳|南阳|新乡|许昌|安阳|平顶山|开封|鹤壁|焦作|濮阳|漯河|三门峡|商丘|信阳|周口|驻马店|henan|zhengzhou|luoyang|nanyang|xinxiang|xuchang|anyang|kaifeng) ]]; then echo "河南";
               elif [[ "$n" =~ (安徽|合肥|芜湖|蚌埠|淮南|马鞍山|安庆|黄山|滁州|阜阳|宿州|六安|亳州|池州|宣城|淮北|铜陵|anhui|hefei|wuhu|bengbu|huainan|anqing|huangshan|fuyang) ]]; then echo "安徽";
@@ -127,7 +154,7 @@ jobs:
               elif [[ "$n" =~ (陕西|西安|宝鸡|咸阳|渭南|延安|汉中|榆林|安康|商洛|铜川|shaanxi|shanxi|xian|baoji|xianyang|weinan|yanan|hanzhong|yulin) ]]; then echo "陕西";
               elif [[ "$n" =~ (广西|南宁|柳州|桂林|北海|防城港|钦州|贵港|玉林|百色|贺州|河池|来宾|崇左|梧州|guangxi|nanning|liuzhou|guilin|beihai|qinzhou|yulin) ]]; then echo "广西";
               elif [[ "$n" =~ (云南|昆明|曲靖|玉溪|保山|昭通|丽江|普洱|临沧|楚雄|红河|文山|西双版纳|大理|德宏|怒江|迪庆|yunnan|kunming|qujing|yuxi|baoshan|zhaotong|lijiang|puer|dali) ]]; then echo "云南";
-              elif [[ "$n" =~ (甘肃|兰州|嘉峪关|金昌|白银|天水|武威|张掖|平凉|酒泉|庆阳|定西|陇南|临夏|甘南|gansu|lanzhou|jiayuguan|tianshui|wuwei|zhangye|jiuquan) ]]; then echo "甘肃";
+              elif [[ "$n" =~ (甘肃|兰州|嘉峪关|金昌|白银|天水|武威|张掖|平凉|酒泉|庆阳|定西|陇南|临夏|甘南|gansu|lanzhou|jiayuguan|tianshui|wuwei|zhangye|jiuquan) ]]; then echo "甘肅";
               elif [[ "$n" =~ (海南|海口|三亚|三沙|儋州|hainan|haikou|sanya|sansha|danzhou) ]]; then echo "海南";
               elif [[ "$n" =~ (贵州|贵阳|六盘水|遵义|安顺|毕节|铜仁|黔东南|黔南|黔西南|guizhou|guiyang|liupanshui|zunyi|anshun|bijie|tongren) ]]; then echo "贵州";
               elif [[ "$n" =~ (西藏|拉萨|日喀则|昌都|林芝|山南|那曲|阿里|xizang|tibet|lasa|rikaze|changdu|linzhi) ]]; then echo "西藏";
@@ -136,7 +163,7 @@ jobs:
               elif [[ "$n" =~ (新疆|乌鲁木齐|克拉玛依|吐鲁番|哈密|昌吉|博尔塔拉|巴音郭楞|阿克苏|克孜勒苏|喀什|和田|伊犁|塔城|阿勒泰|xinjiang|wulumuqi|kelamayi|tulufan|hami|kashi|heti|yili) ]]; then echo "新疆";
               elif [[ "$n" =~ (山西|太原|大同|阳泉|长治|晋城|朔州|晋中|运城|忻州|临汾|吕梁|shanxi|taiyuan|datong|yangquan|changzhi|jincheng|shuozhou|yuncheng|linfen) ]]; then echo "山西";
               elif [[ "$n" =~ (吉林|长春|四平|辽源|通化|白山|松原|白城|延边|jilin|changchun|siping|liaoyuan|tonghua|baishan|songyuan|baicheng|yanbian) ]]; then echo "吉林";
-              elif [[ "$n" =~ (黑龙江|哈尔滨|齐齐哈尔|鸡西|鹤岗|双鸭山|大庆|伊春|佳木斯|七台河|牡丹江|黑河|绥化|heilongjiang|haerbin|harbin|qiqihar|jixi|hegang|daqing|yichun|jiamusi|mudanjiang|heihe) ]]; then echo "黑龙江";
+              elif [[ "$n" =~ (黑龙江|哈爾濱|齐齐哈尔|鸡西|鹤岗|双鸭山|大庆|伊春|佳木斯|七台河|牡丹江|黑河|绥化|heilongjiang|haerbin|harbin|qiqihar|jixi|hegang|daqing|yichun|jiamusi|mudanjiang|heihe) ]]; then echo "黑龙江";
               elif [[ "$n" =~ (内蒙古|呼和浩特|包头|乌海|赤峰|通辽|鄂尔多斯|呼伦贝尔|巴彦淖尔|乌兰察布|neimenggu|innermongolia|huhehaote|baotou|wuhai|chifeng|tongliao|eerduosi|hulunbeier) ]]; then echo "内蒙古";
               else echo "其他"; fi
           }
@@ -144,7 +171,7 @@ jobs:
           while IFS=$'\t' read -r SPEED URL INFO WEIGHT; do
               [ -z "$URL" ] && continue
               NAME_RAW=$(echo "$INFO" | sed 's/.*,//')
-              U_NAME=$(echo "$NAME_RAW" | tr '[:lower:]' '[:upper:]')
+              U_NAME=$(echo "$NAME_RAW" | tr '[:lower:]' '[:upper:]'
               
               # 1. 名稱匹配優先
               QUAL=1
@@ -176,9 +203,8 @@ jobs:
           declare -A EPG
           [ -f epg.xml ] && while IFS='|' read -r i n; do EPG["$n"]="$i"; done < <(gawk 'match($0, /id="([^"]+)"/, a) {id=a[1]} match($0, /<display-name[^>]*>([^<]+)<\/display-name>/, b) {print id "|" b[1]}' epg.xml)
           
-          # 優化 2：精細化排序與視覺化分類標題
+          # 精細化排序與視覺化分類標題
           if [ -s final_list.txt ]; then
-              # 加入了 -k4,4nr (畫質優先) 與 -k2,2nr (穩定歷史頻道優先)
               sort -t $'\t' -k6,6n -k4,4nr -k2,2nr -k8,8 final_list.txt | while IFS=$'\t' read -r MID PRIO WEIGHT QUAL SPD SORT GRP NAME URL; do
                   # 生成可視化分類節點
                   [[ "$GRP" != "$CUR" ]] && { 
@@ -198,9 +224,9 @@ jobs:
           git config --global user.email "actions@github.com"
           git config --global user.name "GitHub Actions"
           if [[ -n $(git status -s) ]]; then
-            # 優化 3：一併提交失敗日誌
+            # 自動提交失敗日誌（方便下一次運行直接作為黑名單加載）
             git add playlist.m3u failed_logs.txt
-            git commit -m "🚀 Update: PRO Playlist (Pinyin + Strict Validation + Sorting) ($(date +'%Y-%m-%d %H:%M'))"
+            git commit -m "🚀 Update: Anti-Fraud Playlist (Keywords Check + Resolution Enforcement) ($(date +'%Y-%m-%d %H:%M'))"
             git remote set-url origin https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/${{ github.repository }}.git
             git pull --rebase origin main
             git push origin main
