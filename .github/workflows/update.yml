@@ -51,7 +51,9 @@ jobs:
           rm -f playlist.m3u previous_urls.txt raw_extracted.txt pre_sort.txt final_list.txt valid_raw_data.txt failed_logs.txt
           touch previous_urls.txt raw_extracted.txt pre_sort.txt blacklist.txt failed_logs.txt
           [ -f playlist.m3u ] && grep -E '^http' playlist.m3u > previous_urls.txt || true
-          echo "#EXTM3U" > playlist.m3u
+          
+          # [優化 1] 加入 UTF-8 BOM 標頭，解決部分 IPTV 播放器無法識別清單的問題
+          printf "\xEF\xBB\xBF#EXTM3U\n" > playlist.m3u
           
           # 載入歷史失敗記錄作為黑名單
           [ -f failed_logs.txt ] && cat failed_logs.txt >> blacklist.txt
@@ -94,7 +96,8 @@ jobs:
               fi
 
               # 步驟一：嚴格連線驗證 (防護底線，確保是活的串流)
-              RESP=$(curl -s -L --connect-timeout 5 --max-time 10 \
+              # [優化 2] 增加 Timeout 到 8/15 秒，避免伺服器回應較慢導致被誤刪
+              RESP=$(curl -s -L --connect-timeout 8 --max-time 15 \
                   -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36" \
                   -H "Referer: https://www.google.com/" \
                   "$URL")
@@ -183,7 +186,8 @@ jobs:
           
           # 輸出為 M3U8
           if [ -s final_list.txt ]; then
-              sort -t $'\t' -k6,6n -k4,4nr -k2,2nr -k8,8 final_list.txt | while IFS=$'\t' read -r MID PRIO WEIGHT QUAL SPD SORT GRP NAME URL; do
+              # [優化 3] 加入 -k7,7，確保同一個 group-title 的頻道會黏在一起，不會重複輸出標題
+              sort -t $'\t' -k6,6n -k7,7 -k4,4nr -k2,2nr -k8,8 final_list.txt | while IFS=$'\t' read -r MID PRIO WEIGHT QUAL SPD SORT GRP NAME URL; do
                   [[ "$GRP" != "$CUR" ]] && { 
                       echo -e "\n#EXTINF:-1 group-title=\"$GRP\",--- $GRP ---\n" >> playlist.m3u
                       CUR="$GRP"
