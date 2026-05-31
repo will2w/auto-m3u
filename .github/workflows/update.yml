@@ -18,7 +18,6 @@ jobs:
       - name: Install Tools
         run: |
           sudo apt-get update
-          # 加入 opencc 用於繁簡轉換
           sudo apt-get install -y jq curl gawk findutils wget ffmpeg opencc
 
       - name: Download Data
@@ -29,7 +28,6 @@ jobs:
                  --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36" \
                  -O "$1" "$2"; then
                  echo "Downloaded $1"
-                 # 清理非法空字元與 Windows 換行符 (解決 null byte 警告)
                  tr -d '\000' < "$1" > "$1.tmp" && mv "$1.tmp" "$1"
                  sed -i 's/\r//g' "$1"
             else
@@ -43,83 +41,74 @@ jobs:
           dl_safe "source_freetv_cn.m3u" "https://t.freetv.fun/m3u/china_original.m3u"
           dl_safe "source_freetv_hk.m3u" "https://t.freetv.fun/m3u/hong_kong_original.m3u"
           dl_safe "source_freetv_tw.m3u" "https://t.freetv.fun/m3u/taiwan_original.m3u"
-          dl_safe "epg.xml"             "https://epg.pw/xmltv/epg_CN.xml"
+          dl_safe "epg.xml"              "https://epg.pw/xmltv/epg_CN.xml"
 
       - name: Build Playlist
         run: |
           set +e
-          # 建立必要文件
-          rm -f playlist.m3u previous_urls.txt raw_extracted.txt pre_sort.txt final_list.txt valid_raw_data.txt failed_logs.txt
+          rm -f playlist.m3u previous_urls.txt raw_extracted.txt pre_sort.txt final_list.txt valid_raw_data.txt
           touch previous_urls.txt raw_extracted.txt pre_sort.txt blacklist.txt failed_logs.txt
+          
           [ -f playlist.m3u ] && grep -E '^http' playlist.m3u > previous_urls.txt || true
           
-          # 【修復】換回最安全的標準標頭，確保所有電視 APP 都能順利識別
-          echo "#EXTM3U" > playlist.m3u
+          # 【優化 1】寫入帶有 EPG 宣告的標準 M3U 標頭，防止 APP 識別錯誤
+          echo '#EXTM3U x-tvg-url="https://epg.pw/xmltv/epg_CN.xml"' > playlist.m3u
           
-          # 載入歷史失敗記錄作為黑名單
-          [ -f failed_logs.txt ] && cat failed_logs.txt >> blacklist.txt
+          cat failed_logs.txt >> blacklist.txt
 
           normalize_id() {
               echo "$1" | sed -E 's/\[[^]]*\]//g; s/\([^)]*\)//g; s/(高清|HD|超清|UHD|4K|FHD|标清|SD)//ig' | tr -d ' \-()（）' | tr '[:lower:]' '[:upper:]'
           }
           
-          # [防護優化] 偵測解析度函數 (時間放寬至 3 秒，避免過場動畫)
-          detect_resolution() {
-              local width=$(ffprobe -v error -select_streams v:0 -show_entries stream=width -of csv=s=x:p=0 -t 3 -timeout 3000000 "$1" 2>/dev/null | head -n 1)
-              [ -z "$width" ] && echo 1 && return
-              if [ "$width" -ge 3800 ]; then echo 5
-              elif [ "$width" -ge 1900 ]; then echo 4
-              elif [ "$width" -ge 1200 ]; then echo 3
-              elif [ "$width" -ge 700 ]; then echo 2
-              else echo 1; fi
-          }
-          export -f detect_resolution
-          
           extract_m3u() {
               local weight=$3
               [ -s "$2" ] && awk -v w="$weight" '/^#EXTINF/ {info=$0; gsub(/'\''/, "", info); getline url; if (url ~ /^http/) print url "\t" info "\t" w}' "$2" >> raw_extracted.txt
           }
+          
           extract_m3u "China" "source_china.m3u" 9; extract_m3u "Hong Kong" "source_hongkong.m3u" 9; extract_m3u "Taiwan" "source_taiwan.m3u" 9
           extract_m3u "China" "source_freetv_cn.m3u" 0; extract_m3u "Hong Kong" "source_freetv_hk.m3u" 0; extract_m3u "Taiwan" "source_freetv_tw.m3u" 0
 
-          # [防護優化] 全面改用「智能降級」取代「硬攔截」，防止誤殺
           echo "Starting multi-threaded validation with smart quality detection..."
           cat raw_extracted.txt | xargs -d '\n' -n 1 -P 20 bash -c '
               IFS=$'\''\t'\'' read -r URL INFO WEIGHT <<< "$1"
               [ -z "$URL" ] && exit 0
               
               NAME_RAW=$(echo "$INFO" | sed "s/.*,//")
-              
-              # === 【核心修正】僅對提取出的頻道名稱單獨轉為簡體，絕不污染語法結構 ===
-              NAME_S=$(echo "$NAME_RAW" | opencc -c t2s.json)
+              NAME_S=$(echo "$NAME_RAW" | opencc -c /usr/share/opencc/t2s.json 2>/dev/null)
               [ -z "$NAME_S" ] && NAME_S="$NAME_RAW"
               
-              # 黑名單攔截 (確保效率)
               if [ -s blacklist.txt ]; then
                   grep -qF "$NAME_S" blacklist.txt && exit 0
                   grep -qF "$URL" blacklist.txt && exit 0
               fi
 
-              # 步驟一：嚴格連線驗證 (防護底線，確保是活的串流)
+              if [[ "$URL" == *"youtube.com"* || "$URL" == *"youtu.be"* ]]; then
+                  echo -e "5000000\t${URL}\t${NAME_S}\t${WEIGHT}\t5"
+                  exit 0
+              fi
+
               RESP=$(curl -s -L --connect-timeout 8 --max-time 15 \
                   -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36" \
                   -H "Referer: https://www.google.com/" \
                   "$URL")
               
-              if ! echo "$RESP" | grep -qE "#EXTM3U|#EXT-X-STREAM-INF"; then
+              if ! echo "$RESP" | grep -qE "#EXTM3U|#EXT-X-STREAM-INF|#EXT-X-TARGETDURATION"; then
                   echo "$URL" >> failed_logs.txt
                   exit 0
               fi
 
-              # 步驟二：對存活的頻道進行真實畫質評估
-              REAL_QUAL=$(detect_resolution "$URL")
+              width=$(ffprobe -v error -select_streams v:0 -show_entries stream=width -of csv=s=x:p=0 -t 3 -timeout 3000000 "$URL" 2>/dev/null | head -n 1)
+              if [ -z "$width" ]; then QUAL=1
+              elif [ "$width" -ge 3800 ]; then QUAL=5
+              elif [ "$width" -ge 1900 ]; then QUAL=4
+              elif [ "$width" -ge 1200 ]; then QUAL=3
+              elif [ "$width" -ge 700 ]; then QUAL=2
+              else QUAL=1; fi
 
-              # 輸出格式：速度(預設) \t 網址 \t 轉簡體後的頻道名稱 \t 原本權重 \t 實測畫質
-              echo -e "2000\t${URL}\t${NAME_S}\t${WEIGHT}\t${REAL_QUAL}"
-          ' _ > valid_raw_data.txt
+              echo -e "2000\t${URL}\t${NAME_S}\t${WEIGHT}\t${QUAL}"
+          ' _ >> valid_raw_data.txt
           echo "Validation complete."
 
-          # 34 省級行政區完整分類函數 (源頭已轉簡體，此處僅保留簡體/拼音/英文精準匹配)
           get_grp() {
               local n=$(echo "$1" | tr '[:upper:]' '[:lower:]')
               if [[ "$n" =~ (cctv|cgtn|央视|yangshi) ]]; then echo "央视";
@@ -134,15 +123,15 @@ jobs:
               elif [[ "$n" =~ (湖北|武汉|宜昌|襄阳|黄冈|荆州|孝感|黄石|十堰|鄂州|荆门|咸宁|随州|恩施|hubei|wuhan|yichang|xiangyang|jingzhou|huangshi) ]]; then echo "湖北";
               elif [[ "$n" =~ (湖南|长沙|株洲|湘潭|衡阳|邵阳|岳阳|常德|张家界|益阳|郴州|永州|怀化|娄底|湘西|hunan|changsha|zhuzhou|xiangtan|hengyang|yueyang|changde) ]]; then echo "湖南";
               elif [[ "$n" =~ (福建|福州|厦门|泉州|漳州|莆田|三明|南平|龙岩|宁德|fujian|fuzhou|xiamen|quanzhou|zhangzhou|putian|nanping) ]]; then echo "福建";
-              elif [[ "$n" =~ (辽宁|沈阳|大连|鞍山|抚顺|本溪|丹东|锦州|营口|盘锦|阜新|辽阳|铁岭|朝阳|葫芦岛|liaoning|shenyang|dalian|anshan|fushun|dandong|jinzhou) ]]; then echo "辽宁";
+              elif [[ "$n" =~ (辽宁|沈阳|大连|鞍山|抚顺|本溪|丹东|錦州|营口|盘锦|阜新|辽阳|铁岭|朝阳|葫芦岛|liaoning|shenyang|dalian|anshan|fushun|dandong|jinzhou) ]]; then echo "辽宁";
               elif [[ "$n" =~ (河北|石家庄|唐山|保定|廊坊|and|秦皇岛|沧州|张家口|承德|邢台|衡水|hebei|shijiazhuang|tangshan|baoding|langfang|handan|qinhuangdao|cangzhou) ]]; then echo "河北";
               elif [[ "$n" =~ (河南|郑州|洛阳|南阳|新乡|许昌|安阳|平顶山|开封|鹤壁|焦作|濮阳|漯河|三门峡|商丘|信阳|周口|驻马店|henan|zhengzhou|luoyang|nanyang|xinxiang|xuchang|anyang|kaifeng) ]]; then echo "河南";
               elif [[ "$n" =~ (安徽|合肥|芜湖|蚌埠|淮南|马鞍山|安庆|黄山|滁州|阜阳|宿州|六安|亳州|池州|宣城|淮北|铜陵|anhui|hefei|wuhu|bengbu|huainan|anqing|huangshan|fuyang) ]]; then echo "安徽";
-              elif [[ "$n" =~ (江西|南昌|赣州|九江|宜春|上饶|景德镇|萍乡|新余|鹰潭|吉安|抚州|jiangxi|nanchang|ganzhou|jiujiang|yichun|shangrao|jingdezhen) ]]; then echo "江西";
+              elif [[ "$n" =~ (江西|南昌|赣州|九江|宜春|上饶|景德鎮|萍乡|新余|鹰潭|吉安|抚州|jiangxi|nanchang|ganzhou|jiujiang|yichun|shangrao|jingdezhen) ]]; then echo "江西";
               elif [[ "$n" =~ (陕西|西安|宝鸡|咸阳|渭南|延安|汉中|榆林|安康|商洛|铜川|shaanxi|shanxi|xian|baoji|xianyang|weinan|yanan|hanzhong|yulin) ]]; then echo "陕西";
               elif [[ "$n" =~ (广西|南宁|柳州|桂林|北海|防城港|钦州|贵港|玉林|百色|贺州|河池|来宾|崇左|梧州|guangxi|nanning|liuzhou|guilin|beihai|qinzhou|yulin) ]]; then echo "广西";
               elif [[ "$n" =~ (云南|昆明|曲靖|玉溪|保山|昭通|丽江|普洱|临沧|楚雄|红河|文山|西双版納|大理|德宏|怒江|迪庆|yunnan|kunming|qujing|yuxi|baoshan|zhaotong|lijiang|puer|dali) ]]; then echo "云南";
-              elif [[ "$n" =~ (甘肃|兰州|嘉峪关|金昌|白银|天水|武威|张掖|平凉|酒泉|庆阳|定西|陇南|临夏|甘南|gansu|lanzhou|jiayuguan|tianshui|wuwei|zhangye|jiuquan) ]]; then echo "甘肃";
+              elif [[ "$n" =~ (甘肃|兰州|嘉峪关|金昌|白银|天水|武威|张掖|平凉|酒泉|慶陽|定西|陇南|临夏|甘南|gansu|lanzhou|jiayuguan|tianshui|wuwei|zhangye|jiuquan) ]]; then echo "甘肃";
               elif [[ "$n" =~ (海南|海口|三亚|三沙|儋州|hainan|haikou|sanya|sansha|danzhou) ]]; then echo "海南";
               elif [[ "$n" =~ (贵州|贵阳|六盘水|遵義|安顺|毕节|铜仁|黔东南|黔南|黔西南|guizhou|guiyang|liupanshui|zunyi|anshun|bijie|tongren) ]]; then echo "贵州";
               elif [[ "$n" =~ (西藏|拉萨|日喀則|昌都|林芝|山南|那曲|阿里|xizang|tibet|lasa|rikaze|changdu|linzhi) ]]; then echo "西藏";
@@ -156,43 +145,55 @@ jobs:
               else echo "其他"; fi
           }
 
-          while IFS=$'\t' read -r SPEED URL NAME_S WEIGHT QUAL; do
-              [ -z "$URL" ] && continue
-              U_NAME=$(echo "$NAME_S" | tr '[:lower:]' '[:upper:]')
-              
-              # 防呆機制：如果實測畫質為空，預設給 1 (標清)
-              [ -z "$QUAL" ] && QUAL=1
-              
-              CLEAN=$(echo "$NAME_S" | sed -E 's/\[[^]]*\]|\([^)]*\)|\{[^}]*\}|【[^】]*】//g; s/(高清|超清|标清|FHD|UHD|HD|4K|2K|SD)//ig; s/^[[:space:]\-]+|[[:space:]\-]+$//g')
-              MID=$(normalize_id "$CLEAN")
-              
-              # 獲取分類並分配排序權重
-              GROUP=$(get_grp "$U_NAME")
-              SORT=4
-              [[ "$GROUP" == "央视" ]] && SORT=1
-              [[ "$GROUP" == "港澳" ]] && SORT=2
-              [[ "$GROUP" == "台湾" ]] && SORT=3
-              
-              grep -Fxq "$URL" previous_urls.txt 2>/dev/null && PRIO=1 || PRIO=0
-              echo -e "${MID}\t${PRIO}\t${WEIGHT}\t${QUAL}\t${SPEED}\t${SORT}\t${GROUP}\t${CLEAN}\t${URL}" >> pre_sort.txt
-          done < valid_raw_data.txt
+          if [ -s valid_raw_data.txt ]; then
+              while IFS=$'\t' read -r SPEED URL NAME_S WEIGHT QUAL; do
+                  [ -z "$URL" ] && continue
+                  U_NAME=$(echo "$NAME_S" | tr '[:lower:]' '[:upper:]')
+                  [ -z "$QUAL" ] && QUAL=1
+                  
+                  CLEAN=$(echo "$NAME_S" | sed -E 's/\[[^]]*\]|\([^)]*\)|\{[^}]*\}|【[^】]*】//g; s/(高清|超清|标清|FHD|UHD|HD|4K|2K|SD)//ig; s/^[[:space:]\-]+|[[:space:]\-]+$//g')
+                  # 【優化 3】清洗掉名稱中可能含有的英文逗號，避免干擾 M3U 欄位
+                  CLEAN=$(echo "$CLEAN" | tr -d ',')
+                  MID=$(normalize_id "$CLEAN")
+                  
+                  GROUP=$(get_grp "$U_NAME")
+                  SORT=4
+                  [[ "$GROUP" == "央视" ]] && SORT=1
+                  [[ "$GROUP" == "港澳" ]] && SORT=2
+                  [[ "$GROUP" == "台湾" ]] && SORT=3
+                  
+                  grep -Fxq "$URL" previous_urls.txt 2>/dev/null && PRIO=1 || PRIO=0
+                  echo -e "${MID}\t${PRIO}\t${WEIGHT}\t${QUAL}\t${SPEED}\t${SORT}\t${GROUP}\t${CLEAN}\t${URL}" >> pre_sort.txt
+              done < valid_raw_data.txt
+          fi
 
-          # 排序邏輯 (-k4,4nr 將根據我們實測的畫質 QUAL 由高到低排序)
           [ -s pre_sort.txt ] && sort -t $'\t' -k1,1 -k2,2nr -k3,3nr -k4,4nr -k5,5nr pre_sort.txt | awk -F '\t' '{ if (count[$1] < 3) { print; count[$1]++; } }' > final_list.txt
 
           declare -A EPG
-          [ -f epg.xml ] && while IFS='|' read -r i n; do EPG["$n"]="$i"; done < <(gawk 'match($0, /id="([^"]+)"/, a) {id=a[1]} match($0, /<display-name[^>]*>([^<]+)<\/display-name>/, b) {print id "|" b[1]}' epg.xml)
+          if [ -f epg.xml ]; then
+              while IFS='|' read -r id name; do
+                  [[ -n "$name" && -n "$id" ]] && EPG["$name"]="$id"
+              done < <(gawk 'match($0, /id="([^"]+)"/, a) {id=a[1]} match($0, /<display-name[^>]*>([^<]+)<\/display-name>/, b) {print id "|" b[1]}' epg.xml 2>/dev/null)
+          fi
           
-          # 輸出為 M3U8
+          # 【優化 2】重新格式化輸出，嚴格控制引號與空格，消除雙空格與未定義屬性
           if [ -s final_list.txt ]; then
-              # [優化 3] 加入 -k7,7，確保同一個 group-title 的頻道會黏在一起，不會重複輸出標題
-              # 【修復】徹底移除了可能造成 APP 載入崩潰的虛擬分組分割行，回歸 100% 標準 M3U 規範
               sort -t $'\t' -k6,6n -k7,7 -k4,4nr -k2,2nr -k8,8 final_list.txt | while IFS=$'\t' read -r MID PRIO WEIGHT QUAL SPD SORT GRP NAME URL; do
                   ICON=$(echo "$NAME" | tr -dc '[:alnum:]' || echo "default")
-                  EXT="#EXTINF:-1 $([[ -n "${EPG[$NAME]}" ]] && echo "tvg-id=\"${EPG[$NAME]}\"") tvg-logo=\"https://raw.githubusercontent.com/fanmingming/live/main/tvicon/${ICON}.png\" group-title=\"$GRP\",$NAME"
-                  echo -e "$EXT\n$URL" >> playlist.m3u
+                  
+                  # 構建乾淨的標籤字串，確保每個屬性間只有單空格，絕不留空
+                  if [[ -n "${EPG[$NAME]}" ]]; then
+                      EXT="#EXTINF:-1 tvg-id=\"${EPG[$NAME]}\" tvg-logo=\"https://raw.githubusercontent.com/fanmingming/live/main/tvicon/${ICON}.png\" group-title=\"${GRP}\",${NAME}"
+                  else
+                      EXT="#EXTINF:-1 tvg-logo=\"https://raw.githubusercontent.com/fanmingming/live/main/tvicon/${ICON}.png\" group-title=\"${GRP}\",${NAME}"
+                  fi
+                  
+                  echo "$EXT" >> playlist.m3u
+                  echo "$URL" >> playlist.m3u
               done
           fi
+          
+          rm -f source_*.m3u epg.xml raw_extracted.txt pre_sort.txt final_list.txt valid_raw_data.txt previous_urls.txt blacklist.txt
           set -e
 
       - name: Commit and Push
@@ -200,12 +201,9 @@ jobs:
           git config --global user.email "actions@github.com"
           git config --global user.name "GitHub Actions"
           
-          # 檢查是否有變更
           if [[ -n $(git status -s) ]]; then
             git add playlist.m3u failed_logs.txt
             git commit -m "🚀 Fix: Ultra-Compatible Playlist for TV Apps ($(date +'%Y-%m-%d %H:%M'))"
-            
-            # 使用 --force-with-lease 安全地推送到遠端
             git push origin main || git push origin main --force
           else
             echo "No changes to commit."
