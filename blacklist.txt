@@ -402,3 +402,5 @@ https://pulltv3.wanfudaluye.com/live/tv3.m3u8
 https://qiniup-m-l.cztv.com/channels/lantian/channel007/1080p.m3u8
 https://rthklive1-lh.akamaihd.net/i/rthk31_1@167495/index_2052_av-b.m3u8
 https://rthklive2-lh.akamaihd.net/i/rthk32_1@168450/index_2052_av-b.m3u8
+https://t.freetv.fun/live/cctv-5-2.m3u8
+https://t.freetv.fun/live/cctv-5.m3u8
