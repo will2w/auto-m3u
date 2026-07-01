@@ -70,9 +70,9 @@ https://t.freetv.fun/live/cctv-12-1.m3u8
 #EXTINF:-1 tvg-id="554358" tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/cctv12.png" group-title="央视",CCTV12
 https://t.freetv.fun/live/cctv-12-3.m3u8
 #EXTINF:-1 tvg-id="554359" tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/cctv13.png" group-title="央视",CCTV13
-http://222.169.85.8:9901/tsfile/live/0013_1.m3u8
-#EXTINF:-1 tvg-id="554359" tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/cctv13.png" group-title="央视",CCTV13
 https://t.freetv.fun/live/cctv-13-1.m3u8
+#EXTINF:-1 tvg-id="554359" tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/cctv13.png" group-title="央视",CCTV13
+https://t.freetv.fun/live/cctv-13.m3u8
 #EXTINF:-1 tvg-id="554360" tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/cctv14.png" group-title="央视",CCTV14
 https://t.freetv.fun/live/cctv-14-1.m3u8
 #EXTINF:-1 tvg-id="554360" tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/cctv14.png" group-title="央视",CCTV14
@@ -116,9 +116,9 @@ https://t.freetv.fun/live/cctv4zhong-wen-guo-ji.m3u8
 #EXTINF:-1 tvg-id="554350" tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/cctv5.png" group-title="央视",CCTV5
 https://t.freetv.fun/live/cctv-5-1.m3u8
 #EXTINF:-1 tvg-id="554350" tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/cctv5.png" group-title="央视",CCTV5
-https://t.freetv.fun/live/cctv-5-2.m3u8
+https://t.freetv.fun/live/cctv-5hd-2.m3u8
 #EXTINF:-1 tvg-id="554350" tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/cctv5.png" group-title="央视",CCTV5
-https://t.freetv.fun/live/cctv-5.m3u8
+https://t.freetv.fun/live/cctv-5hd-3.m3u8
 #EXTINF:-1 tvg-id="554350" tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/cctv5.png" group-title="央视",CCTV5+
 https://t.freetv.fun/live/cctv-5-plusti-yu-sai-shi-1.m3u8
 #EXTINF:-1 tvg-id="554350" tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/cctv5.png" group-title="央视",CCTV5+
@@ -923,6 +923,8 @@ https://t.freetv.fun/live/paramount-movie-channel.m3u8
 https://t.freetv.fun/live/nbc-sports-now.m3u8
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/nowsports.png" group-title="香港",now Sports
 https://t.freetv.fun/live/now-sports-616-hk.m3u8
+#EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/nowsportsprime.png" group-title="香港",now Sports Prime
+https://t.freetv.fun/live/prime.m3u8
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/sportsplus1.png" group-title="香港",Sports Plus 1
 https://t.freetv.fun/live/cowboy-plus-sports.m3u8
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/tvbplus.png" group-title="香港",TVB Plus
