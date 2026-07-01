@@ -40,16 +40,26 @@ jobs:
           dl_safe "source_freetv_cn.m3u" "https://t.freetv.fun/m3u/china_original.m3u"
           dl_safe "source_freetv_hk.m3u" "https://t.freetv.fun/m3u/hong_kong_original.m3u"
           dl_safe "source_freetv_tw.m3u" "https://t.freetv.fun/m3u/taiwan_original.m3u"
-          dl_safe "epg.xml"             "https://epg.pw/xmltv/epg_CN.xml"
+          dl_safe "epg.xml"              "https://epg.pw/xmltv/epg_CN.xml"
 
       - name: Build Playlist
         run: |
           set +e
 
-          rm -f playlist.m3u raw_extracted.txt valid_raw_data.txt pre_sort.txt final_list.txt failed_logs.txt
+          # === 【修正：黑名單邏輯優化】 ===
+          # 1. 先將上一次運行失敗的 URL 追加到黑名單中
+          [ -s failed_logs.txt ] && cat failed_logs.txt >> blacklist.txt
+          
+          # 2. 如果黑名單存在，進行排序與去重，防止檔案無限膨脹
+          if [ -f blacklist.txt ]; then
+              sort -u blacklist.txt -o blacklist.txt
+          fi
+
+          # 3. 清理舊的臨時數據（保留存在本地的 blacklist.txt，不刪除 failed_logs.txt 改用 touch 清空）
+          rm -f playlist.m3u raw_extracted.txt valid_raw_data.txt pre_sort.txt final_list.txt
           touch raw_extracted.txt valid_raw_data.txt blacklist.txt failed_logs.txt
           echo "#EXTM3U" > playlist.m3u
-          [ -f failed_logs.txt ] && cat failed_logs.txt >> blacklist.txt
+          # ==================================
 
           normalize_id() {
               echo "$1" | sed -E 's/\[[^]]*\]//g; s/\([^)]*\)//g; s/\{[^}]*\}//g; s/【[^】]*】//g' | \
@@ -98,11 +108,12 @@ jobs:
               NAME_S=$(echo "$RAW_NAME" | opencc -c t2s.json 2>/dev/null)
               [ -z "$NAME_S" ] && NAME_S="$RAW_NAME"
 
+              # === 【修正：只針對 URL 進行黑名單過濾】 ===
               IN_BLACK=0
               if [ -s blacklist.txt ]; then
-                  grep -qF "$NAME_S" blacklist.txt && IN_BLACK=1
                   grep -qF "$URL" blacklist.txt && IN_BLACK=1
               fi
+              # ==========================================
 
               if [ "$IN_BLACK" -eq 0 ]; then
                   RESP=$(curl -s -L --connect-timeout 8 --max-time 15 \
@@ -164,7 +175,7 @@ jobs:
               CITY_TO_PROV["$city_en"]="江苏"; CITY_TO_PROV_PINYIN["$city_en"]="08_jiangsu"
           done
 
-          # 山东
+          # 山東
           CITY_TO_PROV_PINYIN["山东"]="09_shandong"; CITY_TO_PROV_PINYIN["shandong"]="09_shandong"
           for city in "济南" "青岛" "淄博" "枣庄" "东营" "烟台" "潍坊" "济宁" "泰安" "威海" "日照" "临沂" "德州" "聊城" "滨州" "菏泽"; do
               CITY_TO_PROV["$city"]="山东"; CITY_TO_PROV_PINYIN["$city"]="09_shandong"
@@ -209,7 +220,7 @@ jobs:
               CITY_TO_PROV["$city_en"]="福建"; CITY_TO_PROV_PINYIN["$city_en"]="13_fujian"
           done
 
-          # 辽宁
+          # 遼寧
           CITY_TO_PROV_PINYIN["辽宁"]="14_liaoning"; CITY_TO_PROV_PINYIN["liaoning"]="14_liaoning"
           for city in "沈阳" "大连" "鞍山" "抚顺" "本溪" "丹东" "锦州" "营口" "盘锦" "阜新" "辽阳" "铁岭" "朝阳" "葫芦岛"; do
               CITY_TO_PROV["$city"]="辽宁"; CITY_TO_PROV_PINYIN["$city"]="14_liaoning"
@@ -254,7 +265,7 @@ jobs:
               CITY_TO_PROV["$city_en"]="江西"; CITY_TO_PROV_PINYIN["$city_en"]="18_jiangxi"
           done
 
-          # 陕西
+          # 陝西
           CITY_TO_PROV_PINYIN["陕西"]="19_shaanxi"; CITY_TO_PROV_PINYIN["shaanxi"]="19_shaanxi"
           for city in "西安" "宝鸡" "咸阳" "渭南" "延安" "汉中" "榆林" "安康" "商洛" "铜川"; do
               CITY_TO_PROV["$city"]="陕西"; CITY_TO_PROV_PINYIN["$city"]="19_shaanxi"
@@ -263,16 +274,16 @@ jobs:
               CITY_TO_PROV["$city_en"]="陕西"; CITY_TO_PROV_PINYIN["$city_en"]="19_shaanxi"
           done
 
-          # 广西
+          # 廣西
           CITY_TO_PROV_PINYIN["广西"]="20_guangxi"; CITY_TO_PROV_PINYIN["guangxi"]="20_guangxi"
-          for city in "南宁" "柳州" "桂林" "北海" "防城港" "钦州" "贵港" "玉林" "百色" "贺州" "河池" "来宾" "崇左" "梧州"; do
+          for city in "南寧" "柳州" "桂林" "北海" "防城港" "钦州" "贵港" "玉林" "百色" "賀州" "河池" "来宾" "崇左" "梧州"; do
               CITY_TO_PROV["$city"]="广西"; CITY_TO_PROV_PINYIN["$city"]="20_guangxi"
           done
           for city_en in "nanning" "liuzhou" "guilin" "beihai" "fangchenggang" "qinzhou" "guigang" "yulin" "baise" "hezhou" "hechi" "laibin" "chongzuo" "wuzhou"; do
               CITY_TO_PROV["$city_en"]="广西"; CITY_TO_PROV_PINYIN["$city_en"]="20_guangxi"
           done
 
-          # 云南
+          # 雲南
           CITY_TO_PROV_PINYIN["云南"]="21_yunnan"; CITY_TO_PROV_PINYIN["yunnan"]="21_yunnan"
           for city in "昆明" "曲靖" "玉溪" "保山" "昭通" "丽江" "普洱" "临沧" "楚雄" "红河" "文山" "西双版纳" "大理" "德宏" "怒江" "迪庆"; do
               CITY_TO_PROV["$city"]="云南"; CITY_TO_PROV_PINYIN["$city"]="21_yunnan"
@@ -281,9 +292,9 @@ jobs:
               CITY_TO_PROV["$city_en"]="云南"; CITY_TO_PROV_PINYIN["$city_en"]="21_yunnan"
           done
 
-          # 甘肃
+          # 甘肅
           CITY_TO_PROV_PINYIN["甘肃"]="22_gansu"; CITY_TO_PROV_PINYIN["gansu"]="22_gansu"
-          for city in "兰州" "嘉峪关" "金昌" "白银" "天水" "武威" "张掖" "平凉" "酒泉" "庆阳" "定西" "陇南"; do
+          for city in "兰州" "嘉峪关" "金昌" "白银" "天水" "武威" "张掖" "平凉" "酒泉" "慶陽" "定西" "陇南"; do
               CITY_TO_PROV["$city"]="甘肃"; CITY_TO_PROV_PINYIN["$city"]="22_gansu"
           done
           for city_en in "lanzhou" "jiayuguan" "jinchang" "baiyin" "tianshui" "wuwei" "zhangye" "pingliang" "jiuquan" "qingyang" "dingxi" "longnan"; do
@@ -299,9 +310,9 @@ jobs:
               CITY_TO_PROV["$city_en"]="海南"; CITY_TO_PROV_PINYIN["$city_en"]="23_hainan"
           done
 
-          # 贵州
+          # 貴州
           CITY_TO_PROV_PINYIN["贵州"]="24_guizhou"; CITY_TO_PROV_PINYIN["guizhou"]="24_guizhou"
-          for city in "贵阳" "六盘水" "遵义" "安顺" "毕节" "铜仁"; do
+          for city in "贵阳" "六盘水" "遵義" "安顺" "毕节" "铜仁"; do
               CITY_TO_PROV["$city"]="贵州"; CITY_TO_PROV_PINYIN["$city"]="24_guizhou"
           done
           for city_en in "guiyang" "liupanshui" "zunyi" "anshun" "bijie" "tongren"; do
@@ -326,7 +337,7 @@ jobs:
               CITY_TO_PROV["$city_en"]="吉林"; CITY_TO_PROV_PINYIN["$city_en"]="26_jilin"
           done
 
-          # 黑龙江
+          # 黑龍江
           CITY_TO_PROV_PINYIN["黑龙江"]="27_heilongjiang"; CITY_TO_PROV_PINYIN["heilongjiang"]="27_heilongjiang"
           for city in "哈尔滨" "齐齐哈尔" "鸡西" "鹤岗" "双鸭山" "大庆" "伊春" "佳木斯" "七台河" "牡丹江" "黑河" "绥化"; do
               CITY_TO_PROV["$city"]="黑龙江"; CITY_TO_PROV_PINYIN["$city"]="27_heilongjiang"
@@ -335,9 +346,9 @@ jobs:
               CITY_TO_PROV["$city_en"]="黑龙江"; CITY_TO_PROV_PINYIN["$city_en"]="27_heilongjiang"
           done
 
-          # 内蒙古
+          # 內蒙古
           CITY_TO_PROV_PINYIN["内蒙古"]="28_neimenggu"; CITY_TO_PROV_PINYIN["neimenggu"]="28_neimenggu"
-          for city in "呼和浩特" "包头" "乌海" "赤峰" "通辽" "鄂尔多斯" "呼伦贝尔" "巴彦淖尔" "乌兰察布"; do
+          for city in "呼和浩特" "包頭" "乌海" "赤峰" "通辽" "鄂尔多斯" "呼伦贝尔" "巴彦淖尔" "乌兰察布"; do
               CITY_TO_PROV["$city"]="内蒙古"; CITY_TO_PROV_PINYIN["$city"]="28_neimenggu"
           done
           for city_en in "huhehaote" "baotou" "wuhai" "chifeng" "tongliao" "eerduosi" "hulunbeier" "bayannaoer" "wulanchabu"; do
@@ -371,7 +382,7 @@ jobs:
               CITY_TO_PROV["$city_en"]="青海"; CITY_TO_PROV_PINYIN["$city_en"]="31_qinghai"
           done
 
-          # 宁夏
+          # 寧夏
           CITY_TO_PROV_PINYIN["宁夏"]="32_ningxia"; CITY_TO_PROV_PINYIN["ningxia"]="32_ningxia"
           for city in "银川" "石嘴山" "吴忠" "固原" "中卫"; do
               CITY_TO_PROV["$city"]="宁夏"; CITY_TO_PROV_PINYIN["$city"]="32_ningxia"
@@ -385,12 +396,12 @@ jobs:
           CITY_TO_PROV["hongkong"]="香港"; CITY_TO_PROV_PINYIN["hongkong"]="33_xianggang"
           CITY_TO_PROV["hong kong"]="香港"; CITY_TO_PROV_PINYIN["hong kong"]="33_xianggang"
 
-          # 澳门
+          # 澳門
           CITY_TO_PROV["澳门"]="澳门"; CITY_TO_PROV_PINYIN["澳门"]="34_aomen"
           CITY_TO_PROV["macau"]="澳门"; CITY_TO_PROV_PINYIN["macau"]="34_aomen"
           CITY_TO_PROV["macao"]="澳门"; CITY_TO_PROV_PINYIN["macao"]="34_aomen"
 
-          # 台湾
+          # 台灣
           CITY_TO_PROV["台湾"]="台湾"; CITY_TO_PROV_PINYIN["台湾"]="35_taiwan"
           CITY_TO_PROV["taiwan"]="台湾"; CITY_TO_PROV_PINYIN["taiwan"]="35_taiwan"
           for city in "台北" "高雄" "台中" "台南" "基隆" "新竹" "嘉义"; do
@@ -424,7 +435,6 @@ jobs:
                   GROUP="台湾"; GROUP_PINYIN="${CITY_TO_PROV_PINYIN["台湾"]}"
               elif [[ "$AREA" == "China" ]]; then
                   MATCHED=0
-                  # 修正：使用純英文變數名稱
                   for municipality in "北京" "上海" "天津" "重庆" "beijing" "shanghai" "tianjin" "chongqing"; do
                       UPPER_municipality=$(echo "$municipality" | tr '[:lower:]' '[:upper:]')
                       if [[ "$UPPER_NAME" == *"$UPPER_municipality"* || "$LOWER_NAME" == *"$municipality"* ]]; then
@@ -522,8 +532,13 @@ jobs:
           [ ! -f playlist.m3u ] && echo "⚠️ playlist.m3u 未生成！" && exit 1
           CHANNEL_COUNT=$(grep -c "^#EXTINF" playlist.m3u 2>/dev/null || echo 0)
           TIMESTAMP=$(date +'%Y-%m-%d %H:%M:%S')
+          
+          # === 【修正：將黑名單加入 Git 暫存庫】 ===
           git add playlist.m3u
           [ -f failed_logs.txt ] && git add failed_logs.txt
+          [ -f blacklist.txt ] && git add blacklist.txt
+          # =======================================
+          
           if git diff --cached --quiet; then
             echo "📭 沒有變更"
           else
