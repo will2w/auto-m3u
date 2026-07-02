@@ -56,9 +56,9 @@ https://amg00405-rakutentv-cgtn-rakuten-i9tar.amagi.tv/master.m3u8
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/cgtndocumentary.png" group-title="央视",CGTN Documentary
 https://amg00405-rakutentv-cgtndocumentary-rakuten-0ql8j.amagi.tv/master.m3u8
 #EXTINF:-1 tvg-id="539751" tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/cctv.png" group-title="央视",CCTV
-https://t.freetv.fun/live/cctv-4kgao-qing-1.m3u8
-#EXTINF:-1 tvg-id="539751" tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/cctv.png" group-title="央视",CCTV
 https://t.freetv.fun/live/cctv-4kgao-qing-2.m3u8
+#EXTINF:-1 tvg-id="539751" tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/cctv.png" group-title="央视",CCTV
+https://t.freetv.fun/live/cctv-4kgao-qing.m3u8
 #EXTINF:-1 tvg-id="554356" tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/cctv10.png" group-title="央视",CCTV10
 https://t.freetv.fun/live/cctv-10-1.m3u8
 #EXTINF:-1 tvg-id="554356" tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/cctv10.png" group-title="央视",CCTV10
@@ -108,7 +108,7 @@ https://t.freetv.fun/live/cctv-4zhong-wen-guo-ji-2.m3u8
 #EXTINF:-1 tvg-id="554349" tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/cctv4.png" group-title="央视",CCTV4中文国际欧洲
 https://t.freetv.fun/live/cctv-4zhong-wen-guo-ji-4.m3u8
 #EXTINF:-1 tvg-id="554349" tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/cctv4.png" group-title="央视",CCTV4中文国际美洲
-https://t.freetv.fun/live/cctv-4-zhong-wen-guo-ji-2.m3u8
+https://t.freetv.fun/live/cctv-4-zhong-wen-guo-ji.m3u8
 #EXTINF:-1 tvg-id="554349" tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/cctv4.png" group-title="央视",CCTV4中文国际美洲
 https://t.freetv.fun/live/cctv4zhong-wen-guo-ji-1.m3u8
 #EXTINF:-1 tvg-id="554349" tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/cctv4.png" group-title="央视",CCTV4中文国际美洲
@@ -240,7 +240,7 @@ https://t.freetv.fun/live/yan-dong-ying-shi-1.m3u8
 #EXTINF:-1 tvg-id="539661" tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="广东",广东影视
 https://t.freetv.fun/live/yan-dong-ying-shi-gao-qing-1.m3u8
 #EXTINF:-1 tvg-id="539661" tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="广东",广东影视
-https://t.freetv.fun/live/yan-dong-ying-shi-gao-qing-10.m3u8
+https://t.freetv.fun/live/yan-dong-ying-shi-gao-qing-11.m3u8
 #EXTINF:-1 tvg-id="539782" tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="广东",广东新闻
 https://t.freetv.fun/live/yan-dong-xin-wen-1.m3u8
 #EXTINF:-1 tvg-id="539782" tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="广东",广东新闻
@@ -282,11 +282,11 @@ https://t.freetv.fun/live/yan-zhou-zong-he-2.m3u8
 #EXTINF:-1 tvg-id="544638" tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="广东",广州综合
 https://t.freetv.fun/live/yan-zhou-zong-he-3.m3u8
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="广东",揭阳新闻综合
-https://t.freetv.fun/live/jie-yang-zong-he-gao-qing-1.m3u8
-#EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="广东",揭阳新闻综合
-https://t.freetv.fun/live/jie-yang-zong-he-gao-qing-10.m3u8
-#EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="广东",揭阳新闻综合
 https://t.freetv.fun/live/jie-yang-zong-he-gao-qing-11.m3u8
+#EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="广东",揭阳新闻综合
+https://t.freetv.fun/live/jie-yang-zong-he-gao-qing-12.m3u8
+#EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="广东",揭阳新闻综合
+https://t.freetv.fun/live/jie-yang-zong-he-gao-qing-13.m3u8
 #EXTINF:-1 tvg-id="544379" tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="广东",汕头经济生活
 https://t.freetv.fun/live/shan-tou-sheng-huo-gao-qing-1.m3u8
 #EXTINF:-1 tvg-id="544379" tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="广东",汕头经济生活
@@ -300,11 +300,11 @@ https://t.freetv.fun/live/shan-tou-zong-he-gao-qing-11.m3u8
 #EXTINF:-1 tvg-id="544388" tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="广东",汕头综合
 https://t.freetv.fun/live/shan-tou-zong-he-gao-qing-12.m3u8
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="广东",汕尾综合
-https://t.freetv.fun/live/shan-wei-zong-he-gao-qing-1.m3u8
+https://t.freetv.fun/live/shan-wei-zong-he-gao-qing-12.m3u8
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="广东",汕尾综合
-https://t.freetv.fun/live/shan-wei-zong-he-gao-qing-10.m3u8
+https://t.freetv.fun/live/shan-wei-zong-he-gao-qing-13.m3u8
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="广东",汕尾综合
-https://t.freetv.fun/live/shan-wei-zong-he-gao-qing-11.m3u8
+https://t.freetv.fun/live/shan-wei-zong-he-gao-qing-14.m3u8
 #EXTINF:-1 tvg-id="546050" tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="广东",深圳卫视
 https://t.freetv.fun/live/shen-zhen-wei-shi-1.m3u8
 #EXTINF:-1 tvg-id="546050" tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="广东",深圳卫视
@@ -324,7 +324,7 @@ https://t.freetv.fun/live/chao-zhou-zong-he-gao-qing-1.m3u8
 #EXTINF:-1 tvg-id="544394" tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="广东",潮州综合
 https://t.freetv.fun/live/chao-zhou-zong-he-gao-qing-10.m3u8
 #EXTINF:-1 tvg-id="544394" tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="广东",潮州综合
-https://t.freetv.fun/live/chao-zhou-zong-he-gao-qing-11.m3u8
+https://t.freetv.fun/live/chao-zhou-zong-he-gao-qing-13.m3u8
 #EXTINF:-1 tvg-id="544409" tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="广东",韶关新闻综合
 https://t.freetv.fun/live/shao-guan-zong-he-1.m3u8
 #EXTINF:-1 tvg-id="544409" tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="广东",韶关新闻综合
@@ -466,9 +466,9 @@ https://t.freetv.fun/live/zhe-jiang-gong-gong-xin-wen.m3u8
 #EXTINF:-1 tvg-id="546055" tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="江苏",江苏卫视
 https://t.freetv.fun/live/jiang-su-wei-shi-1.m3u8
 #EXTINF:-1 tvg-id="546055" tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="江苏",江苏卫视
-https://t.freetv.fun/live/jiang-su-wei-shi-10.m3u8
-#EXTINF:-1 tvg-id="546055" tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="江苏",江苏卫视
 https://t.freetv.fun/live/jiang-su-wei-shi-11.m3u8
+#EXTINF:-1 tvg-id="546055" tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="江苏",江苏卫视
+https://t.freetv.fun/live/jiang-su-wei-shi-12.m3u8
 #EXTINF:-1 tvg-id="539898" tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="江苏",江苏城市
 https://t.freetv.fun/live/jiang-su-cheng-shi-1.m3u8
 #EXTINF:-1 tvg-id="539635" tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="江苏",江苏影视
@@ -869,6 +869,8 @@ https://jmp2.uk/plu-69173ce8abd4703b27f71d44.m3u8
 https://copacogen.desdeparaguay.net/heitv/heitv_py_alta/playlist.m3u8?admin=nacion
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/hoytv.png" group-title="香港",HOY TV
 http://uc6.i-cable.com/live_freedirect/opentvhd001_h.live/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/msnow.png" group-title="香港",MS NOW
+http://206.212.244.63/114/index.m3u8
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/now14.png" group-title="香港",Now 14
 https://r.il.cdn-redge.media/livehls/oil/ch14/live/ch14/live.livx/playlist.m3u8
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/nowmediatelevision.png" group-title="香港",NowMedia Television
@@ -879,6 +881,10 @@ https://stream-204968.castr.net/64e0c91d08bff3041638aee3/live_a16fa020f4c411f09d
 https://uycyyuuzyh.turknet.ercdn.net/nphindgytw/nowtv/nowtv.m3u8
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/rthk31.png" group-title="香港",RTHK 31
 https://www.rthk.hk/feeds/dtt/rthktv31_https.m3u8
+#EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/rthk31.png" group-title="香港",RTHK31
+http://rthklive1-lh.akamaihd.net/i/rthk31_1@167495/index_2052_av-b.m3u8
+#EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/rthk31.png" group-title="香港",RTHK31
+http://rthklive1-lh.akamaihd.net/i/rthk31_1@167495/index_810_av-b.m3u8
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/rthk32.png" group-title="香港",RTHK 32
 https://www.rthk.hk/feeds/dtt/rthktv32_https.m3u8
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/tvb.png" group-title="香港",TVB无线新闻
@@ -905,8 +911,6 @@ https://t.freetv.fun/live/cctv-8dian-shi-ju.m3u8
 https://t.freetv.fun/live/cctv-9ji-lu.m3u8
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/c.png" group-title="香港",C+频道
 https://t.freetv.fun/live/fifa-plus-his.m3u8
-#EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/c.png" group-title="香港",C+频道
-https://t.freetv.fun/live/la-nacion-plus.m3u8
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/c.png" group-title="香港",C+频道
 https://t.freetv.fun/live/xiang-gang-c-plus.m3u8
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/discoverykids.png" group-title="香港",Discovery Kids
@@ -935,24 +939,20 @@ https://t.freetv.fun/live/metv-plus.m3u8
 https://t.freetv.fun/live/tvbsya-zhou.m3u8
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/tvb.png" group-title="香港",TVB 亚洲武侠
 https://t.freetv.fun/live/asian.m3u8
-#EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/tvb.png" group-title="香港",TVB星河
-https://t.freetv.fun/live/tvbxing-he.m3u8
-#EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/viutv.png" group-title="香港",ViuTV
-https://t.freetv.fun/live/viutv-1.m3u8
-#EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/viutvsix.png" group-title="香港",ViuTVsix
-https://t.freetv.fun/live/viutvsix-1.m3u8
 #EXTINF:-1 tvg-id="546070" tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="香港",凤凰卫视中文
 https://t.freetv.fun/live/feng-huang-wei-shi-zhong-wen-1.m3u8
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="香港",凤凰电影
 https://t.freetv.fun/live/feng-huang-dian-ying.m3u8
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="香港",明珠台
-https://t.freetv.fun/live/ming-zhu-2.m3u8
+https://t.freetv.fun/live/ming-zhu-1.m3u8
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="香港",明珠台
 https://t.freetv.fun/live/ming-zhu.m3u8
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="香港",星空卫视
 https://t.freetv.fun/live/xing-kong-wei-shi-2.m3u8
 #EXTINF:-1 tvg-id="539871" tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="香港",翡翠台
-https://t.freetv.fun/live/fei-cui-1.m3u8
+https://t.freetv.fun/live/fei-cui-6.m3u8
+#EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="香港",黄金华剧
+https://t.freetv.fun/live/huang-jin-hua-ju.m3u8
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/bloombergtvasialiveevent.png" group-title="台湾",Bloomberg TV Asia Live Event
 https://bloomberg.com/media-manifest/streams/asia-event.m3u8
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/petclubtv.png" group-title="台湾",Pet Club TV
@@ -1121,8 +1121,6 @@ https://t.freetv.fun/live/jing-dian-dian-ying.m3u8
 https://t.freetv.fun/live/jing-dian-xiang-gang-dian-ying.m3u8
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="台湾",美亚电影台
 https://t.freetv.fun/live/mei-ya-dian-ying.m3u8
-#EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="台湾",金光布袋戏
-https://t.freetv.fun/live/jin-guang-bu-dai-xi-1.m3u8
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="台湾",镜新闻
 https://t.freetv.fun/live/jing-xin-wen.m3u8
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="台湾",靖天卡通
@@ -1268,7 +1266,7 @@ https://t.freetv.fun/live/ha-ha-xuan-dong-1.m3u8
 #EXTINF:-1 tvg-id="554398" tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="其他",哈哈炫动
 https://t.freetv.fun/live/ha-ha-xuan-dong-2.m3u8
 #EXTINF:-1 tvg-id="554398" tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="其他",哈哈炫动
-https://t.freetv.fun/live/ha-ha-xuan-dong-3.m3u8
+https://t.freetv.fun/live/ha-ha-xuan-dong-4.m3u8
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="其他",嘉佳卡通
 https://t.freetv.fun/live/jia-jia-qia-tong-10.m3u8
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="其他",嘉佳卡通
