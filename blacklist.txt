@@ -69,6 +69,8 @@ http://118.81.195.79:9003/hls/31/index.m3u8
 http://118.81.195.79:9003/hls/32/index.m3u8
 http://118.81.195.79:9003/hls/34/index.m3u8
 http://119.39.242.52:1935/live/zonghe/playlist.m3u8
+http://120.70.60.179:9901/tsfile/live/1002_1.m3u8?authid=0&key=txiptv&playlive=1
+http://120.70.60.179:9901/tsfile/live/1006_1.m3u8?authid=0&key=txiptv&playlive=1
 http://121.19.134.246:808/hls/20/index.m3u8
 http://121.19.134.246:808/hls/21/index.m3u8
 http://121.19.134.246:808/hls/22/index.m3u8
@@ -355,6 +357,7 @@ http://stream2.xiancity.cn/xatv6/playlist.m3u8
 http://stream4.liveyun.hoge.cn/ch01/sd/live.m3u8
 http://stream4.liveyun.hoge.cn/ch02/sd/live.m3u8
 http://sxjc.chinashadt.com:2036/live/stream:jctv.stream/playlist.m3u8
+http://uc6.i-cable.com/live_freedirect/opentvhd001_h.live/playlist.m3u8
 http://uni6rtmp.tulix.tv:1935/vbstv/vbsabr.smil/chunklist_w1847269952_b204800.m3u8
 http://uni6rtmp.tulix.tv:1935/vbstv/vbsabr.smil/chunklist_w439903609_b1228800.m3u8
 http://video10.qtv.com.cn/drm/qtv1at/manifest.m3u8
