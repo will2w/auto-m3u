@@ -78,6 +78,8 @@ http://121.19.134.246:808/hls/23/index.m3u8
 http://121.19.134.246:808/hls/24/index.m3u8
 http://121.19.134.246:808/hls/25/index.m3u8
 http://121.19.134.246:808/hls/62/index.m3u8
+http://123.130.84.106:8154/tsfile/live/0019_1.m3u8
+http://123.130.84.106:8154/tsfile/live/0142_1.m3u8
 http://123.146.162.24:8013/tslslive/PU2vzMI/hls/live_sd.m3u8
 http://123.146.162.24:8013/tslslive/noEX9SG/hls/live_sd.m3u8
 http://123.146.162.24:8013/tslslive/vWlnEzU/hls/live_sd.m3u8
@@ -336,6 +338,8 @@ http://media.fantv.hk/m3u8/archive/channel2_stream1.m3u8
 http://njzb.scnj.tv:90/live/gggy_gggy800.m3u8
 http://njzb.scnj.tv:90/live/kjpd_kjpd800.m3u8
 http://palive.patv123.com:8091/live/xwpd_800K.m3u8
+http://rthklive1-lh.akamaihd.net/i/rthk31_1@167495/index_2052_av-b.m3u8
+http://rthklive1-lh.akamaihd.net/i/rthk31_1@167495/index_810_av-b.m3u8
 http://scgctvshow.sctv.com/hdlive/kangba/1.m3u8
 http://scgctvshow.sctv.com/hdlive/sctv4/index.m3u8
 http://scgctvshow.sctv.com/hdlive/sctv5/index.m3u8
@@ -416,7 +420,9 @@ https://play-qukan.cztv.com/live/1758879019692345.m3u8
 https://pulltv3.wanfudaluye.com/live/tv3.m3u8
 https://qiniup-m-l.cztv.com/channels/lantian/channel007/1080p.m3u8
 https://rthklive1-lh.akamaihd.net/i/rthk31_1@167495/index_2052_av-b.m3u8
+https://rthklive1-lh.akamaihd.net/i/rthk31_1@167495/master.m3u8
 https://rthklive2-lh.akamaihd.net/i/rthk32_1@168450/index_2052_av-b.m3u8
+https://rthktv31-live.akamaized.net/hls/live/2036818/RTHKTV31/master.m3u8
 https://st-video.xjmty.com/fs/livedit/e55abfa37af26e19/8ce9971c2177b3dd.m3u8
 https://t.freetv.fun/live/cctv-5-2.m3u8
 https://t.freetv.fun/live/cctv-5.m3u8
