@@ -119,6 +119,8 @@ http://183.207.249.34/PLTV/4/224/3221227402/index.m3u8
 http://183.207.249.37/PLTV/4/224/3221227307/index.m3u8
 http://183.207.249.7/PLTV/3/224/3221225949/index.m3u8
 http://183.207.249.71/PLTV/3/224/3221225566/index.m3u8
+http://198.204.240.250:82/live/cctv4k.m3u8
+http://198.204.240.250:82/live/cctv8k.m3u8
 http://202.69.67.66:443/webcast/bshdlive-mobile/playlist.m3u8
 http://202.69.67.66:443/webcast/bshdlive-pc/playlist.m3u8
 http://210.210.155.37/dr9445/h/h03/index.m3u8
@@ -273,6 +275,7 @@ http://61.173.144.157:9901/tsfile/live/1001_1.m3u8?authid=0&key=txiptv&playlive=
 http://audiolive.rbc.cn:1935/live/am927/96K/tzwj_video.m3u8
 http://bziyunshao.synology.me:8892/bysid/31#https://live.hkdvb.com/hls/live/31.m3u8?token=415002797090467
 http://bziyunshao.synology.me:8892/bysid/32#https://live.hkdvb.com/hls/live/32.m3u8?token=415002797090467
+http://cdn.163189.xyz/live/hoy/stream.m3u8
 http://dayeyun.live.tempsource.cjyun.org/videotmp/s10102-TC1T.m3u8
 http://dayeyun.live.tempsource.cjyun.org/videotmp/s10102-TC2T.m3u8
 http://dslive.grtn.cn/fszh/sd/live.m3u8
