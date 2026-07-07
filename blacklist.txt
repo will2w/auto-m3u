@@ -87,6 +87,9 @@ http://123.146.162.24:8017/Cz7WPb8/800/live.m3u8
 http://123.146.162.24:8017/c2F0hmi/1000/live.m3u8
 http://123.146.162.24:8017/d4ceB1a/1000/live.m3u8
 http://123.146.162.24:8017/iTXwrGs/800/live.m3u8
+http://123.163.114.168:9901/tsfile/live/0002_1.m3u8?key=txiptv&playlive=1&authid=0
+http://123.163.114.168:9901/tsfile/live/0007_1.m3u8?key=txiptv&playlive=1&authid=0
+http://123.163.114.168:9901/tsfile/live/0011_1.m3u8?key=txiptv&playlive=1&authid=0
 http://123.56.24.28:1935/live/fm1039/96K/tzwj_video.m3u8
 http://125.210.152.18:9090/live/FHZW_1200.m3u8
 http://125.210.152.18:9090/live/FHZX_1200.m3u8
