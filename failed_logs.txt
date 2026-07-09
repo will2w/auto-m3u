@@ -433,3 +433,4 @@ http://123.163.114.168:9901/tsfile/live/0011_1.m3u8?key=txiptv&playlive=1&authid
 http://123.163.114.168:9901/tsfile/live/0002_1.m3u8?key=txiptv&playlive=1&authid=0
 http://123.163.114.168:9901/tsfile/live/0007_1.m3u8?key=txiptv&playlive=1&authid=0
 http://183.64.181.25:40023/rongchang01.m3u8
+http://45.6.4.35/CGTN/index.m3u8
