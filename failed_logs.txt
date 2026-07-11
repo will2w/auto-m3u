@@ -435,3 +435,8 @@ http://123.163.114.168:9901/tsfile/live/0007_1.m3u8?key=txiptv&playlive=1&authid
 http://183.64.181.25:40023/rongchang01.m3u8
 http://45.6.4.35/CGTN/index.m3u8
 https://l.cztvcloud.com/channels/lantian/SXyuyao2/720p.m3u8
+http://69.30.245.50/live/cctv1.m3u8
+http://74.91.26.218:82/live/cctv1hd.m3u8
+http://198.204.240.250:82/live/cctv1.m3u8
+http://74.91.26.218:82/live/cctv16hd.m3u8
+http://live2.rxip.sc96655.com/live/zxs_4000.m3u8?E=&U=&A=&K=&P=&S=
