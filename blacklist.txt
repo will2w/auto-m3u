@@ -123,6 +123,7 @@ http://183.207.249.37/PLTV/4/224/3221227307/index.m3u8
 http://183.207.249.7/PLTV/3/224/3221225949/index.m3u8
 http://183.207.249.71/PLTV/3/224/3221225566/index.m3u8
 http://183.64.181.25:40023/rongchang01.m3u8
+http://198.204.240.250:82/live/cctv1.m3u8
 http://198.204.240.250:82/live/cctv4k.m3u8
 http://198.204.240.250:82/live/cctv8k.m3u8
 http://202.69.67.66:443/webcast/bshdlive-mobile/playlist.m3u8
@@ -277,6 +278,9 @@ http://61.162.225.122:8181/live/test2.m3u8
 http://61.162.225.122:8181/live/test3.m3u8
 http://61.173.144.157:9901/tsfile/live/1000_1.m3u8?authid=0&key=txiptv&playlive=1
 http://61.173.144.157:9901/tsfile/live/1001_1.m3u8?authid=0&key=txiptv&playlive=1
+http://69.30.245.50/live/cctv1.m3u8
+http://74.91.26.218:82/live/cctv16hd.m3u8
+http://74.91.26.218:82/live/cctv1hd.m3u8
 http://audiolive.rbc.cn:1935/live/am927/96K/tzwj_video.m3u8
 http://bziyunshao.synology.me:8892/bysid/31#https://live.hkdvb.com/hls/live/31.m3u8?token=415002797090467
 http://bziyunshao.synology.me:8892/bysid/32#https://live.hkdvb.com/hls/live/32.m3u8?token=415002797090467
@@ -330,6 +334,7 @@ http://live1.wuhubtv.com/channel1/sd/live.m3u8
 http://live1.wuhubtv.com/channel2/sd/live.m3u8
 http://live1.wuhubtv.com/channel3/sd/live.m3u8
 http://live1.wuhubtv.com/channel4/sd/live.m3u8
+http://live2.rxip.sc96655.com/live/zxs_4000.m3u8?E=&U=&A=&K=&P=&S=
 http://livealone302.iqilu.com/iqilu/ggpd.m3u8
 http://livealone302.iqilu.com/iqilu/gwpd.m3u8
 http://livealone302.iqilu.com/iqilu/nkpd.m3u8
