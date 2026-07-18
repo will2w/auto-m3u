@@ -454,6 +454,7 @@ https://t.freetv.fun/live/hu-nan-jiao-yu.m3u8
 https://t.freetv.fun/live/hu-nan-yu-le-3.m3u8
 https://t.freetv.fun/live/jing-ji-ke-jiao-gao-qing-13.m3u8
 https://t.freetv.fun/live/jing-ji-ke-jiao-gao-qing-6.m3u8
+https://t.freetv.fun/live/shang-yu-wen-hua-ying-yuan-2.m3u8zzhed
 https://t.freetv.fun/live/shen-zhen-wei-shi-14.m3u8
 https://t.freetv.fun/live/shen-zhen-wei-shi-2.m3u8
 https://t.freetv.fun/live/shen-zhen-wei-shi-4.m3u8
