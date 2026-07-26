@@ -78,6 +78,8 @@ http://121.19.134.246:808/hls/23/index.m3u8
 http://121.19.134.246:808/hls/24/index.m3u8
 http://121.19.134.246:808/hls/25/index.m3u8
 http://121.19.134.246:808/hls/62/index.m3u8
+http://122.152.202.33/s/81a8a44f/index.m3u8?id=53
+http://122.152.202.33/s/81a8a44f/index.m3u8?id=53$LR•IPV4『线路26』
 http://123.130.84.106:8154/tsfile/live/0019_1.m3u8
 http://123.130.84.106:8154/tsfile/live/0142_1.m3u8
 http://123.146.162.24:8013/tslslive/PU2vzMI/hls/live_sd.m3u8
@@ -274,6 +276,7 @@ http://45.165.82.19/test/index.m3u8
 http://45.6.4.35/CGTN/index.m3u8
 http://60.30.52.41/live/bhtv1/playlist.m3u8
 http://60.30.52.41/live/bhtv2/playlist.m3u8
+http://61.10.2.140/live_freedirect/freehd209_h.live/chunklist_w135209556.m3u8
 http://61.162.225.122:8181/live/test1.m3u8
 http://61.162.225.122:8181/live/test2.m3u8
 http://61.162.225.122:8181/live/test3.m3u8
@@ -286,6 +289,7 @@ http://audiolive.rbc.cn:1935/live/am927/96K/tzwj_video.m3u8
 http://bziyunshao.synology.me:8892/bysid/31#https://live.hkdvb.com/hls/live/31.m3u8?token=415002797090467
 http://bziyunshao.synology.me:8892/bysid/32#https://live.hkdvb.com/hls/live/32.m3u8?token=415002797090467
 http://cdn.163189.xyz/live/hoy/stream.m3u8
+http://cm61-10-2-143.hkcable.com.hk/live_freedirect/freehd209_h.live/playlist.m3u8
 http://dayeyun.live.tempsource.cjyun.org/videotmp/s10102-TC1T.m3u8
 http://dayeyun.live.tempsource.cjyun.org/videotmp/s10102-TC2T.m3u8
 http://dslive.grtn.cn/fszh/sd/live.m3u8
@@ -354,6 +358,7 @@ http://media.fantv.hk/m3u8/archive/channel2_stream1.m3u8
 http://njzb.scnj.tv:90/live/gggy_gggy800.m3u8
 http://njzb.scnj.tv:90/live/kjpd_kjpd800.m3u8
 http://palive.patv123.com:8091/live/xwpd_800K.m3u8
+http://play1-qk.nmtv.cn/live/1769652109096027.m3u8
 http://rthklive1-lh.akamaihd.net/i/rthk31_1@167495/index_2052_av-b.m3u8
 http://rthklive1-lh.akamaihd.net/i/rthk31_1@167495/index_810_av-b.m3u8
 http://scgctvshow.sctv.com/hdlive/kangba/1.m3u8
@@ -447,6 +452,7 @@ https://t.freetv.fun/live/cctv-5-2.m3u8
 https://t.freetv.fun/live/cctv-5.m3u8
 https://t.freetv.fun/live/cctv-5hd-3.m3u8
 https://t.freetv.fun/live/chao-zhou-zong-he-gao-qing-14.m3u8
+https://t.freetv.fun/live/hai-mian-bao-bao.m3u8
 https://t.freetv.fun/live/hai-nan-wei-shi-1.m3u8
 https://t.freetv.fun/live/hai-xia-wei-shi-2.m3u8
 https://t.freetv.fun/live/hu-bei-wei-shi-19.m3u8
@@ -454,6 +460,7 @@ https://t.freetv.fun/live/hu-nan-jiao-yu.m3u8
 https://t.freetv.fun/live/hu-nan-yu-le-3.m3u8
 https://t.freetv.fun/live/jing-ji-ke-jiao-gao-qing-13.m3u8
 https://t.freetv.fun/live/jing-ji-ke-jiao-gao-qing-6.m3u8
+https://t.freetv.fun/live/lin-zheng-ying-ying-yuan-4.m3u8
 https://t.freetv.fun/live/shang-yu-wen-hua-ying-yuan-2.m3u8zzhed
 https://t.freetv.fun/live/shen-zhen-wei-shi-14.m3u8
 https://t.freetv.fun/live/shen-zhen-wei-shi-2.m3u8
@@ -464,16 +471,9 @@ https://t.freetv.fun/live/yan-dong-ti-yu-10.m3u8
 https://t.freetv.fun/live/zhe-jiang-wei-shi-1.m3u8
 https://t.freetv.fun/live/zhe-jiang-wei-shi-2.m3u8
 https://t.freetv.fun/live/zhe-jiang-wei-shi-30.m3u8
+https://t.freetv.fun/live/zhou-run-fa-dian-ying-4.m3u8
+https://t.freetv.fun/live/zhou-xing-chi-dian-ying-4.m3u8
 https://tmpstream.hyrtv.cn/xwzh/sd/live.m3u8
+https://voa-ingest.akamaized.net/hls/live/2033878/tvmc08/playlist.m3u8
 https://www.sgmsw.cn/videos/tv/201805/1308/9P424TC5M000AFO13CXK6GN6BOA889D2/hls/live.m3u8
 https://www.sgmsw.cn/videos/tv/201805/1308/SB05RIYZOU8JR418AUQOF62CAJQ08D0E/hls/live.m3u8
-https://t.freetv.fun/live/hai-mian-bao-bao.m3u8
-https://voa-ingest.akamaized.net/hls/live/2033878/tvmc08/playlist.m3u8
-http://play1-qk.nmtv.cn/live/1769652109096027.m3u8
-https://t.freetv.fun/live/lin-zheng-ying-ying-yuan-4.m3u8
-http://122.152.202.33/s/81a8a44f/index.m3u8?id=53$LR•IPV4『线路26』
-http://122.152.202.33/s/81a8a44f/index.m3u8?id=53
-http://cm61-10-2-143.hkcable.com.hk/live_freedirect/freehd209_h.live/playlist.m3u8
-http://61.10.2.140/live_freedirect/freehd209_h.live/chunklist_w135209556.m3u8
-https://t.freetv.fun/live/zhou-xing-chi-dian-ying-4.m3u8
-https://t.freetv.fun/live/zhou-run-fa-dian-ying-4.m3u8
