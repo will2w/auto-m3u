@@ -405,6 +405,7 @@ http://yunshangdawu.live.tempsource.cjyun.org/videotmp/s10129-dwzhpd.m3u8
 http://zhibo.hkstv.tv/livestream/mutfysrq/playlist.m3u8
 http://zsxj.chinashadt.com:1935/live/xjsh.stream_360p/playlist.m3u8
 http://zsxj.chinashadt.com:1935/live/xjxw.stream_360p/playlist.m3u8
+http://zwebl02.cztv.com/live/channel01720Pnew.m3u8?auth_key=1785718894-e15972fc6c54611e44bdb4de9dce8de6-0-b4a379cf646b9df093b9105581a06727
 https://31182.hlsplay.aodianyun.com/lms_31182/tv_channel_175.m3u8
 https://copacogen.desdeparaguay.net/heitv/heitv_py_alta/playlist.m3u8?admin=nacion
 https://ct-m-l.cztv.com/channels/lantian/channel007/1080p.m3u8
