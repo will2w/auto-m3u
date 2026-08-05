@@ -471,3 +471,4 @@ https://t.freetv.fun/live/tvbxing-he.m3u8
 https://t.freetv.fun/live/zhong-qing-wei-shi-5.m3u8
 https://live.eac-news.com/CCTV/streams/cctv6.m3u8
 https://t.freetv.fun/live/hu-bei-wei-shi-10.m3u8
+https://p8.vzan.com/218800995/242196610130883766/live.m3u8?zbid=218800995&tpid=208366456

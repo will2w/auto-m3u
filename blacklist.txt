@@ -426,6 +426,7 @@ https://l.cztvcloud.com/channels/lantian/SXxinchang2/720p.m3u8
 https://l.cztvcloud.com/channels/lantian/SXyuyao1/720p.m3u8
 https://l.cztvcloud.com/channels/lantian/SXyuyao2/720p.m3u8
 https://l.cztvcloud.com/channels/lantian/SXyuyao3/720p.m3u8
+https://live.eac-news.com/CCTV/streams/cctv6.m3u8
 https://live.funhillrm.com/2/playlist.m3u8
 https://live.lyg1.com/ggpd/sd/live.m3u8
 https://live.lyg1.com/zhpd/sd/live.m3u8
@@ -460,6 +461,7 @@ https://t.freetv.fun/live/chao-zhou-zong-he-gao-qing-14.m3u8
 https://t.freetv.fun/live/hai-mian-bao-bao.m3u8
 https://t.freetv.fun/live/hai-nan-wei-shi-1.m3u8
 https://t.freetv.fun/live/hai-xia-wei-shi-2.m3u8
+https://t.freetv.fun/live/hu-bei-wei-shi-10.m3u8
 https://t.freetv.fun/live/hu-bei-wei-shi-19.m3u8
 https://t.freetv.fun/live/hu-nan-jiao-yu.m3u8
 https://t.freetv.fun/live/hu-nan-yu-le-3.m3u8
