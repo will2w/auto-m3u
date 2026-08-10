@@ -473,3 +473,17 @@ https://live.eac-news.com/CCTV/streams/cctv6.m3u8
 https://t.freetv.fun/live/hu-bei-wei-shi-10.m3u8
 https://p8.vzan.com/218800995/242196610130883766/live.m3u8?zbid=218800995&tpid=208366456
 http://222.169.85.8:9901/tsfile/live/0130_1.m3u8
+http://119.166.53.110:9901/tsfile/live/0002_3.m3u8?key=txiptv&playlive=1&authid=0$LR•IPV4『线路36』
+http://119.166.53.110:9901/tsfile/live/0002_5.m3u8?key=txiptv&playlive=1&authid=0$LR•IPV4『线路35』
+http://119.166.53.110:9901/tsfile/live/0002_68.m3u8?key=txiptv&playlive=1&authid=0$LR•IPV4『线路3』
+http://119.166.53.110:9901/tsfile/live/0002_60.m3u8?key=txiptv&playlive=1&authid=0$LR•IPV4『线路3』
+http://139.227.21.22:9901/tsfile/live/0010_1.m3u8?key=txiptv&playlive=1&authid=0
+http://139.227.21.22:9901/tsfile/live/0011_1.m3u8?key=txiptv&playlive=1&authid=0
+http://110.6.204.65:9901/tsfile/live/1033_1.m3u8?key=txiptv&playlive=1&authid=0$LR•IPV4『线路21』
+http://101.66.195.138:9901/tsfile/live/0138_1.m3u8?key=txiptv&playlive=0&authid=0$LR•IPV4『线路28』
+http://120.237.39.10:9901/tsfile/live/1069_1.m3u8?key=txiptv&playlive=1&down=1$LR•IPV4『线路2』
+http://120.198.86.186:9901/tsfile/live/1112_1.m3u8?key=txiptv&playlive=1&authid=0$LR•IPV4
+http://124.116.183.146:9901/tsfile/live/1004_1.m3u8?key=txiptv&playlive=1&authid=0$LR•IPV4『线路4』
+http://101.66.195.138:9901/tsfile/live/0119_1.m3u8?key=txiptv&playlive=0&authid=0$LR•IPV4『线路23』
+http://110.6.204.65:9901/tsfile/live/1036_1.m3u8?key=txiptv&playlive=1&authid=0$LR•IPV4『线路16』
+http://110.6.204.65:9901/tsfile/live/1041_1.m3u8?key=txiptv&playlive=1&authid=0$LR•IPV4『线路16』
