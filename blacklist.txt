@@ -1,7 +1,12 @@
 http://1.24.190.98:10080/hls/39/index.m3u8
 http://1.24.190.98:10080/hls/40/index.m3u8
 http://1.24.190.98:10080/hls/51/index.m3u8
+http://101.66.195.138:9901/tsfile/live/0119_1.m3u8?key=txiptv&playlive=0&authid=0$LR•IPV4『线路23』
+http://101.66.195.138:9901/tsfile/live/0138_1.m3u8?key=txiptv&playlive=0&authid=0$LR•IPV4『线路28』
 http://110.19.156.172:9901/tsfile/live/1003_1.m3u8
+http://110.6.204.65:9901/tsfile/live/1033_1.m3u8?key=txiptv&playlive=1&authid=0$LR•IPV4『线路21』
+http://110.6.204.65:9901/tsfile/live/1036_1.m3u8?key=txiptv&playlive=1&authid=0$LR•IPV4『线路16』
+http://110.6.204.65:9901/tsfile/live/1041_1.m3u8?key=txiptv&playlive=1&authid=0$LR•IPV4『线路16』
 http://111.17.214.4:1935/live/xtsh/playlist.m3u8
 http://111.17.214.4:1935/live/xtxc/playlist.m3u8
 http://111.17.214.4:1935/live/xtys/playlist.m3u8
@@ -68,7 +73,13 @@ http://118.81.195.79:9003/hls/30/index.m3u8
 http://118.81.195.79:9003/hls/31/index.m3u8
 http://118.81.195.79:9003/hls/32/index.m3u8
 http://118.81.195.79:9003/hls/34/index.m3u8
+http://119.166.53.110:9901/tsfile/live/0002_3.m3u8?key=txiptv&playlive=1&authid=0$LR•IPV4『线路36』
+http://119.166.53.110:9901/tsfile/live/0002_5.m3u8?key=txiptv&playlive=1&authid=0$LR•IPV4『线路35』
+http://119.166.53.110:9901/tsfile/live/0002_60.m3u8?key=txiptv&playlive=1&authid=0$LR•IPV4『线路3』
+http://119.166.53.110:9901/tsfile/live/0002_68.m3u8?key=txiptv&playlive=1&authid=0$LR•IPV4『线路3』
 http://119.39.242.52:1935/live/zonghe/playlist.m3u8
+http://120.198.86.186:9901/tsfile/live/1112_1.m3u8?key=txiptv&playlive=1&authid=0$LR•IPV4
+http://120.237.39.10:9901/tsfile/live/1069_1.m3u8?key=txiptv&playlive=1&down=1$LR•IPV4『线路2』
 http://120.70.60.179:9901/tsfile/live/1002_1.m3u8?authid=0&key=txiptv&playlive=1
 http://120.70.60.179:9901/tsfile/live/1006_1.m3u8?authid=0&key=txiptv&playlive=1
 http://121.19.134.246:808/hls/20/index.m3u8
@@ -93,6 +104,7 @@ http://123.163.114.168:9901/tsfile/live/0002_1.m3u8?key=txiptv&playlive=1&authid
 http://123.163.114.168:9901/tsfile/live/0007_1.m3u8?key=txiptv&playlive=1&authid=0
 http://123.163.114.168:9901/tsfile/live/0011_1.m3u8?key=txiptv&playlive=1&authid=0
 http://123.56.24.28:1935/live/fm1039/96K/tzwj_video.m3u8
+http://124.116.183.146:9901/tsfile/live/1004_1.m3u8?key=txiptv&playlive=1&authid=0$LR•IPV4『线路4』
 http://125.210.152.18:9090/live/FHZW_1200.m3u8
 http://125.210.152.18:9090/live/FHZX_1200.m3u8
 http://125.210.152.18:9090/live/FXZL_750.m3u8
@@ -102,6 +114,8 @@ http://125.210.152.18:9090/live/JXWSHD_H265.m3u8
 http://125.210.152.18:9090/live/LNWSHD_H265.m3u8
 http://125.210.152.18:9090/live/SCWSHD_H265.m3u8
 http://125.210.152.18:9090/live/SDWSHD_H265.m3u8
+http://139.227.21.22:9901/tsfile/live/0010_1.m3u8?key=txiptv&playlive=1&authid=0
+http://139.227.21.22:9901/tsfile/live/0011_1.m3u8?key=txiptv&playlive=1&authid=0
 http://14.152.88.77/liveplay-kk.rtxapp.com/live/program/live/bjwshd/4000000/mnf.m3u8
 http://174.127.67.246/live330/playlist.m3u8
 http://183.167.193.45:1935/live/cztvgg/playlist.m3u8

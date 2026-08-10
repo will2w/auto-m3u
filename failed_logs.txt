@@ -487,3 +487,7 @@ http://124.116.183.146:9901/tsfile/live/1004_1.m3u8?key=txiptv&playlive=1&authid
 http://101.66.195.138:9901/tsfile/live/0119_1.m3u8?key=txiptv&playlive=0&authid=0$LR•IPV4『线路23』
 http://110.6.204.65:9901/tsfile/live/1036_1.m3u8?key=txiptv&playlive=1&authid=0$LR•IPV4『线路16』
 http://110.6.204.65:9901/tsfile/live/1041_1.m3u8?key=txiptv&playlive=1&authid=0$LR•IPV4『线路16』
+http://120.198.86.186:9901/tsfile/live/1007_1.m3u8?key=txiptv&playlive=1&authid=0$LR•IPV4『线路1』
+http://120.237.39.10:9901/tsfile/live/1004_1.m3u8?key=txiptv&playlive=1&down=1$LR•IPV4『线路2』
+http://120.198.86.186:9901/tsfile/live/1009_1.m3u8?key=txiptv&playlive=1&authid=0$LR•IPV4
+http://173.208.212.130:8181/720p/cctv4k.m3u8
