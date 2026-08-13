@@ -490,6 +490,8 @@ https://live.nbs.cn/channels/njtv/jkpd/m3u8:500k/live.m3u8
 https://live.nbs.cn/channels/njtv/sepd/m3u8:500k/live.m3u8
 https://live.nowtelly.com/now_usa/live_usa/playlist.m3u8
 https://live.sjsrm.com/bjsjs/sd/live.m3u8
+https://liveplus.lzr.com.cn/wlpd/HD/live.m3u8
+https://liveplus.lzr.com.cn/xwzh/HD/live.m3u8
 https://livepull-tcms.sztv.com.cn/live/sz4Kpgm.m3u8
 https://lsfb.avap.jilintv.cn/zqvk7vpj/channel/0a76740c72b74fabae611845aa21e06a/index.m3u8
 https://lsfb.avap.jilintv.cn/zqvk7vpj/channel/3ffc4824dce54b92be185555923ce382/index.m3u8
