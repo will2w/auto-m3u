@@ -117,21 +117,25 @@ http://119.39.9.8:9901/tsfile/live/0139_1.m3u8?key=txiptv&playlive=0&authid=0$LR
 http://119.39.9.8:9901/tsfile/live/0141_1.m3u8?key=txiptv&playlive=0&authid=0$LR—IPV4【线路6】
 http://120.196.235.42:9901/tsfile/live/1006_1.m3u8?key=txiptv&playlive=1&authid=0$LR—IPV4【线路3】
 http://120.198.86.186:9901/tsfile/live/1007_1.m3u8?key=txiptv&playlive=1&authid=0$LR—IPV4【线路1】
+http://120.198.86.186:9901/tsfile/live/1007_1.m3u8?key=txiptv&playlive=1&authid=0$LR—IPV4【线路1】 【1920x1080@256kbps】
 http://120.198.86.186:9901/tsfile/live/1007_1.m3u8?key=txiptv&playlive=1&authid=0$LR•IPV4『线路1』
 http://120.198.86.186:9901/tsfile/live/1009_1.m3u8?key=txiptv&playlive=1&authid=0$LR—IPV4【线路1】
 http://120.198.86.186:9901/tsfile/live/1009_1.m3u8?key=txiptv&playlive=1&authid=0$LR•IPV4
 http://120.198.86.186:9901/tsfile/live/1112_1.m3u8?key=txiptv&playlive=1&authid=0$LR•IPV4
 http://120.198.95.220:9901/tsfile/live/1004_1.m3u8?key=txiptv&playlive=1&down=1$LR—IPV4【线路1】
 http://120.198.95.220:9901/tsfile/live/1004_1.m3u8?key=txiptv&playlive=1&down=1$LR—IPV4【线路5】
+http://120.198.95.220:9901/tsfile/live/1004_1.m3u8?key=txiptv&playlive=1&down=1$LR—IPV4【线路5】 【720x576@256kbps】
 http://120.237.39.10:9901/tsfile/live/1004_1.m3u8?key=txiptv&playlive=1&down=1$LR—IPV4【线路2】
 http://120.237.39.10:9901/tsfile/live/1004_1.m3u8?key=txiptv&playlive=1&down=1$LR—IPV4【线路4】
 http://120.237.39.10:9901/tsfile/live/1004_1.m3u8?key=txiptv&playlive=1&down=1$LR•IPV4『线路2』
 http://120.237.39.10:9901/tsfile/live/1011_1.m3u8?key=txiptv&playlive=1&down=1$LR—IPV4【线路4】
 http://120.237.39.10:9901/tsfile/live/1069_1.m3u8?key=txiptv&playlive=1&down=1$LR•IPV4『线路2』
 http://120.238.84.45:9901/tsfile/live/1000_1.m3u8?key=txiptv&playlive=1&authid=0$LR—IPV4【线路1】
+http://120.238.84.45:9901/tsfile/live/1000_1.m3u8?key=txiptv&playlive=1&authid=0$LR—IPV4【线路1】 【1920x1080@256kbps】
 http://120.238.84.45:9901/tsfile/live/1000_1.m3u8?key=txiptv&playlive=1&authid=0$LR—IPV4【线路2】
 http://120.238.84.45:9901/tsfile/live/1103_1.m3u8?key=txiptv&playlive=1&authid=0$LR—IPV4【线路1】
 http://120.238.84.45:9901/tsfile/live/1103_1.m3u8?key=txiptv&playlive=1&authid=0$LR—IPV4【线路2】
+http://120.238.84.45:9901/tsfile/live/1103_1.m3u8?key=txiptv&playlive=1&authid=0$LR—IPV4【线路2】 【1920x1080@256kbps】
 http://120.70.60.179:9901/tsfile/live/1002_1.m3u8?authid=0&key=txiptv&playlive=1
 http://120.70.60.179:9901/tsfile/live/1006_1.m3u8?authid=0&key=txiptv&playlive=1
 http://121.19.134.246:808/hls/20/index.m3u8
