@@ -206,6 +206,7 @@ http://183.234.143.5:9902/tsfile/live/1071_1.m3u8?key=txiptv&playlive=0&authid=0
 http://183.64.181.25:40023/rongchang01.m3u8
 http://198.204.240.250:82/live/cctv1.m3u8
 http://198.204.240.250:82/live/cctv4k.m3u8
+http://198.204.240.250:82/live/cctv6.m3u8
 http://198.204.240.250:82/live/cctv8k.m3u8
 http://202.69.67.66:443/webcast/bshdlive-mobile/playlist.m3u8
 http://202.69.67.66:443/webcast/bshdlive-pc/playlist.m3u8
@@ -378,6 +379,7 @@ http://61.162.225.122:8181/live/test3.m3u8
 http://61.173.144.157:9901/tsfile/live/1000_1.m3u8?authid=0&key=txiptv&playlive=1
 http://61.173.144.157:9901/tsfile/live/1001_1.m3u8?authid=0&key=txiptv&playlive=1
 http://69.30.245.50/live/cctv1.m3u8
+http://69.30.245.50/live/cctv6.m3u8
 http://74.91.26.218:82/live/cctv16hd.m3u8
 http://74.91.26.218:82/live/cctv1hd.m3u8
 http://audiolive.rbc.cn:1935/live/am927/96K/tzwj_video.m3u8
