@@ -592,3 +592,5 @@ http://119.166.53.110:85/tsfile/live/0002_1.m3u8?key=txiptv&playlive=1&authid=0
 http://119.166.53.110:85/tsfile/live/1002_1.m3u8?key=txiptv&playlive=1&authid=0
 http://119.166.53.110:85/tsfile/live/1004_1.m3u8?key=txiptv&playlive=1&authid=0
 http://145.239.5.177/214/index.m3u8
+https://live.wjyanghu.com/live/CH2.m3u8
+https://live.wjyanghu.com/live/CH1.m3u8
