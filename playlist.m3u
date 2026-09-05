@@ -75,6 +75,8 @@ http://116.77.33.98:44330/tsfile/live/1008_1.m3u8?key=txiptv&playlive=0&authid=0
 http://120.198.84.146:9901/tsfile/live/1020_1.m3u8?key=txiptv&playlive=1&authid=0
 #EXTINF:-1 tvg-id="539871" tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="香港",翡翠台
 http://120.198.95.220:9901/tsfile/live/1004_1.m3u8?key=txiptv&playlive=1&authid=0
+#EXTINF:-1 tvg-id="539871" tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/01.png" group-title="香港",翡翠台01
+http://74.91.26.218:82/live/jade.m3u8
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/bloombergtvasialiveevent.png" group-title="台湾",Bloomberg TV Asia Live Event
 https://bloomberg.com/media-manifest/streams/asia-event.m3u8
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/petclubtv.png" group-title="台湾",Pet Club TV
