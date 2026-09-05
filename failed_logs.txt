@@ -621,3 +621,4 @@ https://rthktv32-live.akamaized.net/hls/live/2036819/RTHKTV32/master.m3u8
 https://rthktv35-live.akamaized.net/hls/live/2101643/RTHKTV35/master.m3u8
 https://rthktv34-live.akamaized.net/hls/live/2101642/RTHKTV34/master.m3u8
 https://rthktv36-live.akamaized.net/hls/live/2112176/RTHKTV36/master.m3u8
+http://192.151.150.154/live/cctv8k.m3u8
