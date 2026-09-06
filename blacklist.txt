@@ -210,6 +210,7 @@ http://183.234.143.5:9902/tsfile/live/1034_1.m3u8?key=txiptv&playlive=0&authid=0
 http://183.234.143.5:9902/tsfile/live/1068_1.m3u8?key=txiptv&playlive=1&authid=0$LR—IPV4【线路4】
 http://183.234.143.5:9902/tsfile/live/1071_1.m3u8?key=txiptv&playlive=0&authid=0$LR—IPV4【线路3】
 http://183.64.181.25:40023/rongchang01.m3u8
+http://192.151.150.154/live/cctv8k.m3u8
 http://198.204.240.250:82/live/cctv1.m3u8
 http://198.204.240.250:82/live/cctv4k.m3u8
 http://198.204.240.250:82/live/cctv6.m3u8
