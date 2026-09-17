@@ -19,8 +19,6 @@ https://amg00405-rakutentv-cgtndocumentary-rakuten-0ql8j.amagi.tv/master.m3u8
 https://hlspackager.akamaized.net/live/DB/CGTN_DOCUMENTARY/HLS/CGTN_DOCUMENTARY.m3u8
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/cgtnglobalbiz.png" group-title="央视",CGTN Global Biz
 https://fastlive.cctvplus.com/out/v1/2b3d8a0c805d437f9dc85b764c2ac599/index.m3u8
-#EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/guangzhoutv.png" group-title="广东",Guangzhou TV
-https://tencentplaybusiness.gztv.com/live/zonghes.m3u8
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="浙江",浙江 Ⅰ 绍兴影视
 http://live.shaoxing.com.cn/video/s10001-sxtv3/index.m3u8
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="浙江",浙江 Ⅰ 绍兴综合
@@ -39,8 +37,6 @@ https://event.pull.hebtv.com/live/live101.m3u8
 https://restream.pdtvhd.com/memfs/1db8c005-9365-4b32-94a4-3736987b5646.m3u8
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/anhuitv.png" group-title="安徽",Anhui TV
 https://restream.pdtvhd.com/memfs/c1cd2ed0-3b2b-4c25-af98-a7fb0b1eb130.m3u8
-#EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/jiangsupublicnewschannel.png" group-title="江西",Jiangsu Public & News Channel
-https://jiangning-tv-playing-t.cm.jstv.com/jiangning-tv/jnxwzh.m3u8
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/xinjiangtv2.png" group-title="江西",Xinjiang TV 2
 http://110.153.180.106:55555/out_3/index.m3u8
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/xinjiangtv3.png" group-title="江西",Xinjiang TV 3
@@ -51,18 +47,20 @@ http://218.84.35.38:3000/m3u8/live/tctv-2/index.m3u8
 http://hwapi.yntv.net/ew265l/848y54.m3u8
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/anshuncomprehensivenewschannel.png" group-title="贵州",Anshun Comprehensive News Channel
 https://hplayer1.juyun.tv/camera/154379194.m3u8
-#EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/sipingtv.png" group-title="吉林",Siping TV
-http://stream2.jlntv.cn/sptv/sd/live.m3u8?_upt=f27750421743154598
-#EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/chifengcomprehensivenewschanel.png" group-title="内蒙古",Chifeng Comprehensive News Chanel
-http://play1-qk.nmtv.cn/live/1735546697341033.m3u8
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/qinghaitv.png" group-title="青海",Qinghai TV
 https://hls-qhmh.lanzhousobey.cn/qhmh/mhds.m3u8
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/hoy.png" group-title="香港",HOY 资讯台
 http://61.10.2.141/live_freedirect/freehd209_h.live/playlist.m3u8
-#EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/tvb.png" group-title="香港",TVB无线新闻
-http://122.152.202.33/s/81a8a44f/index.m3u8?id=21
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="香港",无线新闻
 https://h5cdn3.kylintv.tv/live/tvbnews_iphone.m3u8
+#EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="香港",明珠台
+http://120.198.84.146:9901/tsfile/live/1054_1.m3u8?key=txiptv&playlive=1&authid=0
+#EXTINF:-1 tvg-id="539871" tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="香港",翡翠台
+http://120.198.84.146:9901/tsfile/live/1020_1.m3u8?key=txiptv&playlive=1&authid=0
+#EXTINF:-1 tvg-id="539871" tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="香港",翡翠台
+http://120.198.95.220:9901/tsfile/live/1004_1.m3u8?key=txiptv&playlive=1&authid=0
+#EXTINF:-1 tvg-id="539871" tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="香港",翡翠台
+http://120.238.85.131:9901/tsfile/live/1005_1.m3u8?key=txiptv&playlive=1&authid=0
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/bloombergtvasialiveevent.png" group-title="台湾",Bloomberg TV Asia Live Event
 https://bloomberg.com/media-manifest/streams/asia-event.m3u8
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/petclubtv.png" group-title="台湾",Pet Club TV
@@ -81,8 +79,6 @@ https://stream.hrbtv.net/xwzh/playlist.m3u8?_upt=ef41dd531755913594
 https://stream.hrbtv.net/yspd/playlist.m3u8
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/kangbatv.png" group-title="其他",Kangba TV
 http://110.185.237.164:8888/hls/30/index.m3u8
-#EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/neimonggoltv.png" group-title="其他",Nei Monggol TV
-http://play1-qk.nmtv.cn/live/1769652018126032.m3u8
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="其他",江津新闻综合
 http://222.179.155.21:1935/ch1.m3u8
 #EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/fanmingming/live/main/tvicon/.png" group-title="其他",江津经济生活
