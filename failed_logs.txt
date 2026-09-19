@@ -1,16 +1,1 @@
-http://tvdrs.wsrtv.com.cn:8100/channellive/ch2.flv
-http://tvdrs.wsrtv.com.cn:8100/channellive/ch1.flv
-http://30814.hlsplay.aodianyun.com/lms_30814/tv_channel_246.flv
-http://tvdrs.wsrtv.com.cn:8100/channellive/ch2.flv
-http://tvdrs.wsrtv.com.cn:8100/channellive/ch1.flv
-http://30814.hlsplay.aodianyun.com/lms_30814/tv_channel_246.flv
-http://43.152.224.209/qctv.fengshows.cn/live/0701pcc72.flv
-http://43.152.224.209/qctv.fengshows.cn/live/0701pin72.flv
-http://43.152.224.209/qctv.fengshows.cn/live/0701phk72.flv
-http://flv3948069e.live.126.net/live/dabadqdszbtest78612.flv
-https://83awgyp5.live.sxmty.com/live/hls/6f6f4b36f9bd42628b718b595ba507ed/724b7e8907a8414d873eb2a2f69bfa18.m3u8
-https://83awgyp5.live.sxmty.com/live/hls/6f6f4b36f9bd42628b718b595ba507ed/724b7e8907a8414d873eb2a2f69bfa18.m3u8?zshanxd
-http://tv.drs.ysxtv.cn:8100/channellive/ystv-bak.flv
-http://live.ahsz.tv/video/s10001-ggpd/index.m3u8?zanhd
-http://live.zzyxxw.com:85/live/xwzh.m3u8?fujian
-http://110.80.17.38:9999/tsfile/live/0128_1.m3u8?key=txiptv&playlive=1&authid=0
+https://epg.pw/stream/c6c1262d0b35e59eac22bf513395f00f8b60cc5eab41f598412cdf8269312f32.m3u8
