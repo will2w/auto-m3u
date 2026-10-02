@@ -1896,4 +1896,9 @@ https://voa-ingest.akamaized.net/hls/live/2033878/tvmc08/playlist.m3u8
 https://www.sgmsw.cn/videos/tv/201805/1308/9P424TC5M000AFO13CXK6GN6BOA889D2/hls/live.m3u8
 https://www.sgmsw.cn/videos/tv/201805/1308/SB05RIYZOU8JR418AUQOF62CAJQ08D0E/hls/live.m3u8
 https://liveplay-srs.voc.com.cn/hls/tv/134_180adf.m3u8
-http://113.57.140.161:10081/newlive/live/hls/1/live.m3u8
+https://event.pull.hebtv.com/jishi/cp1.m3u8
+http://113.15.109.216:59901/tsfile/live/0013_1.m3u8?key=txiptv&playlive=1&authid=0
+http://120.76.248.139/live/bfgd/4200000067.m3u8
+https://event.pull.hebtv.com/jishi/cp2.m3u8
+http://113.15.109.216:59901/tsfile/live/0014_1.m3u8?key=txiptv&playlive=1&authid=0
+http://120.76.248.139/live/bfgd/4200000132.m3u8
