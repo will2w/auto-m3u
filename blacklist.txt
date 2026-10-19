@@ -555,6 +555,8 @@ http://159.75.85.63:35455/huya/26355866#http://cfss.cc/cdn/hy/26355866.m3u8
 http://171.8.86.73:8009/tsfile/live/1006_1.m3u8?key=txiptv&playlive=1&authid=0$LR—IPV4【线路3】
 http://173.208.212.130:8181/1080p/cctv14.m3u8
 http://173.208.212.130:8181/720p/cctv4k.m3u8
+http://173.208.212.130:8181/720p/cctv5.m3u8
+http://173.208.212.130:8181/720p/haws.m3u8
 http://173.208.234.146/live/cts.m3u8
 http://173.208.234.146/live/gdty.m3u8
 http://173.208.234.146/live/ttv.m3u8
@@ -647,6 +649,9 @@ http://183.64.174.171:40123/ch1.m3u8?zzhongqd
 http://183.64.181.25:40023/rongchang01.m3u8
 http://183.64.215.48:1002/1.m3u8
 http://192.151.150.154/live/cctv8k.m3u8
+http://198.204.228.26/live/cctv11hd.m3u8
+http://198.204.228.26/live/cctv9hd.m3u8
+http://198.204.228.26/live/hljwshd.m3u8
 http://198.204.240.250:82/live/cctv1.m3u8
 http://198.204.240.250:82/live/cctv4k.m3u8
 http://198.204.240.250:82/live/cctv6.m3u8
@@ -660,6 +665,10 @@ http://1b6467f415.iok.la:9931/tsfile/live/1107_1.m3u8
 http://1b6467f415.iok.la:9931/tsfile/live/1125_1.m3u8
 http://202.69.67.66:443/webcast/bshdlive-mobile/playlist.m3u8
 http://202.69.67.66:443/webcast/bshdlive-pc/playlist.m3u8
+http://204.12.221.218:8181/3m1080p/cctv10.m3u8
+http://204.12.221.218:8181/3m1080p/cctv11.m3u8
+http://204.12.221.218:8181/3m1080p/cctv12.m3u8
+http://204.12.221.218:8181/3m1080p/hews.m3u8
 http://207.56.13.146:81/cdnlive/cctv16.m3u8
 http://207.56.13.146:81/cdnlive/cctv4.m3u8
 http://207.56.13.146:81/cdnlive/cctv5.m3u8
@@ -1035,8 +1044,10 @@ http://63.141.230.178:82/gslb/zbdq5.m3u8?id=hjjc
 http://63.141.230.178:82/gslb/zbdq5.m3u8?id=sxwshd
 http://63.141.230.178:82/gslb/zbdq5.m3u8?id=tjwshd
 http://69.30.245.50/live/cctv1.m3u8
+http://69.30.245.50/live/cctv10.m3u8
 http://69.30.245.50/live/cctv5.m3u8
 http://69.30.245.50/live/cctv6.m3u8
+http://69.30.245.50/live/cctv7.m3u8
 http://74.91.26.218:82/live/cctv10hd.m3u8
 http://74.91.26.218:82/live/cctv11hd.m3u8
 http://74.91.26.218:82/live/cctv12hd.m3u8
@@ -2903,6 +2914,7 @@ https://gcalic.v.myalicdn.com/gc/zhhd01_1/index.m3u8
 https://gcalic.v.myalicdn.com/gc/zjjafdxfs_1/index.m3u8
 https://gcalic.v.myalicdn.com/gc/zsslsgc_1/index.m3u8
 https://gcalic.v.myalicdn.com/gc/ztb_1/index.m3u8
+https://hls-qhmh.lanzhousobey.cn/qhmh/mhds.m3u8
 https://hls.gstv.com.cn/49048r/3t5xyc.m3u8
 https://hls.gstv.com.cn/49048r/y72q36.m3u8
 https://hls.quklive.com/live/play-sh-21.quklive.com/1777511615189085.m3u8?auth_key=2092871636-a39d8614688744d0b170b856b086ba80-0-33900446b83fa0b5befeb6bedbcd51a0
@@ -2968,6 +2980,7 @@ https://live-play-hls.cctvnews.cctv.com/CCTVChannel/channel_cctv4_mbd.m3u8?auth_
 https://live-play-hls.cctvnews.cctv.com/CCTVChannel/channel_cctv4_mbd.m3u8?auth_key=1792047600-1-b59134a2ead43d7f783f943c8f535e7bb80c5169575b2e8efcd5b3ddea21b41c-df7978bb48c411b79621c35174728471&yid=b59134a2ead43d7f783f943c8f535e7bb80c5169575b2e8efcd5b3ddea21b41c
 https://live-play-hls.cctvnews.cctv.com/CCTVChannel/channel_cctv4_mbd.m3u8?auth_key=1792134000-1-b59134a2ead43d7f783f943c8f535e7bb80c5169575b2e8efcd5b3ddea21b41c-331f666e83cec17730f9bd45baf27f39&yid=b59134a2ead43d7f783f943c8f535e7bb80c5169575b2e8efcd5b3ddea21b41c
 https://live-play-hls.cctvnews.cctv.com/CCTVChannel/channel_cctv4_mbd.m3u8?auth_key=1792220400-1-b59134a2ead43d7f783f943c8f535e7bb80c5169575b2e8efcd5b3ddea21b41c-49273e8ff45ca116267e281db3cf2bec&yid=b59134a2ead43d7f783f943c8f535e7bb80c5169575b2e8efcd5b3ddea21b41c
+https://live-play-hls.cctvnews.cctv.com/CCTVChannel/channel_cctv4_mbd.m3u8?auth_key=1792306800-1-b59134a2ead43d7f783f943c8f535e7bb80c5169575b2e8efcd5b3ddea21b41c-89c7aaf2676dd1219c6cee367118b115&yid=b59134a2ead43d7f783f943c8f535e7bb80c5169575b2e8efcd5b3ddea21b41c
 https://live-play-hls.cctvnews.cctv.com/CCTVChannel/channel_cctv4k_mbd.m3u8?auth_key=1789725600-1-b59134a2ead43d7f783f943c8f535e7bb80c5169575b2e8efcd5b3ddea21b41c-8cb92c2ee13f70ef55c51c6268432242&yid=b59134a2ead43d7f783f943c8f535e7bb80c5169575b2e8efcd5b3ddea21b41c
 https://live-play-hls.cctvnews.cctv.com/CCTVChannel/channel_cctv4k_mbd.m3u8?auth_key=1789819200-1-b59134a2ead43d7f783f943c8f535e7bb80c5169575b2e8efcd5b3ddea21b41c-96edb71971afa6f786538c5e915a3f0e&yid=b59134a2ead43d7f783f943c8f535e7bb80c5169575b2e8efcd5b3ddea21b41c
 https://live-play-hls.cctvnews.cctv.com/CCTVChannel/channel_cctv4k_mbd.m3u8?auth_key=1789905600-1-b59134a2ead43d7f783f943c8f535e7bb80c5169575b2e8efcd5b3ddea21b41c-c233897f78210c7f104269658281b74d&yid=b59134a2ead43d7f783f943c8f535e7bb80c5169575b2e8efcd5b3ddea21b41c
@@ -3000,6 +3013,7 @@ https://live-play-hls.cctvnews.cctv.com/CCTVChannel/channel_cctv4k_mbd.m3u8?auth
 https://live-play-hls.cctvnews.cctv.com/CCTVChannel/channel_cctv4k_mbd.m3u8?auth_key=1792144800-1-b59134a2ead43d7f783f943c8f535e7bb80c5169575b2e8efcd5b3ddea21b41c-168410e6eb705a726c975a74efb0f232&yid=b59134a2ead43d7f783f943c8f535e7bb80c5169575b2e8efcd5b3ddea21b41c
 https://live-play-hls.cctvnews.cctv.com/CCTVChannel/channel_cctv4k_mbd.m3u8?auth_key=1792155600-1-b59134a2ead43d7f783f943c8f535e7bb80c5169575b2e8efcd5b3ddea21b41c-6b8c4237e32a8f5de7a3f6870d95ada4&yid=b59134a2ead43d7f783f943c8f535e7bb80c5169575b2e8efcd5b3ddea21b41c
 https://live-play-hls.cctvnews.cctv.com/CCTVChannel/channel_cctv4k_mbd.m3u8?auth_key=1792242000-1-b59134a2ead43d7f783f943c8f535e7bb80c5169575b2e8efcd5b3ddea21b41c-9987b2702f8c2403326798d0712dfc3e&yid=b59134a2ead43d7f783f943c8f535e7bb80c5169575b2e8efcd5b3ddea21b41c
+https://live-play-hls.cctvnews.cctv.com/CCTVChannel/channel_cctv4k_mbd.m3u8?auth_key=1792324800-1-b59134a2ead43d7f783f943c8f535e7bb80c5169575b2e8efcd5b3ddea21b41c-83ccc83c8a9c4782b3e41db42652f631&yid=b59134a2ead43d7f783f943c8f535e7bb80c5169575b2e8efcd5b3ddea21b41c
 https://live.eac-news.com/CCTV/streams/cctv6.m3u8
 https://live.funhillrm.com/2/playlist.m3u8
 https://live.gdtv.ah.cn/live/newsTV.m3u8
@@ -3113,6 +3127,7 @@ https://tencentplaybusiness.gztv.com/live/xinwen.m3u8
 https://tencentplaybusiness.gztv.com/live/zonghes.m3u8
 https://tencentplaygzrb01.gztv.com/live/zonghes.m3u8
 https://tmpstream.hyrtv.cn/xwzh/sd/live.m3u8
+https://tvasahi.mov3.co/hls/tvasahi.m3u8
 https://tvsen6.aynaott.com/Epm7WrFa/index.m3u8
 https://tx-origin.pull.yximgs.com/gifshow/kwai_actL_ol_act_14963168263_strL_EcAvcFhdL0Mate.flv?txSecret=b22bef93ac96b7d5770869ece3e468f4&txTime=6ab642f0&stat=O%2BDT7bBSWHtdr4%2F5VCoQdJ%2Fz7KaFD6Wb8AbW0h5A7334nU0EJg9Vo4MiDaSAk4zU&tsc=origin&highTraffic=2&oidc=watchmen&sidc=2062&no_script=1&srcStrm=V-jGFVMFSmA&ss=s20&tfc_buyer=1
 https://tx-origin.pull.yximgs.com/gifshow/kwai_actL_ol_act_14963168263_strL_EcAvcFhdL3Mate.flv?txSecret=917e03e582d51426ada7fd0b84405431&txTime=6ab642f0&stat=O%2BDT7bBSWHtdr4%2F5VCoQdJ%2Fz7KaFD6Wb8AbW0h5A7334nU0EJg9Vo4MiDaSAk4zU&tsc=origin&highTraffic=2&oidc=watchmen&sidc=2062&no_script=1&srcStrm=V-jGFVMFSmA&ss=s20&tfc_buyer=1
