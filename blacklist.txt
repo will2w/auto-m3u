@@ -1255,6 +1255,7 @@ http://63.141.230.178:82/gslb/zbdq5.m3u8?id=hjjc
 http://63.141.230.178:82/gslb/zbdq5.m3u8?id=hljwshd
 http://63.141.230.178:82/gslb/zbdq5.m3u8?id=lnbf
 http://63.141.230.178:82/gslb/zbdq5.m3u8?id=lnys
+http://63.141.230.178:82/gslb/zbdq5.m3u8?id=qhws
 http://63.141.230.178:82/gslb/zbdq5.m3u8?id=sxwshd
 http://63.141.230.178:82/gslb/zbdq5.m3u8?id=tjwshd
 http://69.30.245.50/live/cctv1.m3u8
@@ -3826,6 +3827,7 @@ https://gcalic.v.myalicdn.com/gc/zhhd01_1/index.m3u8
 https://gcalic.v.myalicdn.com/gc/zjjafdxfs_1/index.m3u8
 https://gcalic.v.myalicdn.com/gc/zsslsgc_1/index.m3u8
 https://gcalic.v.myalicdn.com/gc/ztb_1/index.m3u8
+https://hkstv.tv/api/m3u8-proxy?url=http%3A%2F%2Fwebcast.hkstv.tv%2Flivestream%2Fmutfysrq%2Fplaylist.m3u8
 https://hls-qhmh.lanzhousobey.cn/qhmh/mhds.m3u8
 https://hls.gstv.com.cn/49048r/3t5xyc.m3u8
 https://hls.gstv.com.cn/49048r/y72q36.m3u8
@@ -3904,6 +3906,7 @@ https://live-play-hls.cctvnews.cctv.com/CCTVChannel/channel_cctv4_mbd.m3u8?auth_
 https://live-play-hls.cctvnews.cctv.com/CCTVChannel/channel_cctv4_mbd.m3u8?auth_key=1793084400-1-b59134a2ead43d7f783f943c8f535e7bb80c5169575b2e8efcd5b3ddea21b41c-b57a52484d28f2d0abcbbd3184450b55&yid=b59134a2ead43d7f783f943c8f535e7bb80c5169575b2e8efcd5b3ddea21b41c
 https://live-play-hls.cctvnews.cctv.com/CCTVChannel/channel_cctv4_mbd.m3u8?auth_key=1793170800-1-b59134a2ead43d7f783f943c8f535e7bb80c5169575b2e8efcd5b3ddea21b41c-fcf86e51beca09ad196f49b7109769a5&yid=b59134a2ead43d7f783f943c8f535e7bb80c5169575b2e8efcd5b3ddea21b41c
 https://live-play-hls.cctvnews.cctv.com/CCTVChannel/channel_cctv4_mbd.m3u8?auth_key=1793257200-1-b59134a2ead43d7f783f943c8f535e7bb80c5169575b2e8efcd5b3ddea21b41c-373f3b49f86f03adc715e21135d9ef2f&yid=b59134a2ead43d7f783f943c8f535e7bb80c5169575b2e8efcd5b3ddea21b41c
+https://live-play-hls.cctvnews.cctv.com/CCTVChannel/channel_cctv4_mbd.m3u8?auth_key=1793343600-1-b59134a2ead43d7f783f943c8f535e7bb80c5169575b2e8efcd5b3ddea21b41c-acd969a55d99be115a1c998829f05e29&yid=b59134a2ead43d7f783f943c8f535e7bb80c5169575b2e8efcd5b3ddea21b41c
 https://live-play-hls.cctvnews.cctv.com/CCTVChannel/channel_cctv4k_mbd.m3u8?auth_key=1789725600-1-b59134a2ead43d7f783f943c8f535e7bb80c5169575b2e8efcd5b3ddea21b41c-8cb92c2ee13f70ef55c51c6268432242&yid=b59134a2ead43d7f783f943c8f535e7bb80c5169575b2e8efcd5b3ddea21b41c
 https://live-play-hls.cctvnews.cctv.com/CCTVChannel/channel_cctv4k_mbd.m3u8?auth_key=1789819200-1-b59134a2ead43d7f783f943c8f535e7bb80c5169575b2e8efcd5b3ddea21b41c-96edb71971afa6f786538c5e915a3f0e&yid=b59134a2ead43d7f783f943c8f535e7bb80c5169575b2e8efcd5b3ddea21b41c
 https://live-play-hls.cctvnews.cctv.com/CCTVChannel/channel_cctv4k_mbd.m3u8?auth_key=1789905600-1-b59134a2ead43d7f783f943c8f535e7bb80c5169575b2e8efcd5b3ddea21b41c-c233897f78210c7f104269658281b74d&yid=b59134a2ead43d7f783f943c8f535e7bb80c5169575b2e8efcd5b3ddea21b41c
@@ -3951,6 +3954,8 @@ https://live-play-hls.cctvnews.cctv.com/CCTVChannel/channel_cctv4k_mbd.m3u8?auth
 https://live-play-hls.cctvnews.cctv.com/CCTVChannel/channel_cctv4k_mbd.m3u8?auth_key=1793108700-1-b59134a2ead43d7f783f943c8f535e7bb80c5169575b2e8efcd5b3ddea21b41c-75640202f9762f020ef498f2cd2e9ee5&yid=b59134a2ead43d7f783f943c8f535e7bb80c5169575b2e8efcd5b3ddea21b41c
 https://live-play-hls.cctvnews.cctv.com/CCTVChannel/channel_cctv4k_mbd.m3u8?auth_key=1793196000-1-b59134a2ead43d7f783f943c8f535e7bb80c5169575b2e8efcd5b3ddea21b41c-d60d7f2bc8007621f780469dd42ac212&yid=b59134a2ead43d7f783f943c8f535e7bb80c5169575b2e8efcd5b3ddea21b41c
 https://live-play-hls.cctvnews.cctv.com/CCTVChannel/channel_cctv4k_mbd.m3u8?auth_key=1793282400-1-b59134a2ead43d7f783f943c8f535e7bb80c5169575b2e8efcd5b3ddea21b41c-ee091110f0d19dc6b77fce9d44b07c0b&yid=b59134a2ead43d7f783f943c8f535e7bb80c5169575b2e8efcd5b3ddea21b41c
+https://live-play-hls.cctvnews.cctv.com/CCTVChannel/channel_cctv4k_mbd.m3u8?auth_key=1793358000-1-b59134a2ead43d7f783f943c8f535e7bb80c5169575b2e8efcd5b3ddea21b41c-fbf5406d5d4861ac710b58dc21cea483&yid=b59134a2ead43d7f783f943c8f535e7bb80c5169575b2e8efcd5b3ddea21b41c
+https://live-play-hls.cctvnews.cctv.com/CCTVChannel/channel_cctv4k_mbd.m3u8?auth_key=1793368800-1-b59134a2ead43d7f783f943c8f535e7bb80c5169575b2e8efcd5b3ddea21b41c-cd2c4aca066072ef428cc495d18d18ff&yid=b59134a2ead43d7f783f943c8f535e7bb80c5169575b2e8efcd5b3ddea21b41c
 https://live.eac-news.com/CCTV/streams/cctv6.m3u8
 https://live.funhillrm.com/2/playlist.m3u8
 https://live.gdtv.ah.cn/live/newsTV.m3u8
@@ -3994,6 +3999,8 @@ https://p2.vzan.com/slowlive/596867413819827251/live.m3u8?zbid=1725814272&tpid=1
 https://p2hs.vzan.com/slowlive/317913155078575177/live.m3u8
 https://p8.vzan.com/218800995/242196610130883766/live.m3u8?zbid=218800995&tpid=208366456
 https://p8.vzan.com/slowlive/415983998730568937/live.m3u8
+https://piccpndali.v.myalicdn.com/audio/cctv10_2.m3u8
+https://piccpndali.v.myalicdn.com/audio/cctv5_2.m3u8
 https://play-live-hls.jxtvcn.com.cn/live-city/tv_jxtv2.m3u8
 https://play-live-hls.jxtvcn.com.cn/live-city/tv_jxtv3.m3u8
 https://play-live-hls.jxtvcn.com.cn/live-city/tv_jxtv4.m3u8
