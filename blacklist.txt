@@ -38,6 +38,7 @@ http://101.66.194.250:9901/tsfile/live/0142_1.m3u8?key=txiptv&playlive=0&authid=
 http://101.66.194.29:9901/tsfile/live/0015_1.m3u8?key=txiptv&playlive=0&authid=0
 http://101.66.194.29:9901/tsfile/live/0118_1.m3u8?key=txiptv&playlive=0&authid=0
 http://101.66.194.46:9901/tsfile/live/0113_1.m3u8?key=txiptv&playlive=0&authid=0
+http://101.66.194.46:9901/tsfile/live/0116_1.m3u8?key=txiptv&playlive=0&authid=0
 http://101.66.194.46:9901/tsfile/live/0118_1.m3u8?key=txiptv&playlive=0&authid=0
 http://101.66.194.46:9901/tsfile/live/0136_1.m3u8?key=txiptv&playlive=0&authid=0
 http://101.66.195.137:9901/tsfile/live/0015_1.m3u8?key=txiptv&playlive=0&authid=0
@@ -117,11 +118,13 @@ http://101.66.198.171:9901/tsfile/live/0002_1.m3u8?key=txiptv&playlive=0&authid=
 http://101.66.198.171:9901/tsfile/live/0005_1.m3u8?key=txiptv&playlive=0&authid=0
 http://101.66.198.171:9901/tsfile/live/0008_1.m3u8?key=txiptv&playlive=0&authid=0
 http://101.66.198.171:9901/tsfile/live/0015_1.m3u8?key=txiptv&playlive=0&authid=0
+http://101.66.198.171:9901/tsfile/live/0018_1.m3u8?key=txiptv&playlive=0&authid=0
 http://101.66.198.171:9901/tsfile/live/0113_1.m3u8?key=txiptv&playlive=0&authid=0
 http://101.66.198.171:9901/tsfile/live/0116_1.m3u8?key=txiptv&playlive=0&authid=0
 http://101.66.198.171:9901/tsfile/live/0117_1.m3u8?key=txiptv&playlive=0&authid=0
 http://101.66.198.171:9901/tsfile/live/0118_1.m3u8?key=txiptv&playlive=0&authid=0
 http://101.66.198.171:9901/tsfile/live/0119_1.m3u8?key=txiptv&playlive=0&authid=0
+http://101.66.198.171:9901/tsfile/live/0124_1.m3u8?key=txiptv&playlive=0&authid=0
 http://101.66.198.171:9901/tsfile/live/0130_1.m3u8?key=txiptv&playlive=0&authid=0
 http://101.66.198.171:9901/tsfile/live/0136_1.m3u8?key=txiptv&playlive=0&authid=0
 http://101.66.198.171:9901/tsfile/live/0143_1.m3u8?key=txiptv&playlive=0&authid=0
@@ -167,13 +170,16 @@ http://101.66.198.234:9901/tsfile/live/0131_1.m3u8?key=txiptv&playlive=0&authid=
 http://101.66.198.234:9901/tsfile/live/0138_1.m3u8?key=txiptv&playlive=0&authid=0
 http://101.66.198.234:9901/tsfile/live/0142_1.m3u8?key=txiptv&playlive=0&authid=0
 http://101.66.198.234:9901/tsfile/live/1000_1.m3u8?key=txiptv&playlive=0&authid=0
+http://101.66.198.35:9901/tsfile/live/0019_1.m3u8?key=txiptv&playlive=0&authid=0
 http://101.66.198.35:9901/tsfile/live/0113_1.m3u8?key=txiptv&playlive=0&authid=0
 http://101.66.198.35:9901/tsfile/live/0116_1.m3u8?key=txiptv&playlive=0&authid=0
 http://101.66.198.35:9901/tsfile/live/0118_1.m3u8?key=txiptv&playlive=0&authid=0
 http://101.66.198.35:9901/tsfile/live/0119_1.m3u8?key=txiptv&playlive=0&authid=0
 http://101.66.198.35:9901/tsfile/live/0120_1.m3u8?key=txiptv&playlive=0&authid=0
 http://101.66.198.35:9901/tsfile/live/0124_1.m3u8?key=txiptv&playlive=0&authid=0
+http://101.66.198.35:9901/tsfile/live/0130_1.m3u8?key=txiptv&playlive=0&authid=0
 http://101.66.198.35:9901/tsfile/live/0136_1.m3u8?key=txiptv&playlive=0&authid=0
+http://101.66.198.35:9901/tsfile/live/0138_1.m3u8?key=txiptv&playlive=0&authid=0
 http://101.66.198.35:9901/tsfile/live/1000_1.m3u8?key=txiptv&playlive=0&authid=0
 http://101.66.198.62:9901/tsfile/live/0003_1.m3u8?key=txiptv&playlive=0&authid=0
 http://101.66.198.62:9901/tsfile/live/0113_1.m3u8?key=txiptv&playlive=0&authid=0
@@ -209,6 +215,7 @@ http://101.66.199.13:9901/tsfile/live/0136_1.m3u8?key=txiptv&playlive=0&authid=0
 http://101.66.199.13:9901/tsfile/live/0143_1.m3u8?key=txiptv&playlive=0&authid=0
 http://101.66.199.210:9901/tsfile/live/0118_1.m3u8?key=txiptv&playlive=0&authid=0
 http://101.66.199.210:9901/tsfile/live/0125_1.m3u8?key=txiptv&playlive=0&authid=0
+http://101.66.199.233:9901/tsfile/live/0116_1.m3u8?key=txiptv&playlive=0&authid=0
 http://101.66.199.252:9901/tsfile/live/0005_1.m3u8?key=txiptv&playlive=0&authid=0$LR•IPV4『线路36』
 http://101.66.199.252:9901/tsfile/live/0008_1.m3u8?key=txiptv&playlive=0&authid=0$LR•IPV4『线路35』
 http://101.66.199.252:9901/tsfile/live/0014_1.m3u8?key=txiptv&playlive=0&authid=0$LR•IPV4『线路30』
@@ -5049,6 +5056,7 @@ https://live-play-hls.cctvnews.cctv.com/CCTVChannel/channel_cctv4k_mbd.m3u8?auth
 https://live-play-hls.cctvnews.cctv.com/CCTVChannel/channel_cctv4k_mbd.m3u8?auth_key=1793368800-1-b59134a2ead43d7f783f943c8f535e7bb80c5169575b2e8efcd5b3ddea21b41c-cd2c4aca066072ef428cc495d18d18ff&yid=b59134a2ead43d7f783f943c8f535e7bb80c5169575b2e8efcd5b3ddea21b41c
 https://live-play-hls.cctvnews.cctv.com/CCTVChannel/channel_cctv4k_mbd.m3u8?auth_key=1793455200-1-b59134a2ead43d7f783f943c8f535e7bb80c5169575b2e8efcd5b3ddea21b41c-883555d4ac11c7aea0b0dfe4bfb763e2&yid=b59134a2ead43d7f783f943c8f535e7bb80c5169575b2e8efcd5b3ddea21b41c
 https://live-play-hls.cctvnews.cctv.com/CCTVChannel/channel_cctv4k_mbd.m3u8?auth_key=1793538000-1-b59134a2ead43d7f783f943c8f535e7bb80c5169575b2e8efcd5b3ddea21b41c-dd5bab3c28afcede1336c4bbe454c04b&yid=b59134a2ead43d7f783f943c8f535e7bb80c5169575b2e8efcd5b3ddea21b41c
+https://live-play-hls.cctvnews.cctv.com/CCTVChannel/channel_cctv4k_mbd.m3u8?auth_key=1793628000-1-b59134a2ead43d7f783f943c8f535e7bb80c5169575b2e8efcd5b3ddea21b41c-28a528dc1079e8bacccb1940f76ca4e1&yid=b59134a2ead43d7f783f943c8f535e7bb80c5169575b2e8efcd5b3ddea21b41c
 https://live.eac-news.com/CCTV/streams/cctv6.m3u8
 https://live.funhillrm.com/2/playlist.m3u8
 https://live.gdtv.ah.cn/live/newsTV.m3u8
@@ -5152,6 +5160,7 @@ https://p8.vzan.com/slowlive/147077707554082780/live.m3u8
 https://p8.vzan.com/slowlive/415983998730568937/live.m3u8
 https://piccpndali.v.myalicdn.com/audio/cctv10_2.m3u8
 https://piccpndali.v.myalicdn.com/audio/cctv5_2.m3u8
+https://pili-live-hls-zdzz-tv.zzxwcm.cn/zdzz-tv/nqzh.m3u8
 https://play-a2.quklive.com/live/1727311690820146.m3u8
 https://play-a2.quklive.com/live/1740970999257207.m3u8
 https://play-a2.quklive.com/live/1743498103845328.m3u8
@@ -5172,6 +5181,8 @@ https://play.jinnantv.top/live/JNTV1/playlist.m3u8
 https://play.scrstv.com.cn/DT/live.m3u8?auth_key=60001724663204-0-0-c1cc4ded9841ac34f63cdbd3aec647ef
 https://pulltv3.wanfudaluye.com/live/tv3.m3u8
 https://qiniup-m-l.cztv.com/channels/lantian/channel007/1080p.m3u8
+https://qmmqvzoz.live.sxmty.com/live/hls/f24f8a390c084386a564074c9260100c/be3fdf07606145739ab2c4b80fe0136a.m3u8
+https://qmmqvzoz.live.sxmty.com/live/hls/f24f8a390c084386a564074c9260100c/be3fdf07606145739ab2c4b80fe0136a.m3u8?zshanxd
 https://rainews1-live.akamaized.net/hls/live/598326/rainews1/rainews1/playlist.m3u8
 https://restream.pdtvhd.com/memfs/0b1b95c9-3543-4af9-9fdb-cf45f1602f17.m3u8
 https://rmplive.hljtv.com/live/daqing.m3u8
