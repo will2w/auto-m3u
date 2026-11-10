@@ -4259,6 +4259,20 @@ http://173.208.234.146/live/ttv.m3u8
 http://173.208.234.146/live/ttvzh.m3u8
 http://174.127.67.246/live330/playlist.m3u8
 http://175.155.106.72:89/live1/live1.m3u8?zsicd 72.会东新闻
+http://182.114.49.44:9901/tsfile/live/0001_1.m3u8?key=txiptv&playlive=1&authid=0
+http://182.114.49.44:9901/tsfile/live/0002_1.m3u8?key=txiptv&playlive=1&authid=0
+http://182.114.49.44:9901/tsfile/live/0005_1.m3u8?key=txiptv&playlive=1&authid=0
+http://182.114.49.44:9901/tsfile/live/0006_1.m3u8?key=txiptv&playlive=1&authid=0
+http://182.114.49.44:9901/tsfile/live/0007_1.m3u8?key=txiptv&playlive=1&authid=0
+http://182.114.49.44:9901/tsfile/live/0008_1.m3u8?key=txiptv&playlive=1&authid=0
+http://182.114.49.44:9901/tsfile/live/0009_1.m3u8?key=txiptv&playlive=1&authid=0
+http://182.114.49.44:9901/tsfile/live/0010_1.m3u8?key=txiptv&playlive=1&authid=0
+http://182.114.49.44:9901/tsfile/live/0011_1.m3u8?key=txiptv&playlive=1&authid=0
+http://182.114.49.44:9901/tsfile/live/0012_1.m3u8?key=txiptv&playlive=1&authid=0
+http://182.114.49.44:9901/tsfile/live/0013_1.m3u8?key=txiptv&playlive=1&authid=0
+http://182.114.49.44:9901/tsfile/live/0014_1.m3u8?key=txiptv&playlive=1&authid=0
+http://182.114.49.44:9901/tsfile/live/0121_1.m3u8?key=txiptv&playlive=1&authid=0
+http://182.114.49.44:9901/tsfile/live/0124_1.m3u8?key=txiptv&playlive=1&authid=0
 http://182.150.23.74:808/hls/26/index.m3u8
 http://182.150.23.74:808/hls/29/index.m3u8
 http://182.150.23.74:808/hls/35/index.m3u8
@@ -8753,6 +8767,7 @@ http://live.hnxttv.com:9601/live/dspd/800K/tzwj_video.m3u8?BVUUID=C236454D-5355-
 http://live.hnxttv.com:9601/live/xwzh/800K/tzwj_video.m3u8
 http://live.hyxrmt.com:85/live/xwpd.m3u8
 http://live.hyxrmt.com:85/live/xwpd.m3u8?zsicd
+http://live.hznet.tv:1935/live/live1/500k/tzwj_video.m3u8
 http://live.hznet.tv:1935/live/live3/500K/tzwj_video.m3u8?shandd
 http://live.jiaodong.net:82/tvfushan/hls/tv_shenghuo.m3u8
 http://live.jinchuanrmt.com:90/live/jcxc.m3u8?zsicd
@@ -9565,6 +9580,7 @@ https://ali.hlspull.yximgs.com/live/asdfg32522.flv
 https://aliplay.yibinrm.cn/live/10883325.m3u8?auth_key=1787043633-0-0-39d8f5805194371260add0dc047df1bb
 https://bcovlive-a.akamaihd.net/4e7f273ae0a04ad6b7d2e543df61e362/us-west-2/6240731308001/playlist.m3u8
 https://binhai-tv-hls.cm.jstv.com/binhai-tv/news.m3u8
+https://brtv-radiolive.rbc.cn/alive/fm945.m3u8
 https://c1.ddbbffcdn.com/video/jigong/HD%E5%9B%BD%E8%AF%AD/index.m3u8
 https://cdn.haititivi.com/website/haitinews/index.m3u8
 https://cdn6.163189.xyz/live/fhhk/stream.m3u8
@@ -9967,6 +9983,7 @@ https://live-play-hls.cctvnews.cctv.com/CCTVChannel/channel_cctv4k_mbd.m3u8?auth
 https://live-play-hls.cctvnews.cctv.com/CCTVChannel/channel_cctv4k_mbd.m3u8?auth_key=1793966400-1-b59134a2ead43d7f783f943c8f535e7bb80c5169575b2e8efcd5b3ddea21b41c-7fdfe4ef2739bdc1cc237f077aa25103&yid=b59134a2ead43d7f783f943c8f535e7bb80c5169575b2e8efcd5b3ddea21b41c
 https://live-play-hls.cctvnews.cctv.com/CCTVChannel/channel_cctv4k_mbd.m3u8?auth_key=1793977200-1-b59134a2ead43d7f783f943c8f535e7bb80c5169575b2e8efcd5b3ddea21b41c-7a6fe08d70833e74d5549966c9d811aa&yid=b59134a2ead43d7f783f943c8f535e7bb80c5169575b2e8efcd5b3ddea21b41c
 https://live-play-hls.cctvnews.cctv.com/CCTVChannel/channel_cctv4k_mbd.m3u8?auth_key=1794060000-1-b59134a2ead43d7f783f943c8f535e7bb80c5169575b2e8efcd5b3ddea21b41c-cc4611dc634ebde45861a9a2ceb0136b&yid=b59134a2ead43d7f783f943c8f535e7bb80c5169575b2e8efcd5b3ddea21b41c
+https://live-play-hls.cctvnews.cctv.com/CCTVChannel/channel_cctv4k_mbd.m3u8?auth_key=1794232800-1-b59134a2ead43d7f783f943c8f535e7bb80c5169575b2e8efcd5b3ddea21b41c-2ecc1ed9e30fd7be070b68f4af3861c6&yid=b59134a2ead43d7f783f943c8f535e7bb80c5169575b2e8efcd5b3ddea21b41c
 https://live.eac-news.com/CCTV/streams/cctv6.m3u8
 https://live.funhillrm.com/2/playlist.m3u8
 https://live.gdtv.ah.cn/live/newsTV.m3u8
@@ -10877,6 +10894,7 @@ https://xhmm-new-live.media.xinhuamm.net/liveNoRecord/a42bf9ee9c224a44a393aafc33
 https://xykt-fix.github.io/play/a02b/index.m3u8
 https://xykt-fix.github.io/play/a02e/index.m3u8
 https://ysp.lml1971.ccwu.cc/mg_hnaw/playlist.m3u8
+https://ysp.lml1971.ccwu.cc/mg_hnds/playlist.m3u8
 https://ysp.lml1971.ccwu.cc/mg_hndsj/playlist.m3u8
 https://ysp.lml1971.ccwu.cc/mg_hndy/playlist.m3u8
 https://ysp.lml1971.ccwu.cc/mg_hnjs/playlist.m3u8
