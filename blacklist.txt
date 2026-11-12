@@ -4893,6 +4893,7 @@ http://183.234.143.5:9902/tsfile/live/1068_1.m3u8?key=txiptv&playlive=1&authid=0
 http://183.234.143.5:9902/tsfile/live/1071_1.m3u8?key=txiptv&playlive=0&authid=0$LR—IPV4【线路3】
 http://183.237.95.108:9901/tsfile/live/1009_1.m3u8?key=txiptv&playlive=1&authid=0
 http://183.237.95.108:9901/tsfile/live/1074_1.m3u8?key=txiptv&playlive=0&authid=0
+http://183.237.95.108:9901/tsfile/live/1104_1.m3u8?key=txiptv&playlive=0&authid=0
 http://183.239.108.37:1698/hls/133/index.m3u8
 http://183.239.108.37:1698/hls/92/index.m3u8
 http://183.239.108.37:1698/hls/93/index.m3u8
@@ -10162,6 +10163,8 @@ http://tvdrs.wsrtv.com.cn:8100/channellive/ch1.flv?zyund
 http://tvdrs.wsrtv.com.cn:8100/channellive/ch2.flv
 http://tvfile.jjrm.org.cn/nmip-media/channellive/channel106282/playlist.m3u8
 http://tvfile.jjrm.org.cn/nmip-media/channellive/channel106282/playlist.m3u8?zsicd
+http://tvfile.jyrmt.cn/nmip-media/channellive/channel104452/playlist.m3u8
+http://tvfile.jyrmt.cn:80/nmip-media/channellive/channel104452/playlist.m3u8
 http://tvfile.lzgbdst.com/nmip-media/channellive/channel106876/playlist.m3u8?zsicdhttp://tv.drs.lzgbdst.com:8100/channellive/lztv2.flv?zsicd
 http://tvfile.lzgbdst.com:80/nmip-media/channellive/channel106876/playlist.m3u8
 http://tvfile.mb.lsrm.org.cn/nmip-media/channellive/channel104860/playlist.m3u8
