@@ -12750,6 +12750,9 @@ http://fjnhdb.chinashadt.com:2036/live/stream:10003.stream/chunklist.m3u8
 http://fjnhdb.chinashadt.com:2036/live/stream:nh1.stream/playlist.m3u8
 http://fjnhdb.chinashadt.com:2036/live/stream:nh2.stream/playlist.m3u8
 http://flv3948069e.live.126.net/live/dabadqdszbtest78612.flv
+http://fuxin.yunjifei.top:999/tsfile/live/0115_1.m3u8?key=txiptv
+http://fuxin.yunjifei.top:999/tsfile/live/0123_1.m3u8?key=txiptv
+http://fuxin.yunjifei.top:999/tsfile/live/1010_1.m3u8?key=txiptv
 http://fxgm.fxjf.work:19901/tsfile/live/0111_1.m3u8
 http://fxgm.fxjf.work:19901/tsfile/live/0129_1.m3u8
 http://fxgm.fxjf.work:19901/tsfile/live/0141_1.m3u8
@@ -16662,6 +16665,7 @@ http://tvcdn.stream3.hndt.com/tv/65c4a6d5017e1000b2b6ea2500000000_transios/playl
 http://tvcdn.stream3.hndt.com/tv/65c4a6d5017e1000b2b6ea2500000000_transios/playlist.m3u8?wsSecret=61de2cc06e9f42b1485c3fa4d42e930a&wsTime=1790193800
 http://tvcdn.stream3.hndt.com/tv/65c4a6d5017e1000b2b6ea2500000000_transios/playlist.m3u8?wsSecret=68d9106ce402a09294becb8dc2f01984&wsTime=1793995402
 http://tvcdn.stream3.hndt.com/tv/65c4a6d5017e1000b2b6ea2500000000_transios/playlist.m3u8?wsSecret=6a859dda6f47a2cd8027652d99f69e6c&wsTime=1790021004
+http://tvcdn.stream3.hndt.com/tv/65c4a6d5017e1000b2b6ea2500000000_transios/playlist.m3u8?wsSecret=6c498915ad08966278d65488871efc64&wsTime=1795464201
 http://tvcdn.stream3.hndt.com/tv/65c4a6d5017e1000b2b6ea2500000000_transios/playlist.m3u8?wsSecret=6d699bdc5090d88c20e117c50bcbb45e&wsTime=1790366603
 http://tvcdn.stream3.hndt.com/tv/65c4a6d5017e1000b2b6ea2500000000_transios/playlist.m3u8?wsSecret=7c61ad868edf72824aa419f76df4df13&wsTime=1794945801
 http://tvcdn.stream3.hndt.com/tv/65c4a6d5017e1000b2b6ea2500000000_transios/playlist.m3u8?wsSecret=7fb41de4198a9774e229e08cdaa5a1b3&wsTime=1794427401
