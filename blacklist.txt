@@ -483,15 +483,20 @@ http://110.6.204.65:9901/tsfile/live/1033_1.m3u8?key=txiptv&playlive=1&authid=0$
 http://110.6.204.65:9901/tsfile/live/1033_1.m3u8?key=txiptv&playlive=1&authid=0$LR•IPV4『线路21』
 http://110.6.204.65:9901/tsfile/live/1036_1.m3u8?key=txiptv&playlive=1&authid=0$LR•IPV4『线路16』
 http://110.6.204.65:9901/tsfile/live/1041_1.m3u8?key=txiptv&playlive=1&authid=0$LR•IPV4『线路16』
+http://110.72.84.47:808/hls/1009/index.m3u8
 http://110.72.84.47:808/hls/129/index.m3u8
 http://110.72.84.47:808/hls/138/index.m3u8
+http://110.72.84.47:808/hls/14/index.m3u8
+http://110.72.84.47:808/hls/17/index.m3u8
 http://110.72.84.47:808/hls/18/index.m3u8
+http://110.72.84.47:808/hls/20/index.m3u8
 http://110.72.84.47:808/hls/206/index.m3u8
 http://110.72.84.64:808/hls/1/index.m3u8
 http://110.72.84.64:808/hls/1009/index.m3u8
 http://110.72.84.64:808/hls/1010/index.m3u8
 http://110.72.84.64:808/hls/129/index.m3u8
 http://110.72.84.64:808/hls/138/index.m3u8
+http://110.72.84.64:808/hls/14/index.m3u8
 http://110.72.84.64:808/hls/18/index.m3u8
 http://110.72.84.64:808/hls/20/index.m3u8
 http://110.72.84.64:808/hls/206/index.m3u8
@@ -824,6 +829,7 @@ http://119.125.131.84:9901/tsfile/live/1036_1.m3u8?key=txiptv&playlive=1&down=1
 http://119.125.131.84:9901/tsfile/live/1037_1.m3u8?key=txiptv&playlive=1&down=1
 http://119.125.131.84:9901/tsfile/live/1048_1.m3u8?key=txiptv&playlive=1&down=1
 http://119.125.131.84:9901/tsfile/live/1052_1.m3u8?key=txiptv&playlive=1&down=1
+http://119.125.131.84:9901/tsfile/live/1056_1.m3u8?key=txiptv&playlive=1&down=1
 http://119.125.131.84:9901/tsfile/live/1057_1.m3u8?key=txiptv&playlive=1&down=1
 http://119.125.131.84:9901/tsfile/live/1060_1.m3u8?key=txiptv&playlive=1&down=1
 http://119.125.131.84:9901/tsfile/live/1063_1.m3u8?key=txiptv&playlive=1&down=1
@@ -834,7 +840,9 @@ http://119.129.172.107:9901/tsfile/live/0107_1.m3u8?key=txiptv&playlive=1&authid
 http://119.129.172.107:9901/tsfile/live/0127_1.m3u8?key=txiptv&playlive=1&authid=0
 http://119.129.172.107:9901/tsfile/live/0132_1.m3u8?key=txiptv&playlive=1&authid=0
 http://119.129.172.107:9901/tsfile/live/1010_1.m3u8?key=txiptv&playlive=1&authid=0
+http://119.129.172.110:9901/tsfile/live/0006_1.m3u8?key=txiptv&playlive=1&authid=0
 http://119.129.172.110:9901/tsfile/live/1010_1.m3u8?key=txiptv&playlive=1&authid=0
+http://119.129.172.125:9901/tsfile/live/0005_1.m3u8?key=txiptv&playlive=1&authid=0
 http://119.129.172.127:9901/tsfile/live/0001_1.m3u8?key=txiptv&playlive=1&authid=0
 http://119.129.172.127:9901/tsfile/live/0003_1.m3u8?key=txiptv&playlive=1&authid=0
 http://119.129.172.127:9901/tsfile/live/0004_1.m3u8?key=txiptv&playlive=1&authid=0
@@ -13769,6 +13777,7 @@ http://63.141.230.178:82/gslb/zbdq5.m3u8?id=bqkj
 http://63.141.230.178:82/gslb/zbdq5.m3u8?id=cctv12hd
 http://63.141.230.178:82/gslb/zbdq5.m3u8?id=cctv14hd
 http://63.141.230.178:82/gslb/zbdq5.m3u8?id=cctv16hd
+http://63.141.230.178:82/gslb/zbdq5.m3u8?id=cctv17hd
 http://63.141.230.178:82/gslb/zbdq5.m3u8?id=cctv5hd
 http://63.141.230.178:82/gslb/zbdq5.m3u8?id=cctv5p
 http://63.141.230.178:82/gslb/zbdq5.m3u8?id=dmxchd
@@ -18201,6 +18210,7 @@ http://tvcdn.stream3.hndt.com/tv/65c4a6d5017e1000b2b6ea2500000000_transios/playl
 http://tvcdn.stream3.hndt.com/tv/65c4a6d5017e1000b2b6ea2500000000_transios/playlist.m3u8?wsSecret=d17afd3bcdb456dae3735999a378e6c3&wsTime=1795140240
 http://tvcdn.stream3.hndt.com/tv/65c4a6d5017e1000b2b6ea2500000000_transios/playlist.m3u8?wsSecret=e10fe4dae715dc1a2d738e6e2c5af385&wsTime=1795291402
 http://tvcdn.stream3.hndt.com/tv/65c4a6d5017e1000b2b6ea2500000000_transios/playlist.m3u8?wsSecret=e5f2f0dc06cd546a081b4f3009aa0285&wsTime=1795205001
+http://tvcdn.stream3.hndt.com/tv/65c4a6d5017e1000b2b6ea2500000000_transios/playlist.m3u8?wsSecret=e6425513bf5eafe0ded34222b1c2327b&wsTime=1795723401
 http://tvcdn.stream3.hndt.com/tv/65c4a6d5017e1000b2b6ea2500000000_transios/playlist.m3u8?wsSecret=e67d3eaeaa516b70af35e877c1db7c62&wsTime=1793318609
 http://tvcdn.stream3.hndt.com/tv/65c4a6d5017e1000b2b6ea2500000000_transios/playlist.m3u8?wsSecret=ecab79437098af19d679a63c2f985a61&wsTime=1792710281
 http://tvcdn.stream3.hndt.com/tv/65c4a6d5017e1000b2b6ea2500000000_transios/playlist.m3u8?wsSecret=fe0003418f6e851d2e6a24ab7dd81933&wsTime=1791921801
